@@ -4,7 +4,7 @@ Aplicação com mapa interativo que permite analisar a distribuição espacial d
 
 Projecto desenvolvido no ambito:
 
-1. Tese de Mestrado de Estudar Lopes.
+1. Tese de Mestrado de Eduardo Lopes.
 
 # Gitflow
 
