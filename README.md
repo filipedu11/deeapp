@@ -13,7 +13,7 @@ Um gitflow estruturado permite uma implementação mais *limpa* e organizada do 
 
 ## Nova *issue*
 	
-As *issues* representam as tarefas que são para implementar. Cada issue pode ser marcada com 3 diferentes flags e são elas:
+As *issues* representam as tarefas que são para implementar. Cada issue pode ser marcada com 2 diferentes flags e são elas:
 
 1. **Enhancement**: Representa uma nova *feature* na aplicação
 2. **Bug**: Representa uma correção a uma *feature* existente
