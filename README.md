@@ -68,5 +68,3 @@ Para fazer merge do pull request, este terá de ser aceite pelo reviewer. Para f
     Merge branch 'XXXX' into YYYY
 
     URL: url_of_issues
-
-    Signed-off-by: *name* of people that accept the PR
