@@ -1,0 +1,34 @@
+{
+  "name": "deeapp",
+  "version": "1.0.0",
+  "description": "Application to analyse the spatial error distribution of land cover classification",
+  "main": "index.js",
+  "dependencies": {
+    "ol": "^5.3.2",
+    "parcel-bundler": "^1.12.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "parcel index.html",
+    "build": "parcel build --public-url . index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/filipedu11/deeapp.git"
+  },
+  "keywords": [
+    "WebMap",
+    "Map",
+    "LCC",
+    "Spatial",
+    "Error",
+    "Distribution"
+  ],
+  "author": "Eduardo Lopes (ef.lopes@campus.fct.unl.pt)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/filipedu11/deeapp/issues"
+  },
+  "homepage": "https://github.com/filipedu11/deeapp#readme"
+}
