@@ -4,12 +4,22 @@
   "description": "Application to analyse the spatial error distribution of land cover classification",
   "main": "index.js",
   "dependencies": {
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.16.0",
+    "jshint": "^2.10.2",
     "ol": "^5.3.2",
     "parcel-bundler": "^1.12.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "@babel/register": "^7.4.4",
+    "babel": "^6.23.0",
+    "babel-register": "^6.26.0",
+    "mocha": "^6.1.4"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --require @babel/register test",
     "start": "parcel index.html",
     "build": "parcel build --public-url . index.html"
   },
