@@ -1,0 +1,27 @@
+{
+    "type": "string",
+    "idClassification": "string",
+    "name": "string",
+    "description": "string",
+    "crs": "object",
+    "features": [{
+      "type": "string",
+      "properties": {
+          "idClass": "number",
+          "className": "string",
+          "area": "number"
+      },
+      "geometry": {
+        "type":"string",
+        "coordinates": "object"
+      }
+    }],
+    "classification_stats": {
+        "featuresStats" : [{
+            "idClass": "number",
+            "numFeatures": "number",
+            "occupiedAreaInPixel": "number",
+            "occupiedAreaInKm": "number"
+        }]
+      }
+  }
