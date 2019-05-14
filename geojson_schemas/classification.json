@@ -1,27 +1,45 @@
 {
     "type": "string",
-    "idClassification": "string",
-    "name": "string",
-    "description": "string",
+    "classificationID": "string",
+    "classificationName": "string",
+    "classificationDescription": "string",
+    "classificationRasterFile": "string",
+    "classificationSource": {
+      "author": "string",
+      "classifierAlgorithm": "string",
+      "preProcTechniquesUsed": "object",
+      "postProcTechniquesUsed": "object"
+    },
     "crs": "object",
     "features": [{
       "type": "string",
       "properties": {
-          "idClass": "number",
+          "classID": "number",
           "className": "string",
-          "area": "number"
+          "areaInHectare": "number",
+          "areaInPixels": "number",
+          "perimeterInKM": "number",
+          "numVertex": "number"
       },
       "geometry": {
         "type":"string",
         "coordinates": "object"
       }
     }],
-    "classification_stats": {
+    "classificationStats": {
         "featuresStats" : [{
-            "idClass": "number",
+            "classID": "number",
+            "className": "number",
             "numFeatures": "number",
-            "occupiedAreaInPixel": "number",
-            "occupiedAreaInKm": "number"
+            "totalAreaInHectare": "number",
+            "totalAreaInPixels": "number",
+            "totalPerimeterInKM": "number",
+            "meanOfFeaturesAreaInHectare": "number",
+            "meanOfFeaturesAreaInPixels": "number",
+            "meanOfFeaturesPerimeterInKM": "number",
+            "stdOfFeaturesAreaInHectare": "number",
+            "stdOfFeaturesAreaInPixels": "number",
+            "stdOfFeaturesPerimeter": "number"
         }]
       }
   }
