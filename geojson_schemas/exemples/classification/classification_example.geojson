@@ -4,6 +4,12 @@
     "classificationName": "Classificação Exemplo",
     "classificationDescription": "Exemplo de um geojson para uma classificação",
     "classificationRasterFile": "classification_example.tif",
+    "classificationSource": {
+      "author": "Eduardo Lopes",
+      "classifierAlgorithm": "Random classification (qgis)",
+      "preProcTechniquesUsed": [],
+      "postProcTechniquesUsed": []
+    },  
     "classificationStats": {
         "featuresStats": [
             {
@@ -16,9 +22,9 @@
                 "meanOfFeaturesAreaInHectare": 0.238124,
                 "meanOfFeaturesAreaInPixels": 4.4,
                 "meanOfFeaturesPerimeterInHectare": 0.023260,
-                "stdOfFeaturesAreaInHectare": 0.169611,
-                "stdOfFeaturesAreaInPixels": 3.134042,
-                "stdOfFeaturesPerimeter": 0.0124042
+                "stdOfFeaturesAreaInHectare": 0.160908,
+                "stdOfFeaturesAreaInPixels": 2.97321,
+                "stdOfFeaturesPerimeter": 0.011768
             },
             {
                 "classID": "2",
@@ -30,9 +36,9 @@
                 "meanOfFeaturesAreaInHectare": 0.757666,
                 "meanOfFeaturesAreaInPixels": 14.0,
                 "meanOfFeaturesPerimeterInHectare": 0.059325,
-                "stdOfFeaturesAreaInHectare": 0.796610,
-                "stdOfFeaturesAreaInPixels": 14.719601,
-                "stdOfFeaturesPerimeter": 0.059146
+                "stdOfFeaturesAreaInHectare": 0.689885,
+                "stdOfFeaturesAreaInPixels": 14.7475,
+                "stdOfFeaturesPerimeter": 0.051222
             }
         ]
     },
