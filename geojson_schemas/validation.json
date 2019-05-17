@@ -1,27 +1,49 @@
 {
-    "type": "string",
-    "idValidation": "string",
-    "name": "string",
-    "description": "string",
-    "crs": "object",
-    "features": [{
+  "type": "string",
+  "validationID": "string",
+  "validationName": "string",
+  "validationDescription": "string",
+  "validationRasterFile": "string",
+  "validationSource": {
+    "author": "string",
+    "classifierAlgorithm": "string",
+    "preProcTechniquesUsed": "object",
+    "postProcTechniquesUsed": "object"
+  },  
+  "validationStats": {
+    "featuresStats": [
+      {
+        "classID": "string",
+        "className": "string",
+        "numFeatures": "number",
+        "totalAreaInHectare": "number",
+        "totalAreaInPixels": "number",
+        "totalPerimeterInKM": "number",
+        "meanOfFeaturesAreaInHectare": "number",
+        "meanOfFeaturesAreaInPixels": "number",
+        "meanOfFeaturesPerimeterInKM": "number",
+        "stdOfFeaturesAreaInHectare": "number",
+        "stdOfFeaturesAreaInPixels": "number",
+        "stdOfFeaturesPerimeter": "number"
+      }
+    ]
+  },
+  "crs": "object",
+  "features": [
+    {
       "type": "string",
       "properties": {
-          "idClass": "number",
-          "className": "string",
-          "area": "number"
+        "classID": "number",
+        "className": "string",
+        "areaInHa": "number",
+        "areaInPixels": "number",
+        "perimeterInHa": "number",
+        "numVertex": "number"
       },
       "geometry": {
-        "type":"string",
+        "type": "string",
         "coordinates": "object"
       }
-    }],
-    "validation_stats": {
-      "featuresStats" : [{
-          "idClass": "number",
-          "numFeatures": "number",
-          "occupiedAreaInPixel": "number",
-          "occupiedAreaInKm": "number"
-      }]
     }
-  }
+  ]
+}
