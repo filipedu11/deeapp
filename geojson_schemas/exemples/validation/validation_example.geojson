@@ -1,4 +1,4 @@
-{
+﻿{
     "type": "FeatureCollection",
     "validationID": "validation1",
     "validationName": "Validação Exemplo",
@@ -6,7 +6,6 @@
     "validationRasterFile": "validation_example.tif",
     "validationSource": {
       "author": "Eduardo Lopes",
-      "classifierAlgorithm": "Random validation (qgis)",
       "preProcTechniquesUsed": [],
       "postProcTechniquesUsed": []
     },  
@@ -18,7 +17,7 @@
                 "numFeatures": 11,
                 "totalAreaInHectare": 2.92243,
                 "totalAreaInPixels": 54,
-                "totalPerimeterInKM": 0.279123,
+                "totalPerimeterInHectare": 0.279123,
                 "meanOfFeaturesAreaInHectare": 0.265675,
                 "meanOfFeaturesAreaInPixels": 4.90909,
                 "meanOfFeaturesPerimeterInHectare": 0.025375,

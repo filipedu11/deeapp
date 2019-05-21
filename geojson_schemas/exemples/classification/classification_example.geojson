@@ -1,4 +1,4 @@
-{
+﻿{
     "type": "FeatureCollection",
     "classificationID": "classification1",
     "classificationName": "Classificação Exemplo",
@@ -18,13 +18,22 @@
                 "numFeatures": 10,
                 "totalAreaInHectare": 2.381239,
                 "totalAreaInPixels": 44,
-                "totalPerimeterInKM": 0.232597,
+                "totalPerimeterInHectare": 0.232597,
                 "meanOfFeaturesAreaInHectare": 0.238124,
                 "meanOfFeaturesAreaInPixels": 4.4,
                 "meanOfFeaturesPerimeterInHectare": 0.023260,
                 "stdOfFeaturesAreaInHectare": 0.160908,
                 "stdOfFeaturesAreaInPixels": 2.97321,
-                "stdOfFeaturesPerimeter": 0.011768
+                "stdOfFeaturesPerimeter": 0.011768,
+                "medianOfFeaturesAreaInHectare": 0.216473,
+                "medianOfFeaturesAreaInPixels": 4,
+                "medianOfFeaturesPerimeter": 0.023264,
+                "minFeatureAreaInHectare": 0.054119,
+                "minFeatureAreaInPixels": 1,
+                "minFeaturePerimeter": 0.009305,
+                "maxFeatureAreaInHectare": 0.432961,
+                "maxFeatureAreaInPixels": 8,
+                "maxFeaturePerimeter": 0.037221
             },
             {
                 "classID": "2",
@@ -38,9 +47,32 @@
                 "meanOfFeaturesPerimeterInHectare": 0.059325,
                 "stdOfFeaturesAreaInHectare": 0.689885,
                 "stdOfFeaturesAreaInPixels": 14.7475,
-                "stdOfFeaturesPerimeter": 0.051222
+                "stdOfFeaturesPerimeter": 0.051222,
+                "medianOfFeaturesAreaInHectare": 0.541189,
+                "medianOfFeaturesAreaInPixels": 10,
+                "medianOfFeaturesPerimeter": 0.041875,
+                "minFeatureAreaInHectare": 0.05412,
+                "minFeatureAreaInPixels": 1,
+                "minFeaturePerimeter": 0.009306,
+                "maxFeatureAreaInHectare": 1.89416,
+                "maxFeatureAreaInPixels": 35,
+                "maxFeaturePerimeter": 0.144243
             }
-        ]
+        ],
+        "globalStats": {
+          "ascendingOrderOfClassesByOccupiedAreaInHectare": [],
+          "ascendingOrderOfClassesByOccupiedAreaInPixels": [],
+          "ascendingOrderOfClassesByPerimeterInHectare": [],
+          "ascendingOrderOfClassesByMeanOfOccupiedAreaInHectare": [],
+          "ascendingOrderOfClassesByMeanOfOccupiedAreaInPixels": [],
+          "ascendingOrderOfClassesByMeanOfPerimeterInHectare": [],
+          "ascendingOrderOfClassesByStdOfOccupiedAreaInHectare": [],
+          "ascendingOrderOfClassesByStdOfOccupiedAreaInPixels": [],
+          "ascendingOrderOfClassesByStdOfPerimeterInHectare": [],
+          "ascendingOrderOfClassesByMedianOfOccupiedAreaInHectare": [],
+          "ascendingOrderOfClassesByMedianOfOccupiedAreaInPixels": [],
+          "ascendingOrderOfClassesByMedianOfPerimeterInHectare": []
+        }
     },
     "crs": {
         "type": "name",
