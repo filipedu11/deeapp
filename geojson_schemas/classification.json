@@ -36,14 +36,37 @@
         "numFeatures": "number",
         "totalAreaInHectare": "number",
         "totalAreaInPixels": "number",
-        "totalPerimeterInKM": "number",
+        "totalPerimeterInHectare": "number",
         "meanOfFeaturesAreaInHectare": "number",
         "meanOfFeaturesAreaInPixels": "number",
-        "meanOfFeaturesPerimeterInKM": "number",
+        "meanOfFeaturesPerimeterInHectare": "number",
         "stdOfFeaturesAreaInHectare": "number",
         "stdOfFeaturesAreaInPixels": "number",
-        "stdOfFeaturesPerimeter": "number"
+        "stdOfFeaturesPerimeter": "number",
+        "medianOfFeaturesAreaInHectare": "number",
+        "medianOfFeaturesAreaInPixels": "number",
+        "medianOfFeaturesPerimeter": "number",
+        "minFeatureAreaInHectare": "number",
+        "minFeatureAreaInPixels": "number",
+        "minFeaturePerimeter": "number",
+        "maxFeatureAreaInHectare": "number",
+        "maxFeatureAreaInPixels": "number",
+        "maxFeaturePerimeter": "number"
       }
-    ]
+    ],
+    "globalStats": {
+      "ascendingOrderOfClassesByOccupiedAreaInHectare": "array",
+      "ascendingOrderOfClassesByOccupiedAreaInPixels": "array",
+      "ascendingOrderOfClassesByPerimeterInHectare": "array",
+      "ascendingOrderOfClassesByMeanOfOccupiedAreaInHectare": "array",
+      "ascendingOrderOfClassesByMeanOfOccupiedAreaInPixels": "array",
+      "ascendingOrderOfClassesByMeanOfPerimeterInHectare": "array",
+      "ascendingOrderOfClassesByStdOfOccupiedAreaInHectare": "array",
+      "ascendingOrderOfClassesByStdOfOccupiedAreaInPixels": "array",
+      "ascendingOrderOfClassesByStdOfPerimeterInHectare": "array",
+      "ascendingOrderOfClassesByMedianOfOccupiedAreaInHectare": "array",
+      "ascendingOrderOfClassesByMedianOfOccupiedAreaInPixels": "array",
+      "ascendingOrderOfClassesByMedianOfPerimeterInHectare": "array"
+    }
   }
 }
