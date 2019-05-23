@@ -8,70 +8,87 @@
       "author": "Eduardo Lopes",
       "classifierAlgorithm": "Random classification (qgis)",
       "preProcTechniquesUsed": [],
-      "postProcTechniquesUsed": []
+      "postProcTechniquesUsed": [],
+      "date": "",
+      "classificationDate": ""
     },  
     "classificationStats": {
-        "featuresStats": [
+        "classStats": [
             {
                 "classID": "1",
                 "className": "Área ardida",
-                "numFeatures": 10,
-                "totalAreaInHectare": 2.381239,
-                "totalAreaInPixels": 44,
-                "totalPerimeterInHectare": 0.232597,
-                "meanOfFeaturesAreaInHectare": 0.238124,
-                "meanOfFeaturesAreaInPixels": 4.4,
-                "meanOfFeaturesPerimeterInHectare": 0.023260,
-                "stdOfFeaturesAreaInHectare": 0.160908,
-                "stdOfFeaturesAreaInPixels": 2.97321,
-                "stdOfFeaturesPerimeter": 0.011768,
-                "medianOfFeaturesAreaInHectare": 0.216473,
-                "medianOfFeaturesAreaInPixels": 4,
-                "medianOfFeaturesPerimeter": 0.023264,
-                "minFeatureAreaInHectare": 0.054119,
-                "minFeatureAreaInPixels": 1,
-                "minFeaturePerimeter": 0.009305,
-                "maxFeatureAreaInHectare": 0.432961,
-                "maxFeatureAreaInPixels": 8,
-                "maxFeaturePerimeter": 0.037221
+                "numberOfPolygons": 10,
+                "statsAreaInPixel": {
+                    "totalAreaInPixels": 44,
+                    "meanOfFeaturesAreaInPixels": 4.4,
+                    "stdOfFeaturesAreaInPixels": 2.97321,
+                    "medianOfFeaturesAreaInPixels": 4,
+                    "minFeatureAreaInPixels": 1,
+                    "maxFeatureAreaInPixels": 8
+                },
+                "statsAreaInHectare": {
+                    "totalAreaInHectare": 2.381239,
+                    "meanOfFeaturesAreaInHectare": 0.238124,
+                    "stdOfFeaturesAreaInHectare": 0.160908,
+                    "medianOfFeaturesAreaInHectare": 0.216473,
+                    "minFeatureAreaInHectare": 0.054119,
+                    "maxFeatureAreaInHectare": 0.432961
+                },
+                "statsPerimeterInMeters": {
+                    "totalPerimeterInMeters": 48.228311,
+                    "meanOfFeaturesPerimeterInMeters": 48.797951,
+                    "stdOfFeaturesPerimeterInMeters": 10.848041,
+                    "medianOfFeaturesPerimeterInMeters": 15.252540,
+                    "minFeaturePerimeterInMeters": 9.646243,
+                    "maxFeaturePerimeterInMeters": 19.292745
+                }
             },
             {
                 "classID": "2",
                 "className": "Área não ardida",
-                "numFeatures": 4,
-                "totalAreaInHectare": 3.030663,
-                "totalAreaInPixels": 56,
-                "totalPerimeterInHectare": 0.237298,
-                "meanOfFeaturesAreaInHectare": 0.757666,
-                "meanOfFeaturesAreaInPixels": 14.0,
-                "meanOfFeaturesPerimeterInHectare": 0.059325,
-                "stdOfFeaturesAreaInHectare": 0.689885,
-                "stdOfFeaturesAreaInPixels": 14.7475,
-                "stdOfFeaturesPerimeter": 0.051222,
-                "medianOfFeaturesAreaInHectare": 0.541189,
-                "medianOfFeaturesAreaInPixels": 10,
-                "medianOfFeaturesPerimeter": 0.041875,
-                "minFeatureAreaInHectare": 0.05412,
-                "minFeatureAreaInPixels": 1,
-                "minFeaturePerimeter": 0.009306,
-                "maxFeatureAreaInHectare": 1.89416,
-                "maxFeatureAreaInPixels": 35,
-                "maxFeaturePerimeter": 0.144243
+                "numberOfPolygons": 4,
+                "statsAreaInPixel": {
+                    "totalAreaInPixels": 56,
+                    "meanOfFeaturesAreaInPixels": 14.0,
+                    "stdOfFeaturesAreaInPixels": 14.7475,
+                    "medianOfFeaturesAreaInPixels": 10,
+                    "minFeatureAreaInPixels": 1,
+                    "maxFeatureAreaInPixels": 35
+                },
+                "statsAreaInHectare": {
+                    "totalAreaInHectare": 3.030663,
+                    "meanOfFeaturesAreaInHectare": 0.757666,
+                    "stdOfFeaturesAreaInHectare": 0.689885,
+                    "medianOfFeaturesAreaInHectare": 0.541189,
+                    "minFeatureAreaInHectare": 0.05412,
+                    "maxFeatureAreaInHectare": 1.89416
+                },
+                "statsPerimeterInMeters": {
+                    "totalPerimeterInMeters": 48.713243,
+                    "meanOfFeaturesPerimeterInMeters": 24.356724,
+                    "stdOfFeaturesPerimeterInMeters": 22.632278,
+                    "medianOfFeaturesPerimeterInMeters": 20.463382,
+                    "minFeaturePerimeterInMeters": 9.646761,
+                    "maxFeaturePerimeterInMeters": 37.979336
+                }
             }
         ],
         "globalStats": {
-          "ascendingOrderOfClassesByOccupiedAreaInHectare": [],
-          "ascendingOrderOfClassesByOccupiedAreaInPixels": [],
-          "ascendingOrderOfClassesByPerimeterInHectare": [],
-          "ascendingOrderOfClassesByMeanOfOccupiedAreaInHectare": [],
-          "ascendingOrderOfClassesByMeanOfOccupiedAreaInPixels": [],
-          "ascendingOrderOfClassesByMeanOfPerimeterInHectare": [],
-          "ascendingOrderOfClassesByStdOfOccupiedAreaInHectare": [],
-          "ascendingOrderOfClassesByStdOfOccupiedAreaInPixels": [],
-          "ascendingOrderOfClassesByStdOfPerimeterInHectare": [],
-          "ascendingOrderOfClassesByMedianOfOccupiedAreaInHectare": [],
-          "ascendingOrderOfClassesByMedianOfOccupiedAreaInPixels": [],
-          "ascendingOrderOfClassesByMedianOfPerimeterInHectare": []
+            "numberTotalOfPolygons": 14,
+            "statsAreaInPixel": {
+                "totalAreaInPixels": 100,
+                "meanOfFeaturesAreaInPixels": 9.2,
+                "meanStdOfFeaturesAreaInPixels": 8.860355,
+                "meanOfmedianOfFeaturesAreaInPixels": 7,
+                "minFeatureAreaInPixels": 1,
+                "maxFeatureAreaInPixels": 35
+            },
+            "statsAreaInHectare": {
+                "totalAreaInHectare": 5.411902
+            },
+            "statsPerimeterInMeters": {
+                "totalPerimeterInMeters": 96.941554
+            }
         }
     },
     "crs": {
