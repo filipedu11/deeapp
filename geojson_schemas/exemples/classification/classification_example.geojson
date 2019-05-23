@@ -9,7 +9,7 @@
       "classifierAlgorithm": "Random classification (qgis)",
       "preProcTechniquesUsed": [],
       "postProcTechniquesUsed": [],
-      "date": "",
+      "collectedDate": "",
       "classificationDate": ""
     },  
     "classificationStats": {
@@ -103,9 +103,9 @@
             "properties": {
                 "classId": 2,
                 "className": "Área não ardida",
-                "areaInHa": 0.432942,
+                "areaInHectare": 0.432942,
                 "areaInPixels": 8,
-                "perimeterInHa": 0.032578,
+                "perimeterInMeters": 18.049377,
                 "numVertices": 12
             },
             "geometry": {
@@ -171,9 +171,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.162353,
+                "areaInHectare": 0.162353,
                 "areaInPixels": 3,
-                "perimeterInHa": 0.018611,
+                "perimeterInMeters": 13.642214,
                 "numVertices": 9
             },
             "geometry": {
@@ -227,9 +227,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.432944,
+                "areaInHectare": 0.432944,
                 "areaInPixels": 8,
-                "perimeterInHa": 0.037221,
+                "perimeterInMeters": 19.292745,
                 "numVertices": 15
             },
             "geometry": {
@@ -307,9 +307,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.432948,
+                "areaInHectare": 0.432948,
                 "areaInPixels": 8,
-                "perimeterInHa": 0.037203,
+                "perimeterInMeters": 19.288079,
                 "numVertices": 11
             },
             "geometry": {
@@ -371,9 +371,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.270594,
+                "areaInHectare": 0.270594,
                 "areaInPixels": 5,
-                "perimeterInHa": 0.027916,
+                "perimeterInMeters": 16.708082,
                 "numVertices": 10
             },
             "geometry": {
@@ -431,9 +431,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.054119,
+                "areaInHectare": 0.054119,
                 "areaInPixels": 1,
-                "perimeterInHa": 0.009305,
+                "perimeterInMeters": 9.646243,
                 "numVertices": 5
             },
             "geometry": {
@@ -471,9 +471,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.054119,
+                "areaInHectare": 0.054119,
                 "areaInPixels": 1,
-                "perimeterInHa": 0.009305,
+                "perimeterInMeters": 9.646243,
                 "numVertices": 5
             },
             "geometry": {
@@ -511,9 +511,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.05412,
+                "areaInHectare": 0.05412,
                 "areaInPixels": 1,
-                "perimeterInHa": 0.009305,
+                "perimeterInMeters": 9.646242,
                 "numVertices": 5
             },
             "geometry": {
@@ -551,9 +551,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.10824,
+                "areaInHectare": 0.10824,
                 "areaInPixels": 2,
-                "perimeterInHa": 0.013949,
+                "perimeterInMeters": 11.810588,
                 "numVertices": 5
             },
             "geometry": {
@@ -591,9 +591,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.432961,
+                "areaInHectare": 0.432961,
                 "areaInPixels": 8,
-                "perimeterInHa": 0.032579,
+                "perimeterInMeters": 18.049654,
                 "numVertices": 9
             },
             "geometry": {
@@ -647,9 +647,9 @@
             "properties": {
                 "classId": 2,
                 "className": "Área não ardida",
-                "areaInHa": 0.649437,
+                "areaInHectare": 0.649437,
                 "areaInPixels": 12,
-                "perimeterInHa": 0.051171,
+                "perimeterInMeters": 22.621008,
                 "numVertices": 22
             },
             "geometry": {
@@ -755,9 +755,9 @@
             "properties": {
                 "classId": 1,
                 "className": "Área ardida",
-                "areaInHa": 0.378841,
+                "areaInHectare": 0.378841,
                 "areaInPixels": 7,
-                "perimeterInHa": 0.037203,
+                "perimeterInMeters": 19.288079,
                 "numVertices": 14
             },
             "geometry": {
@@ -831,9 +831,9 @@
             "properties": {
                 "classId": 2,
                 "className": "Área não ardida",
-                "areaInHa": 1.894164,
+                "areaInHectare": 1.894164,
                 "areaInPixels": 35,
-                "perimeterInHa": 0.144243,
+                "perimeterInMeters": 37.979336,
                 "numVertices": 51
             },
             "geometry": {
@@ -1055,9 +1055,9 @@
             "properties": {
                 "classId": 2,
                 "className": "Área não ardida",
-                "areaInHa": 0.05412,
+                "areaInHectare": 0.05412,
                 "areaInPixels": 1,
-                "perimeterInHa": 0.009306,
+                "perimeterInMeters": 9.646761,
                 "numVertices": 5
             },
             "geometry": {
