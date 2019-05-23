@@ -1,0 +1,83 @@
+{
+  "type": "string",
+  "classificationID": "string",
+  "classificationName": "string",
+  "classificationDescription": "string",
+  "classificationRasterFile": "string",
+  "classificationSource": {
+    "author": "string",
+    "classifierAlgorithm": "string",
+    "preProcTechniquesUsed": "object",
+    "postProcTechniquesUsed": "object",
+    "collectedDate": "string",
+    "classificationDate": "string"
+  },
+  "classificationStats": {
+    "classStats": [
+      {
+          "classID": "string",
+          "className": "string",
+          "numberOfPolygons": "number",
+          "statsAreaInPixel": {
+              "totalAreaInPixels": "number",
+              "meanOfFeaturesAreaInPixels": "number",
+              "stdOfFeaturesAreaInPixels": "number",
+              "medianOfFeaturesAreaInPixels": "number",
+              "minFeatureAreaInPixels": "number",
+              "maxFeatureAreaInPixels": "number"
+          },
+          "statsAreaInHectare": {
+              "totalAreaInHectare": "number",
+              "meanOfFeaturesAreaInHectare": "number",
+              "stdOfFeaturesAreaInHectare": "number",
+              "medianOfFeaturesAreaInHectare": "number",
+              "minFeatureAreaInHectare": "number",
+              "maxFeatureAreaInHectare": "number"
+          },
+          "statsPerimeterInMeters": {
+              "totalPerimeterInMeters": "number",
+              "meanOfFeaturesPerimeterInMeters": "number",
+              "stdOfFeaturesPerimeterInMeters": "number",
+              "medianOfFeaturesPerimeterInMeters": "number",
+              "minFeaturePerimeterInMeters": "number",
+              "maxFeaturePerimeterInMeters": "number"
+          }
+      }
+    ],
+    "globalStats": {
+        "numberTotalOfPolygons": "number",
+        "statsAreaInPixel": {
+            "totalAreaInPixels": "number",
+            "meanOfFeaturesAreaInPixels": "number",
+            "meanStdOfFeaturesAreaInPixels": "number",
+            "meanOfmedianOfFeaturesAreaInPixels": "number",
+            "minFeatureAreaInPixels": "number",
+            "maxFeatureAreaInPixels": "number"
+        },
+        "statsAreaInHectare": {
+            "totalAreaInHectare": "number"
+        },
+        "statsPerimeterInMeters": {
+            "totalPerimeterInMeters": "number"
+        }
+    }
+  },
+  "crs": "object",
+  "features": [
+    {
+      "type": "string",
+      "properties": {
+        "classId": "number",
+        "className": "string",
+        "areaInHectare": "number",
+        "areaInPixels": "number",
+        "perimeterInMeters": "number",
+        "numVertices": "number"
+      },
+      "geometry": {
+        "type": "string",
+        "coordinates": "object"
+      }
+    }
+  ]
+}
