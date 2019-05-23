@@ -1,0 +1,61 @@
+{
+    "type": "string",
+    "idEvaluation": "string",
+    "name": "string",
+    "description": "string",
+    "crs": "object",
+    "features": [{
+      "type": "string",
+      "properties": {
+          "ID": "number",
+          "clClassID": "number",
+          "clClassName": "string",
+          "valClassID": "number",
+          "valClassName": "string",
+          "area": "number"
+      },
+      "geometry": {
+        "type":"string",
+        "coordinates": "array"
+      }
+    }],
+    "evaluation_stats": {
+        "featuresStats" : [{
+            "idClass": "number",
+            "numFeatures": "number",
+            "occupiedAreaInPixel": "number",
+            "occupiedAreaInKm": "number"
+        }],
+        "OA": "number",
+        "PA": [{
+            "clClassID": "number",
+            "valClassID": "number",
+            "value": "number"
+        }],
+        "UA": [{
+            "clClassID": "number",
+            "valClassID": "number",
+            "value": "number"
+        }],
+        "FP": [{
+            "clClassID": "number",
+            "valClassID": "number",
+            "value": "number"
+        }],
+        "FN": [{
+            "clClassID": "number",
+            "valClassID": "number",
+            "value": "number"
+        }],
+        "VP": [{
+            "clClassID": "number",
+            "valClassID": "number",
+            "value": "number"
+        }],
+        "VN": [{
+            "clClassID": "number",
+            "valClassID": "number",
+            "value": "number"
+        }]
+    } 
+  }
