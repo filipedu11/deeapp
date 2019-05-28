@@ -19,9 +19,9 @@
     "mocha": "^6.1.4"
   },
   "scripts": {
-    "test": "mocha --require @babel/register test",
-    "start": "parcel index.html",
-    "build": "parcel build --public-url . index.html"
+    "test": "mocha --require @babel/register workspace/test",
+    "start": "parcel workspace/index.html",
+    "build": "parcel build --public-url . workspace/index.html"
   },
   "repository": {
     "type": "git",
