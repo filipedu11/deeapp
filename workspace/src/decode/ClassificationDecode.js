@@ -74,5 +74,8 @@ export class ClassificationDecode{
 
         //classificationStats -> globalStats -> statsPerimeterInMeters OBJECT
         this.totalPerimeterInMeters = "totalPerimeterInMeters";
+
+
+        this.polygonProperties = "properties";
     }
 }
