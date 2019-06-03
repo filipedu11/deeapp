@@ -11,4 +11,11 @@ export class Classification{
         this.classificationStats = classificationStats;
         this.features = features;
     }
+
+    /**
+     * Return the class stats of classification
+     */
+    getClassStats(){
+        return this.classificationStats[cDec.classStats];
+    }
 }
