@@ -30,4 +30,10 @@ export class Classification{
         return this.classificationStats[cDec.globalStats];
     }
 
+    /**
+     * Return the properties / stats of each polygon
+     */
+    getPropertiesOfPolygon(index){
+        return this.features[index][cDec.polygonProperties];
+    }
 }
