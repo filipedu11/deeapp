@@ -1,4 +1,8 @@
 
+import { ClassificationDecode } from "../decode/ClassificationDecode";
+
+var cDec = new ClassificationDecode();
+
 export class Classification{
 
     constructor(classificationID, classificationName, classificationDescription, 
@@ -18,4 +22,12 @@ export class Classification{
     getClassStats(){
         return this.classificationStats[cDec.classStats];
     }
+    
+    /**
+     * Return the global stats of classification
+     */
+    getGlobalStats(){
+        return this.classificationStats[cDec.globalStats];
+    }
+
 }
