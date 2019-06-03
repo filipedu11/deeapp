@@ -1,4 +1,4 @@
-import { Stats } from "../src/Stats";
+import { Stats } from "../src/entities/Stats";
 import { strict as assert } from 'assert';
 
 var stats1 = new Stats();
