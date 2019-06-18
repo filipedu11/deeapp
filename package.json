@@ -4,11 +4,24 @@
   "description": "Application to analyse the spatial error distribution of land cover classification",
   "main": "index.js",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.9.0",
     "babel-eslint": "^10.0.1",
+    "bootstrap": "^4.3.1",
     "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.3",
+    "express": "^4.17.1",
+    "jquery": "^3.4.1",
     "jshint": "^2.10.2",
+    "module-name": "0.0.1-security",
     "ol": "^5.3.2",
-    "parcel-bundler": "^1.12.3"
+    "ol-layerswitcher": "^3.2.0",
+    "parcel-bundler": "^1.12.3",
+    "pg": "^7.11.0",
+    "popper": "^1.0.1",
+    "popper.js": "^1.15.0",
+    "sidebar-v2": "^0.4.0",
+    "sortablejs": "^1.10.0-rc2"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",

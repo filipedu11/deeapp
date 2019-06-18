@@ -1,22 +1,29 @@
+/**
+ * Import CSS
+ */
+import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/css/fontawesome.css';
+import '@fortawesome/fontawesome-free/css/brands.css';
 import 'ol/ol.css';
-import {Map, View} from 'ol';
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
-import { readFileSync } from 'fs';
+import 'sidebar-v2/css/ol3-sidebar.css';
+import 'ol-layerswitcher/src/ol-layerswitcher.css';
+import './static/css/map.css';
+import 'popper.js';
 
-var classification = readFileSync("./workspace/static/data/classification/classification_example.geojson", "utf8");
 
-console.log(classification);
+/**
+ * Import Main class
+ */
+import { Main } from './src/Main.js';
 
-const map = new Map({
-    target: 'map',
-    layers: [
-        new TileLayer({
-        source: new OSM()
-        })
-    ],
-    view: new View({
-        center: [0, 0],
-        zoom: 0
-    })
-});
+/**
+ * Import ReadFile class
+ */
+import { ReadFiles } from './static/js/ReadFiles.js';
+
+var app = new Main();
+
+var readFiles = new ReadFiles();
+
+//CREATE THE BASE MAP
+app.createMap();
