@@ -1,5 +1,5 @@
 
-import { ClassificationDecode } from "../decode/ClassificationDecode";
+import { ClassificationDecode } from '../decode/ClassificationDecode';
 
 var cDec = new ClassificationDecode();
 
