@@ -1,4 +1,8 @@
 import Sortable from 'sortablejs'; 
+import View from 'ol/View';
+import { getCenter } from 'ol/extent.js';
+import { ClassificationDecode } from '../../src/decode/ClassificationDecode';
+import Feature from 'ol/Feature';
 
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('ol/control/Control'), require('ol/Observable')) :
@@ -99,6 +103,8 @@ import Sortable from 'sortablejs';
     };
 
     var CSS_PREFIX = 'layer-switcher-';
+    var cDec = new ClassificationDecode();
+
 
     /**
  * OpenLayers Layer Switcher Control.
@@ -243,24 +249,6 @@ import Sortable from 'sortablejs';
 
                 var ul = document.createElement('ul');
 
-                Sortable.create(ul, {
-                    handle: '.my-handle',
-                    chosenClass: 'chosen',
-                    onSort: function (evt) {
-                        var allLayers = document.getElementsByClassName('layer');
-
-                        for (let index = allLayers.length - 1; index > -1; index--) {
-                            const element = allLayers[index];
-                            LayerSwitcher.forEachRecursive(map, function (l) {
-                                if (element.childNodes[1].id === l.get('lyrId')){
-                                    map.removeLayer(l);
-                                    map.addLayer(l);
-                                }
-                            });
-                        }
-                    }
-                });
-
                 panel.appendChild(ul);
                 // passing two map arguments instead of lyr as we're passing the map as the root of the layers tree
                 LayerSwitcher.renderLayers_(map, map, ul);
@@ -297,7 +285,18 @@ import Sortable from 'sortablejs';
             key: 'setVisible_',
             value: function setVisible_(map, lyr, visible) {
                 lyr.setVisible(visible);
-                
+
+                if (lyr.get('typeBase') !== 'basemap') {
+                    if (visible) {
+                        var sourceAux = lyr.get('sourceAux');
+                        map.getView().fit(sourceAux.getExtent(), {constrainResolution: false});
+                        map.getView().setZoom(map.getView().getZoom() - 1);
+                    }
+                    else {
+                        map.getView().fit(map.get('initExtent'), {constrainResolution: false});
+                    }
+                }
+
                 if (visible && lyr.get('type') === 'base') {
                 // Hide all other base layers regardless of grouping
                     LayerSwitcher.forEachRecursive(map, function (l, idx, a) {
@@ -306,10 +305,6 @@ import Sortable from 'sortablejs';
                         }
                     });
                 }
-
-                map.getLayers().forEach(element => {
-                    console.log(element.getVisible());
-                });
             }
 
             /**
@@ -339,23 +334,46 @@ import Sortable from 'sortablejs';
 
                 if (lyr.getLayers && !lyr.get('combine')) {
 
-                    li.className = 'group';
+                    if( lyr.getLayers().getLength() > 0 ){
 
-                    // Group folding
-                    if (lyr.get('fold')) {
-                        li.classList.add(CSS_PREFIX + 'fold');
-                        li.classList.add(CSS_PREFIX + lyr.get('fold'));
-                        label.onclick = function (e) {
-                            LayerSwitcher.toggleFold_(lyr, li);
-                        };
+                        li.className = 'group';
+
+                        // Group folding
+                        if (lyr.get('fold')) {
+                            li.classList.add(CSS_PREFIX + 'fold');
+                            li.classList.add(CSS_PREFIX + lyr.get('fold'));
+                            label.onclick = function (e) {
+                                LayerSwitcher.toggleFold_(lyr, li);
+                            };
+                        }
+                        //li.appendChild(span);
+                        label.innerHTML = lyrTitle;
+                        li.appendChild(label);
+                        var ul = document.createElement('ul');
+
+                        Sortable.create(ul, {
+                            handle: '.my-handle',
+                            chosenClass: 'chosen',
+                            onSort: function (evt) {
+                                var allLayers = document.getElementsByClassName('layer');
+
+                                for (let index = allLayers.length - 1; index > -1; index--) {
+                                    const element = allLayers[index];
+                                    LayerSwitcher.forEachRecursive(map, function (l) {
+                                    
+                                        if (element.childNodes[1].id === l.get('lyrId')){
+                                            map.removeLayer(l);
+                                            map.addLayer(l);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                        li.appendChild(ul);
+
+                        LayerSwitcher.renderLayers_(map, lyr, ul);
                     }
-                    li.appendChild(span);
-                    label.innerHTML = lyrTitle;
-                    li.appendChild(label);
-                    var ul = document.createElement('ul');
-                    li.appendChild(ul);
-
-                    LayerSwitcher.renderLayers_(map, lyr, ul);
                 } else {
 
                     li.className = 'layer';

@@ -1,8 +1,5 @@
 import { MapViewer } from './entities/MapViewer.js';
 
-import { Classification } from './entities/Classification';
-import { ClassificationDecode } from './decode/ClassificationDecode';
-
 export class Main {
 
     constructor(){
@@ -13,8 +10,7 @@ export class Main {
         this.classificationMap = {};
     }
     
-    addClassification(type, classificationGeojson){
-        this.type = type;
-        this.classificationGeojson = classificationGeojson;
+    addClassification(classificationGeojson){
+        this.mapViewer.addClassification(classificationGeojson);
     }
 }
