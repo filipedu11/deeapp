@@ -11,6 +11,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.17.3",
     "express": "^4.17.1",
+    "geojson-vt": "^3.2.1",
     "jquery": "^3.4.1",
     "jshint": "^2.10.2",
     "module-name": "0.0.1-security",
