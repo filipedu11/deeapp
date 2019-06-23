@@ -1,7 +1,7 @@
 import Sortable from 'sortablejs'; 
 import View from 'ol/View';
 import { getCenter } from 'ol/extent.js';
-import { ClassificationDecode } from '../../src/decode/ClassificationDecode';
+import { ClassificationDecode } from '../decode/ClassificationDecode';
 import Feature from 'ol/Feature';
 
 (function (global, factory) {
