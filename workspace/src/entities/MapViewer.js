@@ -6,7 +6,7 @@ import TileLayer from 'ol/layer/Tile';
 import LayerGroup from 'ol/layer/Group';
 import Stamen from 'ol/source/Stamen.js';
 
-import LayerSwitcher from '../../static/js/ol-layerswitcher.js';
+import LayerSwitcher from '../panels/Layer.js';
 import Sidebar from '../../static/js/sidebar.js';
 import { Progress } from '../../static/js/Progress.js';
 
@@ -199,9 +199,8 @@ export class MapViewer{
 
         var tileIndex = geojsonvt(
             classiGeojson, {
-                tolerance:5,
-                maxZoom: this.map.getView().getMaxZoom(),
-                extent: 4096
+                tolerance:3,
+                maxZoom: this.map.getView().getMaxZoom()
             }
         );
 
