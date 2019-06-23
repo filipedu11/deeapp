@@ -26,7 +26,7 @@ export class ClassificationDecode{
         this.globalStats = 'globalStats';
 
         //classificationStats -> classStats OBJECT
-        this.classID = 'classID';
+        this.classID = 'classId';
         this.className = 'className';
         this.numberOfPolygons = 'numberOfPolygons';
 

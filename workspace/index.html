@@ -9,15 +9,16 @@
 </head>
 
 <body>
+  <div id="legend"></div>
   <!-- START OF SIDEBAR DIV -->
   <div id="sidebar" class="sidebar collapsed">
 
     <!-- Nav tabs -->
     <div class="sidebar-tabs">
       <ul role="tablist">
-        <li><a href="#home" role="tab"><i class="fa fa-sliders-h"></i></a></li>
-        <li><a href="#report" role="tab"><i class="fas fa-file-alt"></i></a></li>
-        <li><a href="#toolbox" role="tab"><i class="fas fa-toolbox"></i></a></li>
+        <li><a href="#layers-panel" role="tab"><i class="fa fa-sliders-h"></i></a></li>
+        <li><a href="#metadata" role="tab"><i class="fas fa-file-alt"></i></a></li>
+        <li><a href="#stats" role="tab"><i class="stats"></i></a></li>
         <li><a href="#settings" role="tab"><i class="fa fa-cog"></i></a></li>
 
       </ul>
@@ -29,7 +30,7 @@
 
     <!-- Tab panes -->
     <div class="sidebar-content">
-      <div class="sidebar-pane" id="home">
+      <div class="sidebar-pane" id="layers-panel">
         <h1 class="sidebar-header">
           Layers
           <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
@@ -38,16 +39,19 @@
         <div id="layers" class="layer-switcher"></div>
       </div>
 
-      <div class="sidebar-pane" id="report">
-        <h1 class="sidebar-header">Report<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+      <div class="sidebar-pane" id="metadata">
+        <h1 class="sidebar-header">Metadata<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <div class="content" id="content-metadata"></div>
       </div>
 
-      <div class="sidebar-pane" id="toolbox">
-        <h1 class="sidebar-header">Toolbox<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+      <div class="sidebar-pane" id="stats">
+        <h1 class="sidebar-header">Stats<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <div class="content" id="content-stats"></div>
       </div>
 
       <div class="sidebar-pane" id="settings">
         <h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <div class="content" id="content-settings"></div>
       </div>
     </div>
   </div>

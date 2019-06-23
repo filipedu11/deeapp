@@ -287,12 +287,19 @@ import Feature from 'ol/Feature';
                 lyr.setVisible(visible);
 
                 if (lyr.get('typeBase') !== 'basemap') {
+                    var classObj = lyr.get('class');
                     if (visible) {
                         var sourceAux = lyr.get('sourceAux');
                         map.getView().fit(sourceAux.getExtent(), {constrainResolution: false});
-                        map.getView().setZoom(map.getView().getZoom() - 1);
+                        map.getView().setZoom(map.getView().getZoom() - 2);
+                        classObj.createReport();
+                        classObj.createStats();
+                        classObj.createLegend();
                     }
                     else {
+                        classObj.clearReport();
+                        classObj.clearStats();
+                        classObj.clearLegend();
                         map.getView().fit(map.get('initExtent'), {constrainResolution: false});
                     }
                 }
