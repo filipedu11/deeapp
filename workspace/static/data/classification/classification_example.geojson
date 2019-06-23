@@ -9,13 +9,13 @@
       "classifierAlgorithm": "Random classification (qgis)",
       "preProcTechniquesUsed": [],
       "postProcTechniquesUsed": [],
-      "collectedDate": "",
-      "classificationDate": ""
+      "collectedDate": "11/10/2017",
+      "classificationDate": "20/12/2018"
     },  
     "classificationStats": {
         "classStats": [
             {
-                "classID": "1",
+                "classId": "1",
                 "className": "Área ardida",
                 "numberOfPolygons": 10,
                 "statsAreaInPixel": {
@@ -44,7 +44,7 @@
                 }
             },
             {
-                "classID": "2",
+                "classId": "2",
                 "className": "Área não ardida",
                 "numberOfPolygons": 4,
                 "statsAreaInPixel": {
@@ -93,8 +93,8 @@
     },
     "classificationStyle":{
         "color":{
-            "1": "rgba(200,100,100,1)",
-            "2": "rgba(100,100,100,1)"
+            "1": "rgb(173,112,68)",
+            "2": "rgb(206,206,206)"
         }
     },
     "crs": {

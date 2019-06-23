@@ -199,9 +199,8 @@ export class MapViewer{
 
         var tileIndex = geojsonvt(
             classiGeojson, {
-                tolerance:5,
-                maxZoom: this.map.getView().getMaxZoom(),
-                extent: 4096
+                tolerance:3,
+                maxZoom: this.map.getView().getMaxZoom()
             }
         );
 
