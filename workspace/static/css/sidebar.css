@@ -189,7 +189,7 @@
 .sidebar-header {
   margin: -10px -20px 0;
   height: 40px;
-  padding: 0 40px;
+  padding: 0 30px;
   line-height: 40px;
   font-size: 25px;
   color: #fff;
@@ -257,14 +257,16 @@
 }
 
 .sidebar-left~.sidebar-map .ol-zoom,
-.sidebar-left~.sidebar-map .ol-scale-line {
+.sidebar-left~.sidebar-map .ol-scale-line, 
+.sidebar-left~.sidebar-map #stats-main-board {
   margin-left: 46px;
 }
 
 @media (min-width: 768px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
-  .sidebar-left~.sidebar-map .ol-scale-line {
+  .sidebar-left~.sidebar-map .ol-scale-line, 
+  .sidebar-left~.sidebar-map #stats-main-board {
     transition: margin-left 500ms;
   }
 }
@@ -272,7 +274,8 @@
 @media (min-width: 768px) and (max-width: 991px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
-  .sidebar-left~.sidebar-map .ol-scale-line {
+  .sidebar-left~.sidebar-map .ol-scale-line, 
+  .sidebar-left~.sidebar-map #stats-main-board {
     margin-left: 317px;
   }
 }
@@ -280,7 +283,8 @@
 @media (min-width: 992px) and (max-width: 1199px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
-  .sidebar-left~.sidebar-map .ol-scale-line {
+  .sidebar-left~.sidebar-map .ol-scale-line, 
+  .sidebar-left~.sidebar-map #stats-main-board {
     margin-left: 402px;
   }
 }
@@ -288,7 +292,8 @@
 @media (min-width: 1200px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
-  .sidebar-left~.sidebar-map .ol-scale-line {
+  .sidebar-left~.sidebar-map .ol-scale-line,
+  .sidebar-left~.sidebar-map #stats-main-board {
     margin-left: 472px;
   }
 }
@@ -296,7 +301,8 @@
 @media (min-width: 768px) {
 
   .sidebar-left.collapsed~.sidebar-map .ol-zoom,
-  .sidebar-left.collapsed~.sidebar-map .ol-scale-line {
+  .sidebar-left.collapsed~.sidebar-map .ol-scale-line, 
+  .sidebar-left.collapsed~.sidebar-map #stats-main-board {
     margin-left: 52px;
   }
 }

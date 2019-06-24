@@ -1,52 +1,60 @@
-import { Metada } from './Metadata';
+import { Metada } from '../Metadata';
 
 export class MetadaClassification extends Metada{
 
-    constructor(){
-        super();
+    constructor(lyrObj){
+        super(lyrObj);
     }
 
-    getContentReport(){
-        var sourceC = document.getElementById('content-metadata-'+this.getId());
+    createMetadataPanel(){
+
+        var obj = this.lyrObj;
+
+        var content = document.getElementById('content-metadata');
+
+        var sourceC = document.getElementById('content-metadata-'+obj.getId());
 
         if (sourceC === null) {
             sourceC = document.createElement('div');
-            sourceC.id = 'content-metadata-'+this.getId();
+            sourceC.id = 'content-metadata-'+obj.getId();
         }
 
         sourceC.innerHTML = 
             '<div class="card border-dark mb-3">'+
-                '<div class="card-header text-center mask flex-center rgba-red-strong" data-toggle="collapse" href="#collapse' + this.getId() + '" ' +
+                '<div class="card-header text-center mask flex-center rgba-red-strong" data-toggle="collapse" href="#collapse' + obj.getId() + '" ' +
                     'role="button" aria-expanded="true" aria-controls="collapse">'+
-                    this.getName() +
+                    obj.getName() +
                 '</div>' +
-                '<div class="card-body collapse" id="collapse' + this.getId() + '" style="padding: 0px">'+
+                '<div class="card-body collapse" id="collapse' + obj.getId() + '" style="padding: 0px">'+
                     '<table class="table table-bordered table-dark" style="margin: 0px;">' +
                         '<tbody>' +
                             '<tr>' +
                                 '<th scope="row">Description</th>' +
-                                '<td>' + this.getDescription() +'</td>' +
+                                '<td>' + obj.getDescription() +'</td>' +
                             '</tr>' +
                             '<tr>' +
                                 '<th scope="row">Author</th>'+
-                                '<td>' + this.getAuthor() + '</td>'+
+                                '<td>' + obj.getAuthor() + '</td>'+
                             '</tr>'+
                             '<tr>' +
                                 '<th scope="row">Classification Algorithm</th>'+
-                                '<td>' + this.getClassifierAlgorithm() + '</td>'+
+                                '<td>' + obj.getClassifierAlgorithm() + '</td>'+
                             '</tr>'+
                             '<tr>' +
                                 '<th scope="row">Collected Data Date</th>'+
-                                '<td>' + this.getCollectedDate() + '</td>'+
+                                '<td>' + obj.getCollectedDate() + '</td>'+
                             '</tr>'+
                             '<tr>' +
                                 '<th scope="row">Classification Date</th>'+
-                                '<td>' + this.getClassificationDate() + '</td>'+
+                                '<td>' + obj.getClassificationDate() + '</td>'+
                             '</tr>'+
                         '</tbody>'+
                     '</table>' +
                 '</div>' +
             '</div>';
-        return sourceC;
+        
+        content.append(sourceC);
+
+        return content;
     }
 }

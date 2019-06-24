@@ -292,12 +292,13 @@ import Feature from 'ol/Feature';
                         var sourceAux = lyr.get('sourceAux');
                         map.getView().fit(sourceAux.getExtent(), {constrainResolution: false});
                         map.getView().setZoom(map.getView().getZoom() - 2);
-                        classObj.createReport();
+                        classObj.createMetadata();
                         classObj.createStats();
+                        //classObj.setEventListenersStats();
                         classObj.createLegend();
                     }
                     else {
-                        classObj.clearReport();
+                        classObj.clearMetadata();
                         classObj.clearStats();
                         classObj.clearLegend();
                         map.getView().fit(map.get('initExtent'), {constrainResolution: false});

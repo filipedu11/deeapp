@@ -1,13 +1,16 @@
 
 export class Stats {
 
-    constructor(overallAccuracy, producerAccuracy, userAccuracy, truePositive, trueNegative, falsePositive, falseNegative){
-        this.overallAccuracy = overallAccuracy;
-        this.producerAccuracy = producerAccuracy;
-        this.userAccuracy = userAccuracy;
-        this.truePositive = truePositive;
-        this.trueNegative = trueNegative;
-        this.falsePositive = falsePositive;
-        this.falseNegative = falseNegative;
+    constructor(lyrObj){
+        this.lyrObj = lyrObj;
+    }
+
+    clearStatsPanel(){
+        var content = document.getElementById('content-stats-'+this.lyrObj.getId());
+
+        if (content !== null) {
+            //CLEAR PREVIOUS CONTENT
+            content.innerHTML = '';
+        }
     }
 }

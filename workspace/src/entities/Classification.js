@@ -1,14 +1,17 @@
 
 import { ClassificationDecode } from '../decode/ClassificationDecode';
-import { MetadaClassification } from '../panels/MetadataClassification';
-
-
-var cDec = new ClassificationDecode();
+import { MetadaClassification } from '../panels/classification/MetadataClassification';
+import { Legend } from '../panels/Legend';
+import { StatsClassification } from '../panels/classification/StatsClassification';
 
 export class Classification{
 
     constructor(classificationID, classificationName, classificationDescription, 
         classificationRasterFile, classificationSource, classificationStats, classificationStyle, features, geojsonFile) {
+
+        //Set the decode
+        this.decode = new ClassificationDecode();
+
         this.classificationID = classificationID;
         this.classificationName = classificationName;
         this.classificationDescription = classificationDescription;
@@ -18,7 +21,15 @@ export class Classification{
         this.classificationStyle = classificationStyle;
         this.features = features;
         this.geojsonFile = geojsonFile;
+
+        //Create panel for classification
         this.metadataPanel = new MetadaClassification(this);
+        this.legendPanel = new Legend(this);
+        this.statsPanel = new StatsClassification(this);
+    }
+
+    getDecode(){
+        return this.decode;
     }
 
     /**
@@ -46,67 +57,67 @@ export class Classification{
      * Return the classification author
      */
     getAuthor(){
-        return this.classificationSource[cDec.author];
+        return this.classificationSource[this.decode.author];
     }
 
     /**
      * Return the classification algorithm
      */
     getClassifierAlgorithm(){
-        return this.classificationSource[cDec.classificationAlgorithm];
+        return this.classificationSource[this.decode.classificationAlgorithm];
     }
 
     /**
      * Return the pre processement techniques used
      */
     getPreProcessementTechniquesUsed(){
-        return this.classificationSource[cDec.preProcTechniquesUsed];
+        return this.classificationSource[this.decode.preProcTechniquesUsed];
     }
 
     /**
      * Return the pre processement techniques used
      */
     getPosProcessementTechniquesUsed(){
-        return this.classificationSource[cDec.postProcTechniquesUsed];
+        return this.classificationSource[this.decode.postProcTechniquesUsed];
     }
 
     /**
      * Return the collected date of inputs (satelite images)
      */
     getCollectedDate(){
-        return this.classificationSource[cDec.collectedDate];
+        return this.classificationSource[this.decode.collectedDate];
     }
 
     /**
      * Return the classification date
      */
     getClassificationDate(){
-        return this.classificationSource[cDec.classificationDate];
+        return this.classificationSource[this.decode.classificationDate];
     }
 
     /**
      * Return the class stats of classification
      */
     getClassStats() {
-        return this.classificationStats[cDec.classStats];
+        return this.classificationStats[this.decode.classStats];
     }
     
     /**
      * Return the global stats of classification
      */
     getGlobalStats() {
-        return this.classificationStats[cDec.globalStats];
+        return this.classificationStats[this.decode.globalStats];
     }
 
     /**
      * Return the properties / stats of each polygon
      */
     getPropertiesOfPolygon(index) {
-        return this.features[index][cDec.polygonProperties];
+        return this.features[index][this.decode.polygonProperties];
     }
 
     getColorOfClass(classId){
-        var colorDict = this.classificationStyle[cDec.color];
+        var colorDict = this.classificationStyle[this.decode.color];
         return colorDict[classId];
     }
 
@@ -114,103 +125,27 @@ export class Classification{
         return 'classification';
     }
 
-    createReport(){
-        this.metadataPanel.createReport();
+    createMetadata(){
+        this.metadataPanel.createMetadataPanel();
     }
 
-    getContentReport(){
-        this.metadataPanel.getContentReport();
-    }
-
-    clearReport(){
-        this.metadataPanel.clearReport();
+    clearMetadata(){
+        this.metadataPanel.clearMetadataPanel();
     }
 
     createLegend(){
-        
-        var legend = document.getElementById('legend');
-        var cStatsArray = this.getClassStats();
-
-        legend.innerHTML = '<h6><b><u>Legend</u></b></h6>';
-                
-        for (let index = 0; index < cStatsArray.length; index++) {
-            const classEl = cStatsArray[index];
-
-            legend.innerHTML += 
-                '<li><span class="circle" style="background:' + this.getColorOfClass(classEl[cDec.classID]) + ';"></span> ' + classEl[cDec.className] + ' </li>';
-        }
-
-        legend.style.display = 'inline-block';
+        this.legendPanel.createLegend();
     }
 
     clearLegend(){
-        
-        var legend = document.getElementById('legend');
-
-        if (legend !== null) {
-            //CLEAR PREVIOUS CONTENT
-            legend.innerHTML = '';
-            legend.style.display = 'none';
-        }
+        this.legendPanel.clearLegend();
     }
 
     createStats(){
-        
-        var content = document.getElementById('content-stats');
-
-        content.append(this.getContentStats());
-    }
-
-    getContentStats(){
-        
-        var sourceC = document.getElementById('content-stats-'+this.getId());
-
-        if (sourceC === null) {
-            sourceC = document.createElement('div');
-            sourceC.id = 'content-stats-'+this.getId();
-        }
-
-        sourceC.innerHTML = 
-            '<div class="card border-dark mb-3">'+
-                '<div class="card-header text-center mask flex-center rgba-red-strong">'+
-                    this.getName() +
-                '</div>' +
-                '<div class="card-body" style="padding: 0px">'+
-                    '<table class="table table-bordered table-dark" style="margin: 0px;">' +
-                        '<tbody>' +
-                            '<tr>' +
-                                '<th scope="row">Description</th>' +
-                                '<td>' + this.getDescription() +'</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                                '<th scope="row">Author</th>'+
-                                '<td>' + this.getAuthor() + '</td>'+
-                            '</tr>'+
-                            '<tr>' +
-                                '<th scope="row">Classification Algorithm</th>'+
-                                '<td>' + this.getClassifierAlgorithm() + '</td>'+
-                            '</tr>'+
-                            '<tr>' +
-                                '<th scope="row">Collected Data Date</th>'+
-                                '<td>' + this.getCollectedDate() + '</td>'+
-                            '</tr>'+
-                            '<tr>' +
-                                '<th scope="row">Classification Date</th>'+
-                                '<td>' + this.getClassificationDate() + '</td>'+
-                            '</tr>'+
-                        '</tbody>'+
-                    '</table>' +
-                '</div>' +
-            '</div>';
-        return sourceC;
+        this.statsPanel.createStatsPanel();
     }
 
     clearStats(){
-        var content = document.getElementById('content-stats-'+this.getId());
-
-        if (content !== null) {
-            //CLEAR PREVIOUS CONTENT
-            content.innerHTML = '';
-        }
+        this.statsPanel.clearStatsPanel();
     }
 }
