@@ -5,6 +5,7 @@ import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import LayerGroup from 'ol/layer/Group';
 import Stamen from 'ol/source/Stamen.js';
+import XYZ from 'ol/source/XYZ.js';
 
 import LayerSwitcher from '../panels/Layer.js';
 import Sidebar from '../../static/js/sidebar.js';
@@ -117,19 +118,19 @@ export class MapViewer{
         
         var base = new TileLayer({
             visible: true,
-            title: 'Stamen toner-background',
+            title: 'World Map - Dark',
             typeBase: BASE_TYPE_STRING,
-            source: new Stamen({
-                layer: 'toner-background'
+            source: new XYZ({ 
+                url:'http://{1-4}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
             })
         });
 
         var base2 = new TileLayer({
             visible: false,
-            title: 'Stamen watercolor',
+            title: 'World Map - Light',
             typeBase: BASE_TYPE_STRING,
-            source: new Stamen({
-                layer: 'watercolor'
+            source: new XYZ({ 
+                url:'http://{1-4}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
             })
         });
 

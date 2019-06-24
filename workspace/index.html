@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <div id="legend"></div>
+
   <!-- START OF SIDEBAR DIV -->
   <div id="sidebar" class="sidebar collapsed">
 
@@ -57,7 +57,17 @@
   </div>
   <!-- END OF SIDEBAR DIV -->
 
-  <div id="map" class="sidebar-map"></div>
+  <div id="map" class="sidebar-map">
+    <!-- MAP LEGEND -->
+    <div id="legend" class="none-block"><div id="legend-content"></div></div>
+
+    <!-- STATS CONTENT BOARD -->
+    <div id="stats-main-board" class="none-block">
+      <button title="Close" id="close-button" class="btn"></button>
+      <div id="stats-board">
+      </div>
+    </div>
+  </div>
   <div id="progress"></div>
   <script src="./index.js"></script>
 </body>
