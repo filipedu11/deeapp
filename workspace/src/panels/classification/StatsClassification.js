@@ -121,7 +121,7 @@ export class StatsClassification extends Stats{
         board.id = 'board';
         board.innerHTML = typeBoard;
 
-        statsBoard.append(board);
+        statsBoard.innerHTML = board.outerHTML;
     }
 
     closeStatsMainBoard(){
