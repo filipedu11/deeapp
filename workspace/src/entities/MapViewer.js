@@ -33,6 +33,13 @@ export class MapViewer{
 
     constructor(){
 
+        this.baseDict = {};
+        this.baseArray = [];
+
+        this.classiArray = [];
+
+        this.allLayersDict = {};
+
         //Create the initial map
         this.map =  this.createInitMap();
 
@@ -47,6 +54,8 @@ export class MapViewer{
 
         //Render the layerswitcher
         this.loadLayerSwitcher();
+
+        this.map.set('mapViewer', this);
     }
 
     createInitMap(){
@@ -61,12 +70,6 @@ export class MapViewer{
         });
 
         map.set('initExtent', map.getView().getProjection().getExtent());
-
-        map.set('baseDict', {});
-        map.set('baseArray', []);
-        
-        map.set('classiDict', {});
-        map.set('classiLayer', []);
 
         return map;
     }
@@ -137,9 +140,9 @@ export class MapViewer{
         this.addProgressStatus(base.getSource());
         this.addProgressStatus(base2.getSource());
 
-        this.map.get('baseDict').b1 = base;
-        this.map.get('baseDict').b2 = base2;
-        this.map.get('baseArray').push(base, base2);
+        this.baseDict.b1 = base;
+        this.baseDict.b2 = base2;
+        this.baseArray.push(base, base2);
 
         this.addLayerToMapGroup(BASE_TYPE_STRING, base);
         this.addLayerToMapGroup(BASE_TYPE_STRING, base2);
@@ -152,9 +155,10 @@ export class MapViewer{
     addClassification(classiGeojson){
 
         var cD = new ClassificationDecode();
+        var id = classiGeojson[cD.classificationID];
 
         var classification = new Classification(
-            classiGeojson[cD.classificationID], 
+            id, 
             classiGeojson[cD.classificationName], 
             classiGeojson[cD.classificationDescription], 
             classiGeojson[cD.classificationRasterFile], 
@@ -165,6 +169,9 @@ export class MapViewer{
             classiGeojson
         );
 
+        this.allLayersDict[id] = classification;
+        this.classiArray.push(classification);
+
         var layer = this.createLayer(classiGeojson, classification);
 
         this.addLayerToMapGroup(CLASSIFICATION_TYPE_STRING, layer);
@@ -174,7 +181,7 @@ export class MapViewer{
 
     createStyle(lyr){
 
-        var classAux = lyr.get('class');
+        var classAux = this.getObjectLayer(lyr.get('layerId'));
 
         var fD = new FeaturesDecode();
 
@@ -248,13 +255,47 @@ export class MapViewer{
             title: classObject.getName(),            
             visible: false,
             source: source,
-            class: classObject,
+            layerId: classObject.getId(),
             sourceAux: vectorSource
         });
 
         this.createStyle(layer);
 
         return layer;
+    }
+
+    createMetadata(classificationId){
+        var cl = this.getObjectLayer(classificationId);
+        cl.createMetadata();
+    }
+
+    clearMetadata(classificationId){
+        var cl = this.getObjectLayer(classificationId);
+        cl.clearMetadata();
+    }
+
+    createLegend(classificationId){
+        var cl = this.getObjectLayer(classificationId);
+        cl.createLegend();
+    }
+
+    clearLegend(classificationId){
+        var cl = this.getObjectLayer(classificationId);
+        cl.clearLegend();
+    }
+
+    createStats(classificationId){
+        var cl = this.getObjectLayer(classificationId);
+        cl.createStats();
+    }
+
+    clearStats(classificationId){
+        var cl = this.getObjectLayer(classificationId);
+        cl.clearStats();
+    }
+
+    getObjectLayer(id){
+        return this.allLayersDict[id];
     }
 
     /**

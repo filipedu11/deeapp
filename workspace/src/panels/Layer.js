@@ -287,20 +287,22 @@ import Feature from 'ol/Feature';
                 lyr.setVisible(visible);
 
                 if (lyr.get('typeBase') !== 'basemap') {
-                    var classObj = lyr.get('class');
+                    var lyrId = lyr.get('layerId');
+                    var mapView = map.get('mapViewer');
+                    
                     if (visible) {
                         var sourceAux = lyr.get('sourceAux');
                         map.getView().fit(sourceAux.getExtent(), {constrainResolution: false});
                         map.getView().setZoom(map.getView().getZoom() - 2);
-                        classObj.createMetadata();
-                        classObj.createStats();
+                        mapView.createMetadata(lyrId);
+                        mapView.createStats(lyrId);
                         //classObj.setEventListenersStats();
-                        classObj.createLegend();
+                        mapView.createLegend(lyrId);
                     }
                     else {
-                        classObj.clearMetadata();
-                        classObj.clearStats();
-                        classObj.clearLegend();
+                        mapView.clearMetadata();
+                        mapView.clearStats();
+                        mapView.clearLegend();
                         map.getView().fit(map.get('initExtent'), {constrainResolution: false});
                     }
                 }
