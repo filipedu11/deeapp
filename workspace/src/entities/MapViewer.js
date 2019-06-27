@@ -92,7 +92,7 @@ export class MapViewer{
         var base = new LayerGroup({
             title: 'Base Maps',
             fold: 'open',
-            typeBase: BASE_TYPE_STRING
+            typeBase: BASE_TYPE_STRING,
         });
 
         var classifications = new LayerGroup({
@@ -189,13 +189,13 @@ export class MapViewer{
 
         var classAux = this.getObjectLayer(lyr.get('layerId'));
 
-        var fD = new FeaturesDecode();
-        var k = fD.key;
+        var fD = classAux.getDecode().featuresDecode;
+        var k = classAux.getDecode().key;
 
         var mapAux = this.map;
 
         lyr.setStyle(function name(feature, resolution) {
-           
+
             var colorAux = classAux.getColorOfClass(feature.get(fD.classId[k]));
 
             return [new Style({

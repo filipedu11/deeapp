@@ -1,9 +1,6 @@
-import { Decode } from "./Decode";
-
-export class FeaturesDecode extends Decode{
+export class FeaturesDecode {
 
     constructor(){
-        super();
 
         //GLOBAL VARIABLES
         this.type = ['type', 'Type'];
