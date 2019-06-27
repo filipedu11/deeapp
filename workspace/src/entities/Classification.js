@@ -2,7 +2,6 @@
 import { ClassificationDecode } from '../decode/ClassificationDecode';
 import { MetadaClassification } from '../panels/classification/MetadataClassification';
 import { Legend } from '../panels/Legend';
-import { StatsClassification } from '../panels/classification/StatsClassification';
 
 export class Classification{
 
@@ -25,7 +24,6 @@ export class Classification{
         //Create panel for classification
         this.metadataPanel = new MetadaClassification(this);
         this.legendPanel = new Legend(this);
-        this.statsPanel = new StatsClassification(this);
     }
 
     getDecode(){
