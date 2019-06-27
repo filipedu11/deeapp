@@ -1,85 +1,34 @@
+import { Decode } from './Decode';
+import { FeaturesDecode } from './FeaturesDecode';
+import { StatsDecode } from './StatsDecode';
 
-export class ClassificationDecode{
+export class ClassificationDecode extends Decode{
 
     constructor(){
+        super();
+
+        this.inheritsObject(this,FeaturesDecode);
+        this.inheritsObject(this,StatsDecode);
 
         //GLOBAL VARIABLES
-        this.classificationID = 'classificationID';
-        this.classificationName = 'classificationName';
-        this.classificationDescription = 'classificationDescription';
-        this.classificationRasterFile = 'classificationRasterFile';
-        this.classificationSource = 'classificationSource';
-        this.classificationStats = 'classificationStats';
-        this.classificationStyle = 'classificationStyle';
-        this.features = 'features';
+        this.classificationID = ['classificationID', 'Classification Id'];
+        this.classificationName = ['classificationName', 'Classification Name'];
+        this.classificationDescription = ['classificationDescription', 'Classification Description'];
+        this.classificationRasterFile = ['classificationRasterFile', 'Path to raster classification file'];
+        this.classificationSource = ['classificationSource', 'Classification Source'];
+        this.classificationStats = ['classificationStats', 'Classification Stats'];
+        this.classificationStyle = ['classificationStyle', 'Classification Style'];
+        this.features = ['features', 'Features'];
         
         //classificationSource OBJECT
-        this.author = 'author';
-        this.classificationAlgorithm = 'classifierAlgorithm';
-        this.preProcTechniquesUsed = 'preProcTechniquesUsed';
-        this.postProcTechniquesUsed = 'postProcTechniquesUsed';
-        this.collectedDate = 'collectedDate';
-        this.classificationDate = 'classificationDate';
-
-        //classificationStats OBJECT
-        this.classStats = 'classStats';
-        this.globalStats = 'globalStats';
-
-        //classificationStats -> classStats OBJECT
-        this.classID = 'classId';
-        this.className = 'className';
-        this.numberOfPolygons = 'numberOfPolygons';
-
-        //classificationStats -> globalStats OBJECT
-        this.numberTotalOfPolygons = 'numberTotalOfPolygons';
-        
-        //classificationStats -> classStats || globalStats OBJECT
-        this.statsAreaInPixel = 'statsAreaInPixel';
-        this.statsAreaInHectare = 'statsAreaInHectare';
-        this.statsPerimeterInMeters = 'statsPerimeterInMeters';
-
-        //classificationStats -> classStats -> statsAreaInPixel OBJECT
-        this.totalAreaInPixels = 'totalAreaInPixels';
-        this.meanOfFeaturesAreaInPixels = 'meanOfFeaturesAreaInPixels';
-        this.stdOfFeaturesAreaInPixels = 'stdOfFeaturesAreaInPixels';
-        this.medianOfFeaturesAreaInPixels = 'medianOfFeaturesAreaInPixels';
-        this.minFeatureAreaInPixels = 'minFeatureAreaInPixels';
-        this.maxFeatureAreaInPixels = 'maxFeatureAreaInPixels';
-
-        //classificationStats -> classStats -> statsAreaInHectare OBJECT
-        this.totalAreaInHectare = 'totalAreaInHectare';
-        this.meanOfFeaturesAreaInHectare = 'meanOfFeaturesAreaInHectare';
-        this.stdOfFeaturesAreaInHectare = 'stdOfFeaturesAreaInHectare';
-        this.medianOfFeaturesAreaInHectare = 'medianOfFeaturesAreaInHectare';
-        this.minFeatureAreaInHectare = 'minFeatureAreaInHectare';
-        this.maxFeatureAreaInHectare = 'maxFeatureAreaInHectare';
-
-        //classificationStats -> classStats -> statsPerimeterInMeters OBJECT
-        this.totalPerimeterInMeters = 'totalPerimeterInMeters';
-        this.meanOfFeaturesPerimeterInMeters = 'meanOfFeaturesPerimeterInMeters';
-        this.stdOfFeaturesPerimeterInMeters = 'stdOfFeaturesPerimeterInMeters';
-        this.medianOfFeaturesPerimeterInMeters = 'medianOfFeaturesPerimeterInMeters';
-        this.minFeaturePerimeterInMeters = 'minFeaturePerimeterInMeters';
-        this.maxFeaturePerimeterInMeters = 'maxFeaturePerimeterInMeters';
-
-        //classificationStats -> globalStats -> statsAreaInPixel OBJECT
-        this.totalAreaInPixels = 'totalAreaInPixels';
-        this.meanOfFeaturesAreaInPixels = 'meanOfFeaturesAreaInPixels';
-        this.meanStdOfFeaturesAreaInPixels = 'meanStdOfFeaturesAreaInPixels';
-        this.meanOfmedianOfFeaturesAreaInPixels = 'meanOfmedianOfFeaturesAreaInPixels';
-        this.minFeatureAreaInPixels = 'minFeatureAreaInPixels';
-        this.maxFeatureAreaInPixels = 'maxFeatureAreaInPixels';
-
-        //classificationStats -> globalStats -> statsAreaInHectare OBJECT
-        this.totalAreaInHectare = 'totalAreaInHectare';
-
-        //classificationStats -> globalStats -> statsPerimeterInMeters OBJECT
-        this.totalPerimeterInMeters = 'totalPerimeterInMeters';
-
-
-        this.polygonProperties = 'properties';
+        this.author = ['author', 'Author'];
+        this.classificationAlgorithm = ['classifierAlgorithm', 'Classifier Algorithm'];
+        this.preProcTechniquesUsed = ['preProcTechniquesUsed', 'Pre-processment techniques'];
+        this.postProcTechniquesUsed = ['postProcTechniquesUsed', 'Post-processment techniques'];
+        this.collectedDate = ['collectedDate', 'Satellite Image Collected Date'];
+        this.classificationDate = ['classificationDate', 'Classification Date'];
 
         //classificationStyle -> color
-        this.color = 'color';
+        this.color = ['color', 'Colors'];
     }
 }

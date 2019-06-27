@@ -1,19 +1,21 @@
+import { Decode } from "./Decode";
 
-export class FeaturesDecode{
+export class FeaturesDecode extends Decode{
 
     constructor(){
+        super();
 
         //GLOBAL VARIABLES
-        this.type = 'type';
-        this.properties = 'properties';
-        this.geometry = 'geometry';
+        this.type = ['type', 'Type'];
+        this.properties = ['properties', 'Properties'];
+        this.geometry = ['geometry', 'Geometry'];
 
         //properties
-        this.classId = 'classId';
-        this.className = 'className';
-        this.areaInHectare = 'areaInHectare';
-        this.areaInPixels = 'areaInPixels';
-        this.perimeterInMeters = 'perimeterInMeters';
-        this.numVertices = 'numVertices';
+        this.classId = ['classId', 'Class ID'];
+        this.className = ['className', 'Class Name'];
+        this.areaInHectare = ['areaInHectare', 'Area in hectare'];
+        this.areaInPixels = ['areaInPixels', 'Area in pixels'];
+        this.perimeterInMeters = ['perimeterInMeters', 'Perimeter in meters'];
+        this.numVertices = ['numVertices', 'Number of Vertices'];
     }
 }
