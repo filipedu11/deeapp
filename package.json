@@ -7,11 +7,13 @@
     "@fortawesome/fontawesome-free": "^5.9.0",
     "babel-eslint": "^10.0.1",
     "bootstrap": "^4.3.1",
+    "braces": "^2.3.1",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-import": "^2.18.0",
     "express": "^4.17.1",
     "geojson-vt": "^3.2.1",
+    "highcharts": "^7.1.2",
     "jquery": "^3.4.1",
     "jshint": "^2.10.2",
     "module-name": "0.0.1-security",
@@ -22,7 +24,7 @@
     "popper": "^1.0.1",
     "popper.js": "^1.15.0",
     "sidebar-v2": "^0.4.0",
-    "sortablejs": "^1.10.0-rc2"
+    "sortablejs": "^1.10.0-rc3"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",

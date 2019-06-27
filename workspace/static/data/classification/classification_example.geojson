@@ -74,9 +74,9 @@
             }
         ],
         "globalStats": {
-            "numberTotalOfPolygons": 14,
+            "meanNumberOfPolygons": 7,
             "statsAreaInPixel": {
-                "totalAreaInPixels": 100,
+                "meanAreaInPixels": 50,
                 "meanOfFeaturesAreaInPixels": 9.2,
                 "meanStdOfFeaturesAreaInPixels": 8.860355,
                 "meanOfmedianOfFeaturesAreaInPixels": 7,
@@ -84,10 +84,10 @@
                 "maxFeatureAreaInPixels": 35
             },
             "statsAreaInHectare": {
-                "totalAreaInHectare": 5.411902
+                "meanAreaInHectare": 2.705951
             },
             "statsPerimeterInMeters": {
-                "totalPerimeterInMeters": 96.941554
+                "meanPerimeterInMeters": 48.470777
             }
         }
     },

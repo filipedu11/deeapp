@@ -18,8 +18,12 @@ export class Legend {
         for (let index = 0; index < cStatsArray.length; index++) {
             const classEl = cStatsArray[index];
 
+            console.log(this.dec);
+            console.log(this.dec.key);
+            console.log(classEl);
+
             legendContent.innerHTML += 
-                '<li><span class="circle" style="background:' + this.lyrObj.getColorOfClass(classEl[this.dec.classID]) + ';"></span> ' + classEl[this.dec.className] + ' </li>';
+                '<li><span class="circle" style="background:' + this.lyrObj.getColorOfClass(classEl[this.dec.classID[this.dec.key]]) + ';"></span> ' + classEl[this.dec.className[this.dec.key]] + ' </li>';
         }
 
         legend.className = 'inline-block';

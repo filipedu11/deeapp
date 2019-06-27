@@ -159,17 +159,19 @@ export class MapViewer{
     addClassification(classiGeojson){
 
         var cD = new ClassificationDecode();
-        var id = classiGeojson[cD.classificationID];
+        var k = cD.key;
+        
+        var id = classiGeojson[cD.classificationID[k]];
 
         var classification = new Classification(
             id, 
-            classiGeojson[cD.classificationName], 
-            classiGeojson[cD.classificationDescription], 
-            classiGeojson[cD.classificationRasterFile], 
-            classiGeojson[cD.classificationSource], 
-            classiGeojson[cD.classificationStats], 
-            classiGeojson[cD.classificationStyle],
-            classiGeojson[cD.features],
+            classiGeojson[cD.classificationName[k]], 
+            classiGeojson[cD.classificationDescription[k]], 
+            classiGeojson[cD.classificationRasterFile[k]], 
+            classiGeojson[cD.classificationSource[k]], 
+            classiGeojson[cD.classificationStats[k]], 
+            classiGeojson[cD.classificationStyle[k]],
+            classiGeojson[cD.features[k]],
             classiGeojson
         );
 
@@ -188,12 +190,13 @@ export class MapViewer{
         var classAux = this.getObjectLayer(lyr.get('layerId'));
 
         var fD = new FeaturesDecode();
+        var k = fD.key;
 
         var mapAux = this.map;
 
         lyr.setStyle(function name(feature, resolution) {
            
-            var colorAux = classAux.getColorOfClass(feature.get(fD.classId));
+            var colorAux = classAux.getColorOfClass(feature.get(fD.classId[k]));
 
             return [new Style({
                 // stroke: new Stroke({

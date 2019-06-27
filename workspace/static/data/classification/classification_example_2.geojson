@@ -1,7 +1,7 @@
 ﻿{
     "type": "FeatureCollection",
     "classificationID": "classification2",
-    "classificationName": "Classificação Exemplo",
+    "classificationName": "Classificação Exemplo 2",
     "classificationDescription": "Exemplo de um geojson para uma classificação",
     "classificationRasterFile": "classification_example.tif",
     "classificationSource": {
