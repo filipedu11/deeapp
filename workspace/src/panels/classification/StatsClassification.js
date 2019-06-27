@@ -6,14 +6,16 @@ var INFO_COMBOCHART = 'combochart';
 
 export class StatsClassification extends Stats{
 
-    constructor(lyrObj){
-        super(lyrObj);
-        this.dec = lyrObj.getDecode();
+    constructor(){
+        super();
     }
 
-    createStatsPanel(){
+    createStatsPanel(lyrObj){
 
-        var obj = this.lyrObj;
+        this.selectedLayers.push(lyrObj);
+        this.classificationLayers[lyrObj.getId()] = lyrObj;
+
+        var obj = lyrObj;
         var globalStats = obj.getGlobalStats();
         var classStats = obj.getClassStats();
 
@@ -25,6 +27,15 @@ export class StatsClassification extends Stats{
 
         var content = document.getElementById('content-stats');
 
+        content.append(this.createStatsForIndividualLayer(obj, globalStats, classStats));
+
+        this.setEventListeners();
+
+        return content;
+    }
+
+    createStatsForIndividualLayer(obj, globalStats, classStats){
+        
         var sourceC = document.getElementById('content-stats-'+obj.getId());
 
         if (sourceC === null) {
@@ -41,11 +52,7 @@ export class StatsClassification extends Stats{
         sourceC.append(this.createStatsPanelOfAttribute(globalStats, classStats, 'Mean of median occupied area per class (Pixels)', 7));
         sourceC.append(this.createStatsPanelOfAttribute(globalStats, classStats, 'Mean of median occupied area per class (Pixels)', 8));
 
-        content.append(sourceC);
-
-        this.setEventListeners();
-
-        return content;
+        return sourceC;
     }
 
     createStatsPanelOfAttribute(globalAttributeStat, classesAtributeStat, panelTitle, idPanel){
@@ -81,9 +88,13 @@ export class StatsClassification extends Stats{
         return contentAttributePanel.outerHTML;
     }
 
+
+    /**
+     * DETAIL BOARD TO ANALYSE A SPECIFIC ATTRIBUTE
+     */
     setEventListeners(){
         
-        var funcAux = this.createStatsMainBoard;
+        var funcAux = this.createStatsDetailBoard;
 
         var tableBtn = document.getElementById('info-table-button-1');
         tableBtn.addEventListener('click', function(e) {
@@ -108,7 +119,7 @@ export class StatsClassification extends Stats{
 
     }
 
-    createStatsMainBoard(typeBoard){
+    createStatsDetailBoard(typeBoard){
 
         console.log(typeBoard);
 
@@ -124,7 +135,7 @@ export class StatsClassification extends Stats{
         statsBoard.innerHTML = board.outerHTML;
     }
 
-    closeStatsMainBoard(){
+    closeStatsDetailBoard(){
 
         var mainBoard = document.getElementById('stats-main-board');
         mainBoard.className = 'none-block';

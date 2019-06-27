@@ -296,13 +296,12 @@ import Feature from 'ol/Feature';
                         map.getView().setZoom(map.getView().getZoom() - 2);
                         mapView.createMetadata(lyrId);
                         mapView.createStats(lyrId);
-                        //classObj.setEventListenersStats();
                         mapView.createLegend(lyrId);
                     }
                     else {
-                        mapView.clearMetadata();
-                        mapView.clearStats();
-                        mapView.clearLegend();
+                        mapView.clearMetadata(lyrId);
+                        mapView.clearStats(lyrId);
+                        mapView.clearLegend(lyrId);
                         map.getView().fit(map.get('initExtent'), {constrainResolution: false});
                     }
                 }
