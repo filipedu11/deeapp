@@ -1,9 +1,6 @@
-import { Decode } from './Decode';
-
-export class StatsDecode extends Decode {
+export class StatsDecode {
 
     constructor(){
-        super();
 
         //classificationStats OBJECT
         this.classStats = ['classStats', 'Class Stats'];

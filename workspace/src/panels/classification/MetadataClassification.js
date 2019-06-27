@@ -29,23 +29,23 @@ export class MetadaClassification extends Metada{
                     '<table class="table table-bordered table-dark" style="margin: 0px;">' +
                         '<tbody>' +
                             '<tr>' +
-                                '<th scope="row">Description</th>' +
+                                '<th scope="row">' + obj.getDecode().classificationName[obj.getDecode().text] + '</th>' +
                                 '<td>' + obj.getDescription() +'</td>' +
                             '</tr>' +
                             '<tr>' +
-                                '<th scope="row">Author</th>'+
+                                '<th scope="row">' + obj.getDecode().author[obj.getDecode().text] + '</th>'+
                                 '<td>' + obj.getAuthor() + '</td>'+
                             '</tr>'+
                             '<tr>' +
-                                '<th scope="row">Classification Algorithm</th>'+
+                                '<th scope="row">' + obj.getDecode().classificationAlgorithm[obj.getDecode().text] + '</th>'+
                                 '<td>' + obj.getClassifierAlgorithm() + '</td>'+
                             '</tr>'+
                             '<tr>' +
-                                '<th scope="row">Collected Data Date</th>'+
+                                '<th scope="row">' + obj.getDecode().collectedDate[obj.getDecode().text] + '</th>'+
                                 '<td>' + obj.getCollectedDate() + '</td>'+
                             '</tr>'+
                             '<tr>' +
-                                '<th scope="row">Classification Date</th>'+
+                                '<th scope="row">' + obj.getDecode().classificationDate[obj.getDecode().text] + '</th>'+
                                 '<td>' + obj.getClassificationDate() + '</td>'+
                             '</tr>'+
                         '</tbody>'+

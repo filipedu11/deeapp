@@ -2,7 +2,6 @@
 import { ClassificationDecode } from '../decode/ClassificationDecode';
 import { MetadaClassification } from '../panels/classification/MetadataClassification';
 import { Legend } from '../panels/Legend';
-import { StatsDecode } from '../decode/StatsDecode';
 
 export class Classification{
 
@@ -11,7 +10,6 @@ export class Classification{
 
         //Set the decode
         this.decodeClassification = new ClassificationDecode();
-        this.decodeStats = new StatsDecode();
 
         this.classificationID = classificationID;
         this.classificationName = classificationName;
@@ -57,67 +55,67 @@ export class Classification{
      * Return the classification author
      */
     getAuthor(){
-        return this.classificationSource[this.decodeClassification.author[this.decodeClassification.key]];
+        return this.classificationSource[this.getDecode().author[this.getDecode().key]];
     }
 
     /**
      * Return the classification algorithm
      */
     getClassifierAlgorithm(){
-        return this.classificationSource[this.decodeClassification.classificationAlgorithm[this.decodeClassification.key]];
+        return this.classificationSource[this.getDecode().classificationAlgorithm[this.getDecode().key]];
     }
 
     /**
      * Return the pre processement techniques used
      */
     getPreProcessementTechniquesUsed(){
-        return this.classificationSource[this.decodeClassification.preProcTechniquesUsed[this.decodeClassification.key]];
+        return this.classificationSource[this.getDecode().preProcTechniquesUsed[this.getDecode().key]];
     }
 
     /**
      * Return the pre processement techniques used
      */
     getPosProcessementTechniquesUsed(){
-        return this.classificationSource[this.decodeClassification.postProcTechniquesUsed[this.decodeClassification.key]];
+        return this.classificationSource[this.getDecode().postProcTechniquesUsed[this.getDecode().key]];
     }
 
     /**
      * Return the collected date of inputs (satelite images)
      */
     getCollectedDate(){
-        return this.classificationSource[this.decodeClassification.collectedDate[this.decodeClassification.key]];
+        return this.classificationSource[this.getDecode().collectedDate[this.getDecode().key]];
     }
 
     /**
      * Return the classification date
      */
     getClassificationDate(){
-        return this.classificationSource[this.decodeClassification.classificationDate[this.decodeClassification.key]];
+        return this.classificationSource[this.getDecode().classificationDate[this.getDecode().key]];
     }
 
     /**
      * Return the class stats of classification
      */
     getClassStats() {
-        return this.classificationStats[this.decodeStats.classStats[this.decodeStats.key]];
+        return this.classificationStats[this.getDecode().statsDecode.classStats[this.getDecode().key]];
     }
     
     /**
      * Return the global stats of classification
      */
     getGlobalStats() {
-        return this.classificationStats[this.decodeStats.globalStats[this.decodeStats.key]];
+        return this.classificationStats[this.getDecode().statsDecode.globalStats[this.getDecode().key]];
     }
 
     /**
      * Return the properties / stats of each polygon
      */
     getPropertiesOfPolygon(index) {
-        return this.features[index][this.decodeStats.polygonProperties[this.decodeStats.key]];
+        return this.features[index][this.getDecode().statsDecode.polygonProperties[this.getDecode().key]];
     }
 
     getColorOfClass(classId){
-        var colorDict = this.classificationStyle[this.decodeClassification.color[this.decodeClassification.key]];
+        var colorDict = this.classificationStyle[this.getDecode().color[this.getDecode().key]];
         return colorDict[classId];
     }
 

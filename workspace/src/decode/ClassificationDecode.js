@@ -7,9 +7,6 @@ export class ClassificationDecode extends Decode{
     constructor(){
         super();
 
-        this.inheritsObject(this,FeaturesDecode);
-        this.inheritsObject(this,StatsDecode);
-
         //GLOBAL VARIABLES
         this.classificationID = ['classificationID', 'Classification Id'];
         this.classificationName = ['classificationName', 'Classification Name'];
@@ -22,7 +19,7 @@ export class ClassificationDecode extends Decode{
         
         //classificationSource OBJECT
         this.author = ['author', 'Author'];
-        this.classificationAlgorithm = ['classifierAlgorithm', 'Classifier Algorithm'];
+        this.classificationAlgorithm = ['classifierAlgorithm', 'Classification Algorithm'];
         this.preProcTechniquesUsed = ['preProcTechniquesUsed', 'Pre-processment techniques'];
         this.postProcTechniquesUsed = ['postProcTechniquesUsed', 'Post-processment techniques'];
         this.collectedDate = ['collectedDate', 'Satellite Image Collected Date'];
@@ -30,5 +27,9 @@ export class ClassificationDecode extends Decode{
 
         //classificationStyle -> color
         this.color = ['color', 'Colors'];
+
+        this.statsDecode = new StatsDecode();
+        this.featuresDecode = new FeaturesDecode();
+
     }
 }
