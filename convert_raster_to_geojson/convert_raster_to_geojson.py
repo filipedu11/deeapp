@@ -1,0 +1,123 @@
+import subprocess
+import glob
+from osgeo import gdal, ogr, osr
+import os, errno
+import shutil
+import json
+import sys
+import math
+import shapely.wkt
+
+script = 'C:/Program Files/Python37/Scripts/gdal_polygonize.py'
+
+classification_input_dir = './classification/'
+validation_input_dir = './validation/'
+evaluation_input_dir = './evaluation/'
+
+output_dir_name = 'output/'
+
+example_project_dir = '/GEE_Burned_Area_Experiments/'
+example_project_output_dir = classification_input_dir + example_project_dir + output_dir_name
+
+CLASS_NAMES = {
+    0: "Área não ardida",
+    1: "Área ardida"
+}
+
+def computeStatsOfFeature(feature):
+    poly = ogr.CreateGeometryFromJson(str(feature['geometry']))
+
+    src_spatial_Reference = osr.SpatialReference()
+    src_spatial_Reference.ImportFromEPSG(4326)
+    
+    dst_spatial_Reference = osr.SpatialReference()
+    dst_spatial_Reference.ImportFromEPSG(54009)
+
+    transform = osr.CoordinateTransformation(src_spatial_Reference, dst_spatial_Reference)
+
+    poly.Transform(transform)
+
+    poly_py = shapely.wkt.loads(poly.ExportToWkt())
+
+    return [round(poly.GetArea() * 0.0001, 6), round(poly_py.length,6)]
+
+countFiles = 0
+print(countFiles)
+# Convert coordinates system to the default used and generate the base for geojson file
+for in_file in glob.glob(classification_input_dir + example_project_dir + "*.tif"):
+
+    # Open the raster file
+    input_file = gdal.Open(in_file)
+
+    # Create the output dir (if exist, remove all content and create the output dir)
+    try:
+        os.makedirs( example_project_output_dir )
+    except OSError as e:
+        if countFiles == 0:
+            shutil.rmtree( example_project_output_dir )
+            os.makedirs( example_project_output_dir )
+        elif e.errno == errno.EEXIST:
+            pass
+        else:
+            raise
+    
+    # Path variable to create a auxiliar raster to convert the coordinate system / projection
+    output_file_aux = example_project_output_dir + in_file.split('\\')[-1][:-4] + '_out.tif'
+
+    # Convert the coordinate system
+    gdal.Warp(output_file_aux, input_file, dstSRS='EPSG:4326')
+    
+    # Path variable to create the geojson file
+    out_file = output_file_aux[:-4] + ".geojson"
+
+    print("\n-------------- CONVERT RASTER TO GEOJSON FILE ----------------\n")
+    # call the script that allow the conversion from raster to polygon 
+    subprocess.call(["python",script,output_file_aux,'-f','GeoJSON',out_file])
+    
+    # remove the raster with the new projections
+    os.remove(output_file_aux)
+
+    print("\n-------------- CONSTRUCT THE GEOJSON ACCORDING DEFINED SCHEMAS ----------------\n")
+
+    with open(out_file, encoding='utf-8-sig') as f:
+        data = json.load(f)
+        newFeatures = {}
+        count = 1
+
+        #   "classId": 2,
+        #     "className": "Área não ardida",
+        #     "areaInHectare": 0.432942,
+        #     "areaInPixels": 8,
+        #     "perimeterInMeters": 18.049377,
+        #     "numVertices": 12
+
+        data_features_length = len(data['features'])
+
+        for feature in data['features']:
+
+            perc_read = math.floor((count / data_features_length) * 100)
+            sys.stdout.write("Progress: %d%%   \r" % (perc_read) )
+            sys.stdout.flush()
+
+            # Create a ID for each feature
+            feature['properties']['featureId'] = count
+            count+=1
+            feature['properties']['classId'] = feature['properties'].pop('DN')
+
+            # Set className input in feature properties
+            feature['properties']['className'] = CLASS_NAMES[feature['properties']['classId']]
+
+            # Compute the area of polygon
+            statsFeature = computeStatsOfFeature(feature)
+
+            feature['properties']['areaInHectare'] = statsFeature[0]
+            feature['properties']['perimeterInMeters'] = statsFeature[1]
+
+        print("\n-------------- WRITE THE FINAL GEOJSON FILE ----------------\n")
+
+        #Write the new geojson file
+        with open(out_file, encoding='utf-8-sig', mode="w+") as newFile:
+            json.dump(data, newFile, ensure_ascii=False, indent=2)
+
+        countFiles+=1
+        print("\n-------------- PROCESS FINISH FOR FILE " + out_file.split('/')[-1] + " ----------------\n")
