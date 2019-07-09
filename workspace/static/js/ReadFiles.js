@@ -9,7 +9,7 @@ export class ReadFiles{
     }
 
     readClassificationExample2(){
-        return JSON.parse(readFileSync('./workspace/static/data/classification/classification_example_2.geojson', 'utf8').trim());
+        return JSON.parse(readFileSync('./workspace/static/data/classification/classification_example_out.geojson', 'utf8').trim());
     }
 
     readClassificationChile(){
