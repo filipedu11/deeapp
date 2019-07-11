@@ -29,4 +29,4 @@ var readFiles = new ReadFiles();
 
 app.addClassification(readFiles.readValidationBurnedArea());
 app.addClassification(readFiles.readClassificationContinuousNaiveBayes());
-app.addClassification(readFiles.readClassificationCart());
+// app.addClassification(readFiles.readClassificationCart());

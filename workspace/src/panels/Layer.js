@@ -317,7 +317,6 @@ import Feature from 'ol/Feature';
                 var allLayersInvisible = true;
                 
                 LayerSwitcher.forEachRecursive(map, function (l, idx, a) {
-                    console.log(l);
 
                     if (l.getVisible() && l.get('typeBase') !== 'basemap' && !l.getLayers) {
                         allLayersInvisible = false;

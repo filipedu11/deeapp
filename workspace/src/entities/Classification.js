@@ -6,7 +6,7 @@ import { Legend } from '../panels/Legend';
 export class Classification{
 
     constructor(classificationID, classificationName, classificationDescription, 
-        classificationRasterFile, classificationSource, classificationStats, classificationStyle, features, geojsonFile) {
+        classificationRasterFile, classificationSource, classificationStats, classificationStyle, features, classNames, geojsonFile) {
 
         //Set the decode
         this.decodeClassification = new ClassificationDecode();
@@ -19,6 +19,7 @@ export class Classification{
         this.classificationStats = classificationStats;
         this.classificationStyle = classificationStyle;
         this.features = features;
+        this.classNames = classNames;
         this.geojsonFile = geojsonFile;
 
         //Create panel for classification
@@ -94,20 +95,6 @@ export class Classification{
     }
 
     /**
-     * Return the class stats of classification
-     */
-    getClassStats() {
-        return this.classificationStats[this.getDecode().statsDecode.classStats[this.getDecode().key]];
-    }
-    
-    /**
-     * Return the global stats of classification
-     */
-    getGlobalStats() {
-        return this.classificationStats[this.getDecode().statsDecode.globalStats[this.getDecode().key]];
-    }
-
-    /**
      * Return the properties / stats of each polygon
      */
     getPropertiesOfPolygon(index) {
@@ -117,6 +104,14 @@ export class Classification{
     getColorOfClass(classId){
         var colorDict = this.classificationStyle[this.getDecode().color[this.getDecode().key]];
         return colorDict[classId];
+    }
+
+    getNameOfClass(classId){
+        return this.classNames[classId];
+    }
+    
+    getKeysOfClasses(){
+        return Object.keys(this.classNames);
     }
 
     getType(){
