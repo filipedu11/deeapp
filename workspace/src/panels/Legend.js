@@ -11,16 +11,14 @@ export class Legend {
         
         var legend = document.getElementById('legend');
         var legendContent = document.getElementById('legend-content');
-        var cStatsArray = this.lyrObj.getClassStats();
-        const fDec = this.dec.featuresDecode;
+        const classKeys = this.lyrObj.getKeysOfClasses();
 
         legendContent.innerHTML = '<h6><b><u>Legend</u></b></h6>';
                 
-        for (let index = 0; index < cStatsArray.length; index++) {
-            const classEl = cStatsArray[index];
+        for (let index = 0; index <classKeys.length; index++) {
 
             legendContent.innerHTML += 
-                '<li><span class="circle" style="background:' + this.lyrObj.getColorOfClass(classEl[fDec.classId[this.dec.key]]) + ';"></span> ' + classEl[fDec.className[this.dec.key]] + ' </li>';
+                '<li><span class="circle" style="background:' + this.lyrObj.getColorOfClass(classKeys[index]) + ';"></span> ' +  this.lyrObj.getNameOfClass(classKeys[index]) + ' </li>';
         }
 
         legend.className = 'inline-block';

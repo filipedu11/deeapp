@@ -1,6 +1,5 @@
 import { Decode } from './Decode';
 import { FeaturesDecode } from './FeaturesDecode';
-import { StatsDecode } from './StatsDecode';
 
 export class ClassificationDecode extends Decode{
 
@@ -25,11 +24,12 @@ export class ClassificationDecode extends Decode{
         this.collectedDate = ['collectedDate', 'Satellite Image Collected Date'];
         this.classificationDate = ['classificationDate', 'Classification Date'];
 
+        // Namos of classes in classification
+        this.classNames = ['classNames', 'Class Names'];
+
         //classificationStyle -> color
         this.color = ['color', 'Colors'];
 
-        this.statsDecode = new StatsDecode();
         this.featuresDecode = new FeaturesDecode();
-
     }
 }

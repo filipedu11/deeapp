@@ -172,6 +172,7 @@ export class MapViewer{
             classiGeojson[cD.classificationStats[k]], 
             classiGeojson[cD.classificationStyle[k]],
             classiGeojson[cD.features[k]],
+            classiGeojson[cD.classNames[k]],
             classiGeojson
         );
 

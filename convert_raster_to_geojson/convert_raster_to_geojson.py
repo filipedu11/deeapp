@@ -14,28 +14,19 @@ input_dir = ''
 
 try:
     input_dir = sys.argv[1]
-    input_info_data = sys.argv[2]
-    print(input_dir)
-    try:
-        os.is
-    except expression as identifier:
-        pass
+    input_info = sys.argv[2]
 except:
-    print('Please pass directory_name')
+    print('cmd path_dir_tif_files path_info_json_file')
 
 output_dir_name = '/output/'
 
 example_project_output_dir = input_dir + output_dir_name
 
-CLASS_NAMES = {
-    0: "Área não ardida",
-    1: "Área ardida"
-}
+input_info_data = json.load(open(input_info, encoding='utf-8-sig'))
 
-COLOR_STYLE = {
-    1: 'rgb(173,112,68)',
-    2: 'rgb(206,206,206)'
-}
+CLASS_NAMES = input_info_data["classNames"]
+
+print(CLASS_NAMES)
 
 def computeStatsOfFeature(feature):
     poly = ogr.CreateGeometryFromJson(str(feature['geometry']))
@@ -98,10 +89,7 @@ for in_file in glob.glob(input_dir + "/*.tif"):
         newFeatures = {}
         count = 1
 
-        color = {'color': COLOR_STYLE}
-        data['classificationStyle'] = color
-        data['classificationID'] = in_file_name
-        data['classifcationName'] = in_file_name
+        data.update(input_info_data)
 
         #   "classId": 2,
         #     "className": "Área não ardida",
@@ -124,7 +112,7 @@ for in_file in glob.glob(input_dir + "/*.tif"):
             feature['properties']['classId'] = feature['properties'].pop('DN')
 
             # Set className input in feature properties
-            feature['properties']['className'] = CLASS_NAMES[feature['properties']['classId']]
+            feature['properties']['className'] = CLASS_NAMES[str(feature['properties']['classId'])]
 
             # Compute the area of polygon
             statsFeature = computeStatsOfFeature(feature)
