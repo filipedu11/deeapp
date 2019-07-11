@@ -35,12 +35,13 @@
     "@babel/register": "^7.4.4",
     "babel": "^6.23.0",
     "babel-register": "^6.26.0",
+    "cross-env": "^5.2.0",
     "mocha": "^6.1.4"
   },
   "scripts": {
     "test": "mocha --require @babel/register workspace/test",
-    "start": "parcel workspace/index.html",
-    "build": "parcel build --public-url . workspace/index.html"
+    "start": "cross-env NODE_OPTIONS=--max_old_space_size=2048 parcel workspace/index.html",
+    "build": "cross-env NODE_OPTIONS=--max_old_space_size=2048 parcel build --public-url . workspace/index.html"
   },
   "repository": {
     "type": "git",

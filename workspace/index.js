@@ -27,7 +27,6 @@ var app = new Main();
 
 var readFiles = new ReadFiles();
 
-app.addClassification(readFiles.readClassificationExample());
-app.addClassification(readFiles.readClassificationChile());
-app.addClassification(readFiles.readClassificationExample2());
-// app.addClassification(readFiles.readCountries());
+app.addClassification(readFiles.readValidationBurnedArea());
+app.addClassification(readFiles.readClassificationContinuousNaiveBayes());
+app.addClassification(readFiles.readClassificationCart());

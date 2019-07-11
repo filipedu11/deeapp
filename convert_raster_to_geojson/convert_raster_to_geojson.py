@@ -10,18 +10,31 @@ import shapely.wkt
 
 script = 'C:/Program Files/Python37/Scripts/gdal_polygonize.py'
 
-classification_input_dir = './classification/'
-validation_input_dir = './validation/'
-evaluation_input_dir = './evaluation/'
+input_dir = ''
 
-output_dir_name = 'output/'
+try:
+    input_dir = sys.argv[1]
+    input_info_data = sys.argv[2]
+    print(input_dir)
+    try:
+        os.is
+    except expression as identifier:
+        pass
+except:
+    print('Please pass directory_name')
 
-example_project_dir = '/GEE_Burned_Area_Experiments/'
-example_project_output_dir = classification_input_dir + example_project_dir + output_dir_name
+output_dir_name = '/output/'
+
+example_project_output_dir = input_dir + output_dir_name
 
 CLASS_NAMES = {
     0: "Área não ardida",
     1: "Área ardida"
+}
+
+COLOR_STYLE = {
+    1: 'rgb(173,112,68)',
+    2: 'rgb(206,206,206)'
 }
 
 def computeStatsOfFeature(feature):
@@ -42,12 +55,13 @@ def computeStatsOfFeature(feature):
     return [round(poly.GetArea() * 0.0001, 6), round(poly_py.length,6)]
 
 countFiles = 0
-print(countFiles)
+
 # Convert coordinates system to the default used and generate the base for geojson file
-for in_file in glob.glob(classification_input_dir + example_project_dir + "*.tif"):
+for in_file in glob.glob(input_dir + "/*.tif"):
 
     # Open the raster file
     input_file = gdal.Open(in_file)
+    in_file_name = in_file.split('\\')[-1][:-4]
 
     # Create the output dir (if exist, remove all content and create the output dir)
     try:
@@ -62,7 +76,7 @@ for in_file in glob.glob(classification_input_dir + example_project_dir + "*.tif
             raise
     
     # Path variable to create a auxiliar raster to convert the coordinate system / projection
-    output_file_aux = example_project_output_dir + in_file.split('\\')[-1][:-4] + '_out.tif'
+    output_file_aux = example_project_output_dir + in_file_name + '_out.tif'
 
     # Convert the coordinate system
     gdal.Warp(output_file_aux, input_file, dstSRS='EPSG:4326')
@@ -83,6 +97,11 @@ for in_file in glob.glob(classification_input_dir + example_project_dir + "*.tif
         data = json.load(f)
         newFeatures = {}
         count = 1
+
+        color = {'color': COLOR_STYLE}
+        data['classificationStyle'] = color
+        data['classificationID'] = in_file_name
+        data['classifcationName'] = in_file_name
 
         #   "classId": 2,
         #     "className": "Área não ardida",
