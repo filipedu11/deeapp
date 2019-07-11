@@ -8,7 +8,7 @@ import sys
 import math
 import shapely.wkt
 
-script = 'C:/Program Files/Python37/Scripts/gdal_polygonize.py'
+script = './gdal_polygonize.py'
 
 input_dir = ''
 
@@ -21,23 +21,6 @@ output_dir_name = '/output/'
 
 example_project_output_dir = input_dir + output_dir_name
 
-def computeStatsOfFeature(feature):
-    poly = ogr.CreateGeometryFromJson(str(feature['geometry']))
-
-    src_spatial_Reference = osr.SpatialReference()
-    src_spatial_Reference.ImportFromEPSG(4326)
-    
-    dst_spatial_Reference = osr.SpatialReference()
-    dst_spatial_Reference.ImportFromEPSG(54009)
-
-    transform = osr.CoordinateTransformation(src_spatial_Reference, dst_spatial_Reference)
-
-    poly.Transform(transform)
-
-    poly_py = shapely.wkt.loads(poly.ExportToWkt())
-
-    return [round(poly.GetArea() * 0.0001, 6), round(poly_py.length,6)]
-
 countFiles = 0
 
 # Convert coordinates system to the default used and generate the base for geojson file
@@ -47,7 +30,7 @@ for in_file in glob.glob(input_dir + "/*.tif"):
     input_file = gdal.Open(in_file)
     in_file_name = in_file.split('\\')[-1][:-4]
 
-        
+
     input_info_data = json.load(open(in_file[:-4] + '.json', encoding='utf-8-sig'))
 
     CLASS_NAMES = input_info_data["classNames"]
@@ -63,20 +46,20 @@ for in_file in glob.glob(input_dir + "/*.tif"):
             pass
         else:
             raise
-    
+
     # Path variable to create a auxiliar raster to convert the coordinate system / projection
     output_file_aux = example_project_output_dir + in_file_name + '_out.tif'
 
     # Convert the coordinate system
     gdal.Warp(output_file_aux, input_file, dstSRS='EPSG:4326')
-    
+
     # Path variable to create the geojson file
     out_file = output_file_aux[:-4] + ".geojson"
 
     print("\n-------------- CONVERT RASTER TO GEOJSON FILE ----------------\n")
     # call the script that allow the conversion from raster to polygon 
     subprocess.call(["python",script,output_file_aux,'-f','GeoJSON',out_file])
-    
+
     # remove the raster with the new projections
     os.remove(output_file_aux)
 
@@ -111,12 +94,6 @@ for in_file in glob.glob(input_dir + "/*.tif"):
 
             # Set className input in feature properties
             feature['properties']['className'] = CLASS_NAMES[str(feature['properties']['classId'])]
-
-            # Compute the area of polygon
-            statsFeature = computeStatsOfFeature(feature)
-
-            feature['properties']['areaInHectare'] = statsFeature[0]
-            feature['properties']['perimeterInMeters'] = statsFeature[1]
 
         print("\n-------------- WRITE THE FINAL GEOJSON FILE ----------------\n")
 
