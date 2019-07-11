@@ -14,19 +14,12 @@ input_dir = ''
 
 try:
     input_dir = sys.argv[1]
-    input_info = sys.argv[2]
 except:
     print('cmd path_dir_tif_files path_info_json_file')
 
 output_dir_name = '/output/'
 
 example_project_output_dir = input_dir + output_dir_name
-
-input_info_data = json.load(open(input_info, encoding='utf-8-sig'))
-
-CLASS_NAMES = input_info_data["classNames"]
-
-print(CLASS_NAMES)
 
 def computeStatsOfFeature(feature):
     poly = ogr.CreateGeometryFromJson(str(feature['geometry']))
@@ -53,6 +46,11 @@ for in_file in glob.glob(input_dir + "/*.tif"):
     # Open the raster file
     input_file = gdal.Open(in_file)
     in_file_name = in_file.split('\\')[-1][:-4]
+
+        
+    input_info_data = json.load(open(in_file[:-4] + '.json', encoding='utf-8-sig'))
+
+    CLASS_NAMES = input_info_data["classNames"]
 
     # Create the output dir (if exist, remove all content and create the output dir)
     try:
