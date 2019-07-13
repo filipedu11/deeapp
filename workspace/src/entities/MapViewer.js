@@ -13,7 +13,6 @@ import { Progress } from '../../static/js/Progress.js';
 
 import { Classification } from './Classification';
 import { ClassificationDecode } from '../decode/ClassificationDecode';
-import { StatsClassification } from '../panels/classification/StatsClassification';
 
 import {Style, Fill, Stroke} from 'ol/style';
 import geojsonvt from 'geojson-vt';
@@ -55,9 +54,6 @@ export class MapViewer{
 
         //Render the layerswitcher
         this.loadLayerSwitcher();
-
-
-        this.statsPanel = new StatsClassification();
 
         this.map.set('mapViewer', this);
     }
@@ -290,16 +286,6 @@ export class MapViewer{
     clearLegend(classificationId){
         var cl = this.getObjectLayer(classificationId);
         cl.clearLegend();
-    }
-
-    createStats(classificationId){
-        var cl = this.getObjectLayer(classificationId);
-        this.statsPanel.createStatsPanel(cl);
-    }
-
-    clearStats(classificationId){
-        var cl = this.getObjectLayer(classificationId);
-        this.statsPanel.clearStatsPanel(cl);
     }
 
     getObjectLayer(id){

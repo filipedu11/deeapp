@@ -295,12 +295,10 @@ import Feature from 'ol/Feature';
                         map.getView().fit(sourceAux.getExtent(), {constrainResolution: false});
                         map.getView().setZoom(map.getView().getZoom() - 2);
                         mapView.createMetadata(lyrId);
-                        mapView.createStats(lyrId);
                         mapView.createLegend(lyrId);
                     }
                     else {
                         mapView.clearMetadata(lyrId);
-                        mapView.clearStats(lyrId);
                         mapView.clearLegend(lyrId);
                     }
                 }

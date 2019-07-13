@@ -8,7 +8,7 @@ import sys
 import math
 import shapely.wkt
 
-script = './gdal_polygonize.py'
+script = './gdal_polygonize_64.py'
 
 input_dir = ''
 
