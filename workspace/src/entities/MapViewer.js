@@ -24,6 +24,16 @@ import VectorLayer from 'ol/layer/VectorTile';
 import Projection from 'ol/proj/Projection';
 
 import { FeaturesDecode } from '../decode/FeaturesDecode';
+import { Stats } from '../panels/Stats.js';
+
+import Highcharts from 'highcharts';
+import * as turf from '@turf/turf';
+
+
+import 'jquery';
+import 'highcharts/modules/exporting.js';
+import 'highcharts/modules/export-data.js';
+import 'highcharts/modules/offline-exporting.js';
 
 var BASE_TYPE_STRING = 'basemap';
 var CLASSIFICATION_TYPE_STRING = 'classification';
@@ -39,9 +49,11 @@ export class MapViewer{
         this.classiArray = [];
 
         this.allLayersDict = {};
+        this.lyrsSelected = [];
 
         //Create the initial map
         this.map =  this.createInitMap();
+        this.stats = new Stats();
 
         //Add Sidebar control to map
         this.createSideBar();
@@ -54,6 +66,8 @@ export class MapViewer{
 
         //Render the layerswitcher
         this.loadLayerSwitcher();
+
+        this.createEmptyStatsPanel();
 
         this.map.set('mapViewer', this);
     }
@@ -150,6 +164,10 @@ export class MapViewer{
 
     getMap(){
         return this.map;
+    }
+
+    setLyrsSelected(lyrsSelected){
+        this.lyrsSelected = lyrsSelected;
     }
 
     addClassification(classiGeojson){
@@ -290,6 +308,89 @@ export class MapViewer{
 
     getObjectLayer(id){
         return this.allLayersDict[id];
+    }
+
+    createEmptyStatsPanel(){
+        return this.stats.noneLayerSelected();
+    }
+
+    updateStatsPanel(){
+
+        var content = document.getElementById('container-stats');
+
+        content.innerHTML = '';
+
+        if (this.lyrsSelected.length == 1) {
+            this.createPieChart(this.getObjectLayer(this.lyrsSelected[0].get('layerId')));
+        }
+        else {
+            this.lyrsSelected.forEach(lyr => {
+                var dataLyr = this.getObjectLayer(lyr.get('layerId'));            
+            });
+        }
+    }
+
+    createPieChart(dataLyr){
+
+        var features = dataLyr['features'];
+        console.log(features.length);
+
+        for (let index = 0; index < features.length; index++) {
+            const element = features[index];
+            
+        }
+
+        // Build the chart
+        Highcharts.chart('container-stats', {
+            exporting: { enabled: true },
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: dataLyr.getName()
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: false
+                    },
+                    showInLegend: true
+                }
+            },
+            series: [{
+                name: 'Brands',
+                colorByPoint: true,
+                data: [{
+                    name: 'Chrome',
+                    y: 61.41,
+                    sliced: true,
+                    selected: true
+                }, {
+                    name: 'Internet Explorer',
+                    y: 11.84
+                }, {
+                    name: 'Firefox',
+                    y: 10.85
+                }, {
+                    name: 'Edge',
+                    y: 4.67
+                }, {
+                    name: 'Safari',
+                    y: 4.18
+                }, {
+                    name: 'Other',
+                    y: 7.05
+                }]
+            }]
+        });
     }
 
     /**
