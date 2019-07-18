@@ -10,7 +10,6 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './static/css/ol-layerswitcher.css';
 import './static/css/sidebar.css';
 import './static/css/map.css';
-import 'popper.js';
 
 
 /**

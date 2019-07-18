@@ -285,10 +285,10 @@ import Feature from 'ol/Feature';
             key: 'setVisible_',
             value: function setVisible_(map, lyr, visible) {
                 lyr.setVisible(visible);
+                var lyrId = lyr.get('layerId');
+                var mapView = map.get('mapViewer');
 
                 if (lyr.get('typeBase') !== 'basemap') {
-                    var lyrId = lyr.get('layerId');
-                    var mapView = map.get('mapViewer');
                     
                     if (visible) {
                         var sourceAux = lyr.get('sourceAux');
@@ -313,16 +313,23 @@ import Feature from 'ol/Feature';
                 }
 
                 var allLayersInvisible = true;
+                var lyrsSelected = [];
                 
                 LayerSwitcher.forEachRecursive(map, function (l, idx, a) {
 
                     if (l.getVisible() && l.get('typeBase') !== 'basemap' && !l.getLayers) {
                         allLayersInvisible = false;
+                        lyrsSelected.push(l);
                     }
                 });
 
+                mapView.setLyrsSelected(lyrsSelected);
+
                 if (allLayersInvisible) {
                     map.getView().fit(map.get('initExtent'), {constrainResolution: false});
+                    mapView.createEmptyStatsPanel();
+                } else {
+                    mapView.updateStatsPanel();
                 }
             }
 
