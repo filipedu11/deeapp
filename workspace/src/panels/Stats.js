@@ -1,5 +1,3 @@
-import * as turf from '@turf/turf';
-
 export class Stats {
 
     constructor(){

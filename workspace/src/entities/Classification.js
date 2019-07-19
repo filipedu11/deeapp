@@ -6,7 +6,7 @@ import { Legend } from '../panels/Legend';
 export class Classification{
 
     constructor(classificationID, classificationName, classificationDescription, 
-        classificationRasterFile, classificationSource, classificationStats, classificationStyle, features, classNames, geojsonFile) {
+        classificationRasterFile, classificationSource, classificationStats, classificationStyle, features, classNames, geojsonFile, type) {
 
         //Set the decode
         this.decodeClassification = new ClassificationDecode();
@@ -21,6 +21,7 @@ export class Classification{
         this.features = features;
         this.classNames = classNames;
         this.geojsonFile = geojsonFile;
+        this.type = type;
 
         //Create panel for classification
         this.metadataPanel = new MetadaClassification(this);
@@ -43,6 +44,10 @@ export class Classification{
      */
     getName(){
         return this.classificationName;
+    }
+
+    getType(){
+        return this.type;
     }
 
     /**
@@ -109,13 +114,17 @@ export class Classification{
     getNameOfClass(classId){
         return this.classNames[classId];
     }
-    
+
     getKeysOfClasses(){
         return Object.keys(this.classNames);
     }
 
-    getType(){
-        return 'classification';
+    getClassNames(){
+        return this.classNames;
+    }
+
+    getClassColors(){
+        return this.classificationStyle[this.getDecode().color[this.getDecode().key]];
     }
 
     createMetadata(){

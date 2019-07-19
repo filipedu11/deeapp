@@ -12,6 +12,10 @@ export class ReadFiles{
     //     return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_cart_out.geojson', 'utf8').trim());
     // }
 
+    readClassificationWinnow(){
+        return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_randomForest_out.geojson', 'utf8').trim());
+    }
+
     readClassificationContinuousNaiveBayes(){
         return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_continuousNaiveBayes_out.geojson', 'utf8').trim());
     }

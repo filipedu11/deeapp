@@ -41,8 +41,8 @@
   },
   "scripts": {
     "test": "mocha --require @babel/register workspace/test",
-    "start": "cross-env NODE_OPTIONS=--max_old_space_size=2048 parcel workspace/index.html",
-    "build": "cross-env NODE_OPTIONS=--max_old_space_size=2048 parcel build --public-url . workspace/index.html"
+    "start": "cross-env NODE_OPTIONS=--max_old_space_size=4096 parcel workspace/index.html",
+    "build": "cross-env NODE_OPTIONS=--max_old_space_size=4096 parcel build --public-url . workspace/index.html"
   },
   "repository": {
     "type": "git",
