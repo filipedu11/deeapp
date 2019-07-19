@@ -26,14 +26,13 @@ import Projection from 'ol/proj/Projection';
 import { FeaturesDecode } from '../decode/FeaturesDecode';
 import { Stats } from '../panels/Stats.js';
 
-import Highcharts from 'highcharts';
-import * as turf from '@turf/turf';
-
-
 import 'jquery';
 import 'highcharts/modules/exporting.js';
 import 'highcharts/modules/export-data.js';
 import 'highcharts/modules/offline-exporting.js';
+
+import Highcharts from 'highcharts';
+import * as turf from '@turf/turf';
 
 var BASE_TYPE_STRING = 'basemap';
 var CLASSIFICATION_TYPE_STRING = 'classification';
@@ -47,6 +46,7 @@ export class MapViewer{
         this.baseArray = [];
 
         this.classiArray = [];
+        this.valiArray = [];
 
         this.allLayersDict = {};
         this.lyrsSelected = [];
@@ -132,12 +132,12 @@ export class MapViewer{
     }
 
     addBaseLayers(){
-        
+
         var base = new TileLayer({
             visible: true,
             title: 'World Map - Dark',
             typeBase: BASE_TYPE_STRING,
-            source: new XYZ({ 
+            source: new XYZ({
                 url:'http://{1-4}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
             })
         });
@@ -146,7 +146,7 @@ export class MapViewer{
             visible: false,
             title: 'World Map - Light',
             typeBase: BASE_TYPE_STRING,
-            source: new XYZ({ 
+            source: new XYZ({
                 url:'http://{1-4}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
             })
         });
@@ -174,20 +174,21 @@ export class MapViewer{
 
         var cD = new ClassificationDecode();
         var k = cD.key;
-        
+
         var id = classiGeojson[cD.classificationID[k]];
 
         var classification = new Classification(
-            id, 
-            classiGeojson[cD.classificationName[k]], 
-            classiGeojson[cD.classificationDescription[k]], 
-            classiGeojson[cD.classificationRasterFile[k]], 
-            classiGeojson[cD.classificationSource[k]], 
-            classiGeojson[cD.classificationStats[k]], 
+            id,
+            classiGeojson[cD.classificationName[k]],
+            classiGeojson[cD.classificationDescription[k]],
+            classiGeojson[cD.classificationRasterFile[k]],
+            classiGeojson[cD.classificationSource[k]],
+            classiGeojson[cD.classificationStats[k]],
             classiGeojson[cD.classificationStyle[k]],
             classiGeojson[cD.features[k]],
             classiGeojson[cD.classNames[k]],
-            classiGeojson
+            classiGeojson,
+            CLASSIFICATION_TYPE_STRING
         );
 
         this.allLayersDict[id] = classification;
@@ -199,6 +200,38 @@ export class MapViewer{
 
         this.loadLayerSwitcher();
     }
+
+    addValidation(classiGeojson){
+
+        var cD = new ClassificationDecode();
+        var k = cD.key;
+
+        var id = classiGeojson[cD.classificationID[k]];
+
+        var classification = new Classification(
+            id,
+            classiGeojson[cD.classificationName[k]],
+            classiGeojson[cD.classificationDescription[k]],
+            classiGeojson[cD.classificationRasterFile[k]],
+            classiGeojson[cD.classificationSource[k]],
+            classiGeojson[cD.classificationStats[k]],
+            classiGeojson[cD.classificationStyle[k]],
+            classiGeojson[cD.features[k]],
+            classiGeojson[cD.classNames[k]],
+            classiGeojson,
+            VALIDATION_STRING
+        );
+
+        this.allLayersDict[id] = classification;
+        this.valiArray.push(classification);
+
+        var layer = this.createLayer(classiGeojson, classification);
+
+        this.addLayerToMapGroup(VALIDATION_STRING, layer);
+
+        this.loadLayerSwitcher();
+    }
+
 
     createStyle(lyr){
 
@@ -274,12 +307,41 @@ export class MapViewer{
         });
 
         var layer = new VectorLayer({
-            title: classObject.getName(),            
+            title: classObject.getName(),
             visible: false,
             source: source,
             layerId: classObject.getId(),
-            sourceAux: vectorSource
+            sourceAux: vectorSource,
+            inactiveClasses: {}
         });
+
+        layer.set(
+            'showHideClass',
+            function(lyr, classAux) {
+
+                var inactiveC = lyr.get('inactiveClasses');
+
+                lyr.setStyle(function name(feature, resolution) {
+
+                    var fD = classAux.getDecode().featuresDecode;
+                    var k = classAux.getDecode().key;
+
+                    var colorAux = classAux.getColorOfClass(feature.get(fD.classId[k]));
+
+                    if ( !inactiveC[feature.get(fD.classId[k])] ) {
+                        return [new Style({
+                            // stroke: new Stroke({
+                            //     color: 'rgba(255,255,255,0)',
+                            //     width: 0
+                            // }),
+                            fill: new Fill({
+                                color: colorAux,
+                            }),
+                        })];
+                    }
+                });
+            }
+        );
 
         this.createStyle(layer);
 
@@ -321,28 +383,79 @@ export class MapViewer{
         content.innerHTML = '';
 
         if (this.lyrsSelected.length == 1) {
-            this.createPieChart(this.getObjectLayer(this.lyrsSelected[0].get('layerId')));
+            this.createPieChartForArea(this.lyrsSelected[0]);
         }
         else {
-            this.lyrsSelected.forEach(lyr => {
-                var dataLyr = this.getObjectLayer(lyr.get('layerId'));            
-            });
+            var foundClassificationLayer = false;
+            var foundValidationLayer = false;
+            var isEval = false;
+
+            for (let index = 0; index < this.lyrsSelected.length; index++) {
+                const lyr = this.getObjectLayer(this.lyrsSelected[index].get('layerId'));
+                if (lyr.getType() == CLASSIFICATION_TYPE_STRING) {
+                    foundClassificationLayer = true;
+                } else if (lyr.getType() == VALIDATION_STRING) {
+                    foundValidationLayer = true;
+                }
+            }
+
+            isEval = foundClassificationLayer && foundValidationLayer;
+
+            if (isEval) {
+
+                var features, intersetFeatures;
+
+                this.lyrsSelected.forEach(lyr => {
+                    var dataLyr = this.getObjectLayer(lyr.get('layerId'));
+                    features = turf.featureCollection(dataLyr['features']);
+
+                    console.log(turf.combine(features));
+
+                    //intersetFeatures = intersetFeatures == undefined ? features : turf.collect(intersetFeatures, features, 'classId', 'classId');
+                });
+
+                console.log(intersetFeatures);
+            }
+            else {
+                return;
+            }
         }
     }
 
-    createPieChart(dataLyr){
-
+    createPieChartForArea(lyr){
+        var dataLyr = this.getObjectLayer(lyr.get('layerId'));
         var features = dataLyr['features'];
-        console.log(features.length);
+        var classNames = dataLyr.getClassNames();
+        var classColors = dataLyr.getClassColors();
+        var classKeys = dataLyr.getKeysOfClasses();
+
+        var dataPie = [];
+        var classIndex = {};
+
+        for (let index = 0, len = classKeys.length ; index < len; index++) {
+            const key = classKeys[index];
+            classIndex[classNames[key]] = index;
+
+            dataPie.push(
+                {
+                    name: classNames[key],
+                    y: 0,
+                    color: classColors[key],
+                    id: key
+                }
+            );
+        }
 
         for (let index = 0; index < features.length; index++) {
-            const element = features[index];
-            
+
+            const polygon = features[index]['geometry']['coordinates'];
+            const pos = classIndex[features[index]['properties']['className']];
+
+            dataPie[pos]['y'] += turf.area(turf.polygon(polygon));
         }
 
         // Build the chart
         Highcharts.chart('container-stats', {
-            exporting: { enabled: true },
             chart: {
                 plotBackgroundColor: null,
                 plotBorderWidth: null,
@@ -362,33 +475,24 @@ export class MapViewer{
                     dataLabels: {
                         enabled: false
                     },
-                    showInLegend: true
+                    showInLegend: true,
+                    point: {
+                        events: {
+                            legendItemClick: function(e) {
+                                var C_ID = e['target']['id'];
+
+                                lyr.get('inactiveClasses')[C_ID] = !lyr.get('inactiveClasses')[C_ID];
+
+                                lyr.get('showHideClass')(lyr, dataLyr);
+                            }
+                        }
+                    }
                 }
             },
             series: [{
-                name: 'Brands',
+                name: 'Area',
                 colorByPoint: true,
-                data: [{
-                    name: 'Chrome',
-                    y: 61.41,
-                    sliced: true,
-                    selected: true
-                }, {
-                    name: 'Internet Explorer',
-                    y: 11.84
-                }, {
-                    name: 'Firefox',
-                    y: 10.85
-                }, {
-                    name: 'Edge',
-                    y: 4.67
-                }, {
-                    name: 'Safari',
-                    y: 4.18
-                }, {
-                    name: 'Other',
-                    y: 7.05
-                }]
+                data: dataPie
             }]
         });
     }

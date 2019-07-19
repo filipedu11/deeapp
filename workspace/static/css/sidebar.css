@@ -172,17 +172,35 @@
   .sidebar-pane {
     min-width: 265px;
   }
+
+  .container-stats{
+      height:100%;
+      width:100%;
+      position:absolute;
+  }
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {
   .sidebar-pane {
     min-width: 350px;
   }
+
+  .container-stats{
+      height:100%;
+      width:100%;
+      position:absolute;
+  }
 }
 
 @media (min-width: 1200px) {
   .sidebar-pane {
     min-width: 420px;
+  }
+
+  .container-stats{
+      height:100%;
+      width:100%;
+      position:absolute;
   }
 }
 
