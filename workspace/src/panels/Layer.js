@@ -329,7 +329,10 @@ import Feature from 'ol/Feature';
                     map.getView().fit(map.get('initExtent'), {constrainResolution: false});
                     mapView.createEmptyStatsPanel();
                 } else {
+                    var t0 = performance.now();
                     mapView.updateStatsPanel();
+                    var t1 = performance.now();
+                    console.log('Call to doSomething took ' + (t1 - t0) + ' milliseconds.');
                 }
             }
 
