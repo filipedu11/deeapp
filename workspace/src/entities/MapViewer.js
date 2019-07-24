@@ -33,11 +33,10 @@ import 'highcharts/modules/offline-exporting.js';
 
 import Highcharts from 'highcharts';
 import * as turf from '@turf/turf';
-import RBush from 'geojson-rbush';
 
 /*eslint no-undef: "error"*/
 /*eslint-env node*/
-var geojsonRbush = require('geojson-rbush').default;
+var geojsonRbush = require('../../static/js/geojson-rbush').default;
 
 var BASE_TYPE_STRING = 'basemap';
 var CLASSIFICATION_TYPE_STRING = 'classification';
@@ -274,6 +273,8 @@ export class MapViewer{
         this.addLayerToMapGroup(EVALUATION_STRING, layer);
 
         this.loadLayerSwitcher();
+
+        return layer;
     }
 
 
@@ -447,30 +448,33 @@ export class MapViewer{
                     'features': []
                 };
                 
-                var element = null;
                 var containElements = null;
+                var searchElements = [];
 
-                for (let index = 0; index < 50/* features.length */; index++) {
-                    element = features[index];
-                    
-                    containElements = rbush.search(features[index]);
+                for (let i = 0, len=features.length; i < len; i++) {                    
+                    containElements = rbush.search(features[i]);
+                    searchElements.push(containElements);
+                }
 
-                    if (containElements.features.length != 0) {
-            
-                        containElements.features.map();
-                        containElements.features.map(function(contEl){
+                for (let i = 0, len = searchElements.length; i < len; i++) {
+                    const feats = searchElements[i].features;
+                    const feat = features[i];
+                    const featProp = [feat['properties']['featureId'], feat['properties']['classId'], feat['properties']['className']];
+                    console.log(i + ' - ' + feats.length);
+                    for (let j = 0, lenFeats = feats.length;  j < lenFeats; j++) {
+                        const el2 = feats[j];
 
-                            var feat = turf.intersect(element, contEl);
+                        var featInter = turf.intersect(feat, el2);
 
-                            if (feat != null) {
-                                feat.properties = {
-                                    'featureId': element['properties']['featureId'] + ' - ' + contEl['properties']['featureId'],
-                                    'classId': element['properties']['classId'] + '' + contEl['properties']['classId'],
-                                    'className': element['properties']['className'] + ' vs ' + contEl['properties']['className']
-                                };                                
-                                intersect.features.push(feat);
-                            }
-                        });
+                        if (featInter != null) {
+                            featInter.properties = {
+                                'featureId': featProp[0] + ' - ' + el2['properties']['featureId'],
+                                'classId': featProp[1] + '' + el2['properties']['classId'],
+                                'className': featProp[2] + ' vs ' + el2['properties']['className']
+                            };                                
+                            intersect.features.push(featInter);
+                        }
+                        console.log(j);
                     }
                 }
 
@@ -514,7 +518,9 @@ export class MapViewer{
                 intersect['type'] = 'FeatureCollection';
 
                 console.log(intersect);
-                this.addEvaluation(intersect);
+                var lAux = this.addEvaluation(intersect);
+
+                this.createPieChartForArea(lAux);
             }
             else {
                 return;
@@ -535,7 +541,7 @@ export class MapViewer{
 
         for (let index = 0, len = classKeys.length ; index < len; index++) {
             const key = classKeys[index];
-            classIndex[classNames[key]] = index;
+            classIndex[key] = index;
 
             dataPie.push(
                 {
@@ -548,11 +554,10 @@ export class MapViewer{
         }
 
         for (let index = 0; index < features.length; index++) {
-
             const polygon = features[index]['geometry']['coordinates'];
-            const pos = classIndex[features[index]['properties']['className']];
-
-            dataPie[pos]['y'] += turf.area(turf.polygon(polygon));
+            const pos = classIndex[parseInt(features[index]['properties']['classId'])];
+            if ( !polygon )
+                dataPie[pos]['y'] += turf.area(turf.polygon(polygon));
         }
 
         // Build the chart
