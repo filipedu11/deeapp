@@ -7,12 +7,12 @@ import LayerGroup from 'ol/layer/Group';
 import Stamen from 'ol/source/Stamen.js';
 import XYZ from 'ol/source/XYZ.js';
 
-import LayerSwitcher from '../panels/Layer.js';
+import LayerSwitcher from '../panels/LayerSwitcher.js';
 import Sidebar from '../../static/js/sidebar.js';
 import { Progress } from '../../static/js/Progress.js';
 
-import { Classification } from './Classification';
-import { ClassificationDecode } from '../decode/ClassificationDecode';
+import { Layer, LayerEntity } from './LayerEntity';
+import { LayerDecode } from '../decode/LayerDecode';
 
 import {Style, Fill, Stroke} from 'ol/style';
 import geojsonvt from 'geojson-vt';
@@ -36,7 +36,7 @@ import * as turf from '@turf/turf';
 
 /*eslint no-undef: "error"*/
 /*eslint-env node*/
-var geojsonRbush = require('../../static/js/geojson-rbush').default;
+var geojsonRbush = require('geojson-rbush').default;
 
 var BASE_TYPE_STRING = 'basemap';
 var CLASSIFICATION_TYPE_STRING = 'classification';
@@ -182,101 +182,58 @@ export class MapViewer{
         this.lyrsSelected = lyrsSelected;
     }
 
+    createLayerObj(layerGeojson, typeGroup) {
+        var cD = new LayerDecode();
+        var k = cD.key;
+
+        var id = layerGeojson[cD.layerID[k]];
+
+        var lyr = new LayerEntity(
+            id,
+            layerGeojson[cD.layerName[k]],
+            layerGeojson[cD.layerDescription[k]],
+            layerGeojson[cD.layerRasterFile[k]],
+            layerGeojson[cD.layerSource[k]],
+            layerGeojson[cD.layerStats[k]],
+            layerGeojson[cD.layerStyle[k]],
+            layerGeojson[cD.features[k]],
+            layerGeojson[cD.classNames[k]],
+            layerGeojson,
+            typeGroup
+        );
+
+        this.allLayersDict[id] = lyr;
+        this.valiArray.push(lyr);
+
+        return lyr;
+    }
+
     addClassification(classiGeojson){
 
-        var cD = new ClassificationDecode();
-        var k = cD.key;
+        var newLayer = this.createLayer(classiGeojson, this.createLayerObj(classiGeojson, CLASSIFICATION_TYPE_STRING));
 
-        var id = classiGeojson[cD.classificationID[k]];
-
-        var classification = new Classification(
-            id,
-            classiGeojson[cD.classificationName[k]],
-            classiGeojson[cD.classificationDescription[k]],
-            classiGeojson[cD.classificationRasterFile[k]],
-            classiGeojson[cD.classificationSource[k]],
-            classiGeojson[cD.classificationStats[k]],
-            classiGeojson[cD.classificationStyle[k]],
-            classiGeojson[cD.features[k]],
-            classiGeojson[cD.classNames[k]],
-            classiGeojson,
-            CLASSIFICATION_TYPE_STRING
-        );
-
-        this.allLayersDict[id] = classification;
-        this.classiArray.push(classification);
-
-        var layer = this.createLayer(classiGeojson, classification);
-
-        this.addLayerToMapGroup(CLASSIFICATION_TYPE_STRING, layer);
+        this.addLayerToMapGroup(CLASSIFICATION_TYPE_STRING, newLayer);
 
         this.loadLayerSwitcher();
     }
 
-    addValidation(classiGeojson){
+    addValidation(validationGeojson){
 
-        var cD = new ClassificationDecode();
-        var k = cD.key;
+        var newLayer = this.createLayer(validationGeojson, this.createLayerObj(validationGeojson, VALIDATION_STRING));
 
-        var id = classiGeojson[cD.classificationID[k]];
-
-        var classification = new Classification(
-            id,
-            classiGeojson[cD.classificationName[k]],
-            classiGeojson[cD.classificationDescription[k]],
-            classiGeojson[cD.classificationRasterFile[k]],
-            classiGeojson[cD.classificationSource[k]],
-            classiGeojson[cD.classificationStats[k]],
-            classiGeojson[cD.classificationStyle[k]],
-            classiGeojson[cD.features[k]],
-            classiGeojson[cD.classNames[k]],
-            classiGeojson,
-            VALIDATION_STRING
-        );
-
-        this.allLayersDict[id] = classification;
-        this.valiArray.push(classification);
-
-        var layer = this.createLayer(classiGeojson, classification);
-
-        this.addLayerToMapGroup(VALIDATION_STRING, layer);
+        this.addLayerToMapGroup(VALIDATION_STRING, newLayer);
 
         this.loadLayerSwitcher();
     }
 
-    addEvaluation(classiGeojson){
+    addEvaluation(evaluationGeojson){
 
-        var cD = new ClassificationDecode();
-        var k = cD.key;
+        var newLayer = this.createLayer(evaluationGeojson, this.createLayerObj(evaluationGeojson, EVALUATION_STRING));
 
-        var id = classiGeojson[cD.classificationID[k]];
-
-        var classification = new Classification(
-            id,
-            classiGeojson[cD.classificationName[k]],
-            classiGeojson[cD.classificationDescription[k]],
-            classiGeojson[cD.classificationRasterFile[k]],
-            classiGeojson[cD.classificationSource[k]],
-            classiGeojson[cD.classificationStats[k]],
-            classiGeojson[cD.classificationStyle[k]],
-            classiGeojson[cD.features[k]],
-            classiGeojson[cD.classNames[k]],
-            classiGeojson,
-            EVALUATION_STRING
-        );
-
-        this.allLayersDict[id] = classification;
-        this.valiArray.push(classification);
-
-        var layer = this.createLayer(classiGeojson, classification);
-
-        this.addLayerToMapGroup(EVALUATION_STRING, layer);
+        this.addLayerToMapGroup(EVALUATION_STRING, newLayer);
 
         this.loadLayerSwitcher();
-
-        return layer;
     }
-
 
     createStyle(lyr){
 
@@ -305,10 +262,10 @@ export class MapViewer{
         });
     }
 
-    createSource(classiGeojson){
+    createSource(lyrGeojson){
 
         var tileIndex = geojsonvt(
-            classiGeojson, {
+            lyrGeojson, {
                 tolerance:3,
                 maxZoom: this.map.getView().getMaxZoom()
             }
@@ -318,7 +275,7 @@ export class MapViewer{
 
         return new VectorSource({
             format: new GeoJSON(),
-            features: classiGeojson,
+            features: lyrGeojson,
             tileLoadFunction: function(tile) {
                 var format = tile.getFormat();
                 var tileCoord = tile.getTileCoord();
@@ -355,7 +312,7 @@ export class MapViewer{
 
         var layer = new VectorLayer({
             title: classObject.getName(),
-            visible: EVALUATION_STRING == classObject.getType(),
+            visible: false,
             source: source,
             layerId: classObject.getId(),
             sourceAux: vectorSource,
@@ -367,23 +324,23 @@ export class MapViewer{
         return layer;
     }
 
-    createMetadata(classificationId){
-        var cl = this.getObjectLayer(classificationId);
+    createMetadata(lyrId){
+        var cl = this.getObjectLayer(lyrId);
         cl.createMetadata();
     }
 
-    clearMetadata(classificationId){
-        var cl = this.getObjectLayer(classificationId);
+    clearMetadata(lyrId){
+        var cl = this.getObjectLayer(lyrId);
         cl.clearMetadata();
     }
 
-    createLegend(classificationId){
-        var cl = this.getObjectLayer(classificationId);
+    createLegend(lyrId){
+        var cl = this.getObjectLayer(lyrId);
         cl.createLegend();
     }
 
-    clearLegend(classificationId){
-        var cl = this.getObjectLayer(classificationId);
+    clearLegend(lyrId){
+        var cl = this.getObjectLayer(lyrId);
         cl.clearLegend();
     }
 
@@ -422,105 +379,105 @@ export class MapViewer{
 
             if (isEval) {
 
-                const el1 = this.lyrsSelected[0];
-                const el2 = this.lyrsSelected[1];
+                // const el1 = this.lyrsSelected[0];
+                // const el2 = this.lyrsSelected[1];
 
-                var tree = geojsonRbush();
+                // var tree = geojsonRbush();
 
-                var dataEl1 = this.getObjectLayer(el1.get('layerId'));
-                var geojson1 = dataEl1.geojsonFile;
+                // var dataEl1 = this.getObjectLayer(el1.get('layerId'));
+                // var geojson1 = dataEl1.geojsonFile;
 
-                var dataEl2 = this.getObjectLayer(el2.get('layerId'));
-                var geojson2 = dataEl2.geojsonFile;
+                // var dataEl2 = this.getObjectLayer(el2.get('layerId'));
+                // var geojson2 = dataEl2.geojsonFile;
 
-                var rbush = geojson1.features.length > geojson2.features.length ? tree.load(geojson1) : tree.load(geojson2);
-                var features = geojson1.features.length > geojson2.features.length ? geojson2.features : geojson1.features;
+                // var rbush = geojson1.features.length > geojson2.features.length ? tree.load(geojson1) : tree.load(geojson2);
+                // var features = geojson1.features.length > geojson2.features.length ? geojson2.features : geojson1.features;
 
-                var intersect = {
-                    'type': 'FeatureCollection',
-                    'name': 'out',
-                    'crs': {
-                        'type': 'name',
-                        'properties': {
-                            'name': 'urn:ogc:def:crs:OGC:1.3:CRS84'
-                        }
-                    },
-                    'features': []
-                };
+                // var intersect = {
+                //     'type': 'FeatureCollection',
+                //     'name': 'out',
+                //     'crs': {
+                //         'type': 'name',
+                //         'properties': {
+                //             'name': 'urn:ogc:def:crs:OGC:1.3:CRS84'
+                //         }
+                //     },
+                //     'features': []
+                // };
                 
-                var containElements = null;
-                var searchElements = [];
+                // var containElements = null;
+                // var searchElements = [];
 
-                for (let i = 0, len=features.length; i < len; i++) {                    
-                    containElements = rbush.search(features[i]);
-                    searchElements.push(containElements);
-                }
+                // for (let i = 0, len=features.length; i < len; i++) {                    
+                //     containElements = rbush.search(features[i]);
+                //     searchElements.push(containElements);
+                // }
 
-                for (let i = 0, len = searchElements.length; i < len; i++) {
-                    const feats = searchElements[i].features;
-                    const feat = features[i];
-                    const featProp = [feat['properties']['featureId'], feat['properties']['classId'], feat['properties']['className']];
-                    console.log(i + ' - ' + feats.length);
-                    for (let j = 0, lenFeats = feats.length;  j < lenFeats; j++) {
-                        const el2 = feats[j];
+                // for (let i = 0, len = searchElements.length; i < len; i++) {
+                //     const feats = searchElements[i].features;
+                //     const feat = features[i];
+                //     const featProp = [feat['properties']['featureId'], feat['properties']['classId'], feat['properties']['className']];
+                //     console.log(i + ' - ' + feats.length);
+                //     for (let j = 0, lenFeats = feats.length;  j < lenFeats; j++) {
+                //         const el2 = feats[j];
 
-                        var featInter = turf.intersect(feat, el2);
+                //         var featInter = turf.intersect(feat, el2);
 
-                        if (featInter != null) {
-                            featInter.properties = {
-                                'featureId': featProp[0] + ' - ' + el2['properties']['featureId'],
-                                'classId': featProp[1] + '' + el2['properties']['classId'],
-                                'className': featProp[2] + ' vs ' + el2['properties']['className']
-                            };                                
-                            intersect.features.push(featInter);
-                        }
-                        console.log(j);
-                    }
-                }
+                //         if (featInter != null) {
+                //             featInter.properties = {
+                //                 'featureId': featProp[0] + ' - ' + el2['properties']['featureId'],
+                //                 'classId': featProp[1] + '' + el2['properties']['classId'],
+                //                 'className': featProp[2] + ' vs ' + el2['properties']['className']
+                //             };                                
+                //             intersect.features.push(featInter);
+                //         }
+                //         console.log(j);
+                //     }
+                // }
 
-                const extIntersect = {
-                    'crs': {
-                        'type': 'name',
-                        'properties': {
-                            'name': 'urn:ogc:def:crs:OGC:1.3:CRS84'
-                        }
-                    },
-                    'classificationID': dataEl1.getId() + dataEl2.getId(),
-                    'classificationName': dataEl1.getName() + ' vs ' + dataEl2.getName(),
-                    'classificationDescription': 'Dados de Validação que mapeia a area ardida',
-                    'classificationRasterFile': 'classification_example.tif',
-                    'classificationSource': {
-                        'author': 'Eduardo Fernandes',
-                        'classifierAlgorithm': '',
-                        'preProcTechniquesUsed': [],
-                        'postProcTechniquesUsed': [],
-                        'collectedDate': '',
-                        'classificationDate': ''
-                    },
-                    'classificationStyle': {
-                        'color': {
-                            '00': 'rgb(206,206,206)',
-                            '01': 'rgb(150,150,150)',
-                            '10': 'rgb(150,95,50)',
-                            '11': 'rgb(173,112,68)'
-                        }
-                    },
-                    'classNames': {
-                        '00': 'Área não ardida (Correct)',
-                        '01': 'Área não ardida (Wrong)',
-                        '10': 'Área ardida (Wrong)',
-                        '11': 'Área ardida (Correct)',
-                    }
-                };
+                // const extIntersect = {
+                //     'crs': {
+                //         'type': 'name',
+                //         'properties': {
+                //             'name': 'urn:ogc:def:crs:OGC:1.3:CRS84'
+                //         }
+                //     },
+                //     'classificationID': dataEl1.getId() + dataEl2.getId(),
+                //     'classificationName': dataEl1.getName() + ' vs ' + dataEl2.getName(),
+                //     'classificationDescription': 'Dados de Validação que mapeia a area ardida',
+                //     'classificationRasterFile': 'classification_example.tif',
+                //     'classificationSource': {
+                //         'author': 'Eduardo Fernandes',
+                //         'classifierAlgorithm': '',
+                //         'preProcTechniquesUsed': [],
+                //         'postProcTechniquesUsed': [],
+                //         'collectedDate': '',
+                //         'classificationDate': ''
+                //     },
+                //     'classificationStyle': {
+                //         'color': {
+                //             '00': 'rgb(206,206,206)',
+                //             '01': 'rgb(150,150,150)',
+                //             '10': 'rgb(150,95,50)',
+                //             '11': 'rgb(173,112,68)'
+                //         }
+                //     },
+                //     'classNames': {
+                //         '00': 'Área não ardida (Correct)',
+                //         '01': 'Área não ardida (Wrong)',
+                //         '10': 'Área ardida (Wrong)',
+                //         '11': 'Área ardida (Correct)',
+                //     }
+                // };
 
-                intersect =  Object.assign({}, intersect, extIntersect);
+                // intersect =  Object.assign({}, intersect, extIntersect);
 
-                intersect['type'] = 'FeatureCollection';
+                // intersect['type'] = 'FeatureCollection';
 
-                console.log(intersect);
-                var lAux = this.addEvaluation(intersect);
+                // console.log(intersect);
+                // var lAux = this.addEvaluation(intersect);
 
-                this.createPieChartForArea(lAux);
+                // this.createPieChartForArea(lAux);
             }
             else {
                 return;
@@ -556,8 +513,7 @@ export class MapViewer{
         for (let index = 0; index < features.length; index++) {
             const polygon = features[index]['geometry']['coordinates'];
             const pos = classIndex[parseInt(features[index]['properties']['classId'])];
-            if ( !polygon )
-                dataPie[pos]['y'] += turf.area(turf.polygon(polygon));
+            dataPie[pos]['y'] += turf.area(turf.polygon(polygon));
         }
 
         // Build the chart

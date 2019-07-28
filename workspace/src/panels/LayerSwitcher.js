@@ -1,7 +1,7 @@
 import Sortable from 'sortablejs'; 
 import View from 'ol/View';
 import { getCenter } from 'ol/extent.js';
-import { ClassificationDecode } from '../decode/ClassificationDecode';
+import { LayerDecode } from '../decode/LayerDecode';
 import Feature from 'ol/Feature';
 
 (function (global, factory) {
@@ -103,7 +103,7 @@ import Feature from 'ol/Feature';
     };
 
     var CSS_PREFIX = 'layer-switcher-';
-    var cDec = new ClassificationDecode();
+    var lDec = new LayerDecode();
 
 
     /**
