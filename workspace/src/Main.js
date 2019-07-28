@@ -17,4 +17,9 @@ export class Main {
     addValidation(validationGeojson){
         this.mapViewer.addValidation(validationGeojson);
     }
+
+    addEvaluation(evaluationGeojson){
+        this.mapViewer.addEvaluation(evaluationGeojson);
+    }
+    
 }

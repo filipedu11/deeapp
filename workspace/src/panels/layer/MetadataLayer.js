@@ -1,6 +1,6 @@
 import { Metada } from '../Metadata';
 
-export class MetadaClassification extends Metada{
+export class MetadaLayer extends Metada{
 
     constructor(lyrObj){
         super(lyrObj);
@@ -29,7 +29,7 @@ export class MetadaClassification extends Metada{
                     '<table class="table table-bordered table-dark" style="margin: 0px;">' +
                         '<tbody>' +
                             '<tr>' +
-                                '<th scope="row">' + obj.getDecode().classificationName[obj.getDecode().text] + '</th>' +
+                                '<th scope="row">' + obj.getDecode().layerName[obj.getDecode().text] + '</th>' +
                                 '<td>' + obj.getDescription() +'</td>' +
                             '</tr>' +
                             '<tr>' +
@@ -37,7 +37,7 @@ export class MetadaClassification extends Metada{
                                 '<td>' + obj.getAuthor() + '</td>'+
                             '</tr>'+
                             '<tr>' +
-                                '<th scope="row">' + obj.getDecode().classificationAlgorithm[obj.getDecode().text] + '</th>'+
+                                '<th scope="row">' + obj.getDecode().layerAlgorithm[obj.getDecode().text] + '</th>'+
                                 '<td>' + obj.getClassifierAlgorithm() + '</td>'+
                             '</tr>'+
                             '<tr>' +
@@ -45,8 +45,8 @@ export class MetadaClassification extends Metada{
                                 '<td>' + obj.getCollectedDate() + '</td>'+
                             '</tr>'+
                             '<tr>' +
-                                '<th scope="row">' + obj.getDecode().classificationDate[obj.getDecode().text] + '</th>'+
-                                '<td>' + obj.getClassificationDate() + '</td>'+
+                                '<th scope="row">' + obj.getDecode().layerDate[obj.getDecode().text] + '</th>'+
+                                '<td>' + obj.getLayerDate() + '</td>'+
                             '</tr>'+
                         '</tbody>'+
                     '</table>' +

@@ -3,7 +3,8 @@ dist
 package-lock.json
 .vscode
 .cache
-convert_raster_to_geojson/__pycache__/
-convert_raster_to_geojson/build/
-convert_raster_to_geojson/convert_raster_to_geojson.spec
-convert_raster_to_geojson/classification/
+python_scripts/convert_raster_to_geojson/__pycache__/
+python_scripts/convert_raster_to_geojson/build/
+python_scripts/convert_raster_to_geojson/convert_raster_to_geojson.spec
+python_scripts/data/*
+*.tif
