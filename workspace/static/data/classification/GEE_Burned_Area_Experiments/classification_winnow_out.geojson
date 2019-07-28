@@ -2979,22 +2979,22 @@
       }
     }
   ],
-  "classificationID": "classification_winnow",
-  "classificationName": "Classificação winnow",
-  "classificationDescription": "Classification using the winnow algorithm",
-  "classificationRasterFile": "classification_example.tif",
-  "classificationSource": {
+  "layerID": "validation",
+  "layerName": "Dados de Validação",
+  "layerDescription": "Dados de Validação que mapeia a area ardida",
+  "layerRasterFile": "classification_example.tif",
+  "layerSource": {
     "author": "Eduardo Fernandes",
-    "classifierAlgorithm": "winnow",
+    "classifierAlgorithm": "",
     "preProcTechniquesUsed": [],
     "postProcTechniquesUsed": [],
     "collectedDate": "",
-    "classificationDate": ""
+    "layerDate": ""
   },
-  "classificationStyle": {
+  "layerStyle": {
     "color": {
-      "0": "rgb(173,112,68)",
-      "1": "rgb(206,206,206)"
+      "0": "rgb(206,206,206)",
+      "1": "rgb(173,112,68)"
     }
   },
   "classNames": {
