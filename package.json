@@ -23,6 +23,7 @@
     "geojson-vt": "^3.2.1",
     "highcharts": "^7.1.2",
     "jquery": "^3.4.1",
+    "jscolor": "^0.3.0",
     "jshint": "^2.10.2",
     "jsts": "^2.0.6",
     "module-name": "0.0.1-security",

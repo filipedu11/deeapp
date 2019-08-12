@@ -30,9 +30,7 @@ import 'jquery';
 import 'highcharts/modules/exporting.js';
 import 'highcharts/modules/export-data.js';
 import 'highcharts/modules/offline-exporting.js';
-
-import Highcharts from 'highcharts';
-import * as turf from '@turf/turf';
+import { Legend } from '../panels/Legend.js';
 
 /*eslint no-undef: "error"*/
 /*eslint-env node*/
@@ -59,6 +57,7 @@ export class MapViewer{
         //Create the initial map
         this.map =  this.createInitMap();
         this.stats = new Stats();
+        this.legend = new Legend();
 
         //Add Sidebar control to map
         this.createSideBar();
@@ -72,7 +71,7 @@ export class MapViewer{
         //Render the layerswitcher
         this.loadLayerSwitcher();
 
-        this.createEmptyStatsPanel();
+        this.clearStatsPanel();
 
         this.map.set('mapViewer', this);
     }
@@ -235,6 +234,13 @@ export class MapViewer{
         this.loadLayerSwitcher();
     }
 
+    removeEvaluation(evaluationLayer){
+
+        this.map.removeLayer(evaluationLayer);
+
+        this.loadLayerSwitcher();
+    }
+
     createStyle(lyr){
 
         var classAux = this.getObjectLayer(lyr.get('layerId'));
@@ -334,227 +340,64 @@ export class MapViewer{
         cl.clearMetadata();
     }
 
-    createLegend(lyrId){
-        var cl = this.getObjectLayer(lyrId);
-        cl.createLegend();
+    createLegend(){
+        var lenSelectLayer = this.lyrsSelected.length;
+        if (lenSelectLayer > 0) this.legend.createLegend(this.getObjectLayer(this.lyrsSelected[lenSelectLayer-1].get('layerId')));
     }
 
-    clearLegend(lyrId){
-        var cl = this.getObjectLayer(lyrId);
-        cl.clearLegend();
+    clearLegend(){
+        this.legend.clearLegend();
     }
 
     getObjectLayer(id){
         return this.allLayersDict[id];
     }
 
-    createEmptyStatsPanel(){
-        return this.stats.noneLayerSelected();
+    updateLayersInMap(){
+
     }
 
     updateStatsPanel(){
 
-        var content = document.getElementById('container-stats');
+        this.clearStatsPanel();
 
-        content.innerHTML = '';
+        var lenSelectLayer = this.lyrsSelected.length;
 
-        if (this.lyrsSelected.length == 1) {
-            this.createPieChartForArea(this.lyrsSelected[0]);
-        }
-        else {
-            var foundClassificationLayer = false;
-            var foundValidationLayer = false;
-            var isEval = false;
+        if (lenSelectLayer > 0) {
+            this.createPieChartForArea(this.lyrsSelected[lenSelectLayer - 1]);
+
+            var foundEvalLayers = [];
 
             for (let index = 0; index < this.lyrsSelected.length; index++) {
                 const lyr = this.getObjectLayer(this.lyrsSelected[index].get('layerId'));
-                if (lyr.getType() == CLASSIFICATION_TYPE_STRING) {
-                    foundClassificationLayer = true;
-                } else if (lyr.getType() == VALIDATION_STRING) {
-                    foundValidationLayer = true;
-                }
+                if (lyr.getType() == EVALUATION_STRING) {
+                    foundEvalLayers.push(this.lyrsSelected[index]);
+                } 
             }
 
-            isEval = foundClassificationLayer && foundValidationLayer;
-
-            if (isEval) {
-
-                // const el1 = this.lyrsSelected[0];
-                // const el2 = this.lyrsSelected[1];
-
-                // var tree = geojsonRbush();
-
-                // var dataEl1 = this.getObjectLayer(el1.get('layerId'));
-                // var geojson1 = dataEl1.geojsonFile;
-
-                // var dataEl2 = this.getObjectLayer(el2.get('layerId'));
-                // var geojson2 = dataEl2.geojsonFile;
-
-                // var rbush = geojson1.features.length > geojson2.features.length ? tree.load(geojson1) : tree.load(geojson2);
-                // var features = geojson1.features.length > geojson2.features.length ? geojson2.features : geojson1.features;
-
-                // var intersect = {
-                //     'type': 'FeatureCollection',
-                //     'name': 'out',
-                //     'crs': {
-                //         'type': 'name',
-                //         'properties': {
-                //             'name': 'urn:ogc:def:crs:OGC:1.3:CRS84'
-                //         }
-                //     },
-                //     'features': []
-                // };
-                
-                // var containElements = null;
-                // var searchElements = [];
-
-                // for (let i = 0, len=features.length; i < len; i++) {                    
-                //     containElements = rbush.search(features[i]);
-                //     searchElements.push(containElements);
-                // }
-
-                // for (let i = 0, len = searchElements.length; i < len; i++) {
-                //     const feats = searchElements[i].features;
-                //     const feat = features[i];
-                //     const featProp = [feat['properties']['featureId'], feat['properties']['classId'], feat['properties']['className']];
-                //     console.log(i + ' - ' + feats.length);
-                //     for (let j = 0, lenFeats = feats.length;  j < lenFeats; j++) {
-                //         const el2 = feats[j];
-
-                //         var featInter = turf.intersect(feat, el2);
-
-                //         if (featInter != null) {
-                //             featInter.properties = {
-                //                 'featureId': featProp[0] + ' - ' + el2['properties']['featureId'],
-                //                 'classId': featProp[1] + '' + el2['properties']['classId'],
-                //                 'className': featProp[2] + ' vs ' + el2['properties']['className']
-                //             };                                
-                //             intersect.features.push(featInter);
-                //         }
-                //         console.log(j);
-                //     }
-                // }
-
-                // const extIntersect = {
-                //     'crs': {
-                //         'type': 'name',
-                //         'properties': {
-                //             'name': 'urn:ogc:def:crs:OGC:1.3:CRS84'
-                //         }
-                //     },
-                //     'classificationID': dataEl1.getId() + dataEl2.getId(),
-                //     'classificationName': dataEl1.getName() + ' vs ' + dataEl2.getName(),
-                //     'classificationDescription': 'Dados de Validação que mapeia a area ardida',
-                //     'classificationRasterFile': 'classification_example.tif',
-                //     'classificationSource': {
-                //         'author': 'Eduardo Fernandes',
-                //         'classifierAlgorithm': '',
-                //         'preProcTechniquesUsed': [],
-                //         'postProcTechniquesUsed': [],
-                //         'collectedDate': '',
-                //         'classificationDate': ''
-                //     },
-                //     'classificationStyle': {
-                //         'color': {
-                //             '00': 'rgb(206,206,206)',
-                //             '01': 'rgb(150,150,150)',
-                //             '10': 'rgb(150,95,50)',
-                //             '11': 'rgb(173,112,68)'
-                //         }
-                //     },
-                //     'classNames': {
-                //         '00': 'Área não ardida (Correct)',
-                //         '01': 'Área não ardida (Wrong)',
-                //         '10': 'Área ardida (Wrong)',
-                //         '11': 'Área ardida (Correct)',
-                //     }
-                // };
-
-                // intersect =  Object.assign({}, intersect, extIntersect);
-
-                // intersect['type'] = 'FeatureCollection';
-
-                // console.log(intersect);
-                // var lAux = this.addEvaluation(intersect);
-
-                // this.createPieChartForArea(lAux);
-            }
-            else {
-                return;
+            if (foundEvalLayers.length > 0) {
+                this.createConfusionMatrix(foundEvalLayers[foundEvalLayers.length-1]);
+                this.createStatsController();
             }
         }
     }
 
     createPieChartForArea(lyr){
         var dataLyr = this.getObjectLayer(lyr.get('layerId'));
-        var features = dataLyr['features'];
-        var classNames = dataLyr.getClassNames();
-        var classColors = dataLyr.getClassColors();
-        var classKeys = dataLyr.getKeysOfClasses();
+        this.stats.createPieChart(lyr, dataLyr);
+    }   
+    
+    createConfusionMatrix(lyr){
+        var dataLyr = this.getObjectLayer(lyr.get('layerId'));
+        this.stats.createConfusionMatrix(lyr, dataLyr);
+    }
 
+    createStatsController(){
+        this.stats.createStatsController();
+    }
 
-        var dataPie = [];
-        var classIndex = {};
-
-        for (let index = 0, len = classKeys.length ; index < len; index++) {
-            const key = classKeys[index];
-            classIndex[key] = index;
-
-            dataPie.push(
-                {
-                    name: classNames[key],
-                    y: 0,
-                    color: classColors[key],
-                    id: key
-                }
-            );
-        }
-
-        for (let index = 0; index < features.length; index++) {
-            const polygon = features[index]['geometry']['coordinates'];
-            const pos = classIndex[parseInt(features[index]['properties']['classId'])];
-            dataPie[pos]['y'] += turf.area(turf.polygon(polygon));
-        }
-
-        // Build the chart
-        Highcharts.chart('container-stats', {
-            chart: {
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false,
-                type: 'pie'
-            },
-            title: {
-                text: dataLyr.getName()
-            },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>{series.name}: <b>{point.y:.3f} km</b>'
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: false
-                    },
-                    showInLegend: true,
-                    point: {
-                        events: {
-                            legendItemClick: function(e) {
-                                var C_ID = e['target']['id'];
-                                lyr.get('inactiveClasses')[C_ID] = !lyr.get('inactiveClasses')[C_ID];
-                                lyr.getSource().dispatchEvent('change');
-                            }
-                        }
-                    }
-                }
-            },
-            series: [{
-                name: 'Area',
-                colorByPoint: true,
-                data: dataPie
-            }]
-        });
+    clearStatsPanel(){
+        this.stats.clearStatsPanel();
     }
 
     /**

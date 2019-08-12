@@ -106,6 +106,10 @@ export class LayerEntity{
         return this.features[index][this.getDecode().statsDecode.polygonProperties[this.getDecode().key]];
     }
 
+    getFeatures(){
+        return this.features;
+    }
+
     getColorOfClass(classId){
         var colorDict = this.layerStyle[this.getDecode().color[this.getDecode().key]];
         return colorDict[classId];
@@ -123,6 +127,21 @@ export class LayerEntity{
         return this.classNames;
     }
 
+    //FOR EVAL LAYERS
+    getIndividualClassNames(){
+
+        var categories = {};
+        var cN;
+
+        Object.values(this.classNames).forEach(cName => {    
+            cN = cName.split(' vs ')[0];
+            if( !categories[cN] ) categories[cN] = true;
+
+        });
+
+        return categories;
+    }
+
     getClassColors(){
         return this.layerStyle[this.getDecode().color[this.getDecode().key]];
     }
@@ -133,21 +152,5 @@ export class LayerEntity{
 
     clearMetadata(){
         this.metadataPanel.clearMetadataPanel();
-    }
-
-    createLegend(){
-        this.legendPanel.createLegend();
-    }
-
-    clearLegend(){
-        this.legendPanel.clearLegend();
-    }
-
-    createStats(){
-        this.statsPanel.createStatsPanel();
-    }
-
-    clearStats(){
-        this.statsPanel.clearStatsPanel();
     }
 }
