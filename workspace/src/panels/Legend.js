@@ -2,37 +2,31 @@
 
 export class Legend {
 
-    constructor(lyrObj){
-        this.lyrObj = lyrObj;
-        this.dec = lyrObj.getDecode();
+    constructor(){
+        this.legend = document.getElementById('legend');
+        this.legendContent = document.getElementById('legend-content');
     }
 
-    createLegend(){
-        
-        var legend = document.getElementById('legend');
-        var legendContent = document.getElementById('legend-content');
-        const classKeys = this.lyrObj.getKeysOfClasses();
+    createLegend(lyrObj){
+        const classKeys = lyrObj.getKeysOfClasses();
 
-        legendContent.innerHTML = '<h6><b><u>Legend</u></b></h6>';
+        this.legendContent.innerHTML = '<h6><b><u>Legend</u></b></h6>';
                 
         for (let index = 0; index <classKeys.length; index++) {
 
-            legendContent.innerHTML += 
-                '<li><span class="circle" style="background:' + this.lyrObj.getColorOfClass(classKeys[index]) + ';"></span> ' +  this.lyrObj.getNameOfClass(classKeys[index]) + ' </li>';
+            this.legendContent.innerHTML += 
+                '<li><span class="circle" style="background:' + lyrObj.getColorOfClass(classKeys[index]) + ';"></span> ' +  lyrObj.getNameOfClass(classKeys[index]) + ' </li>';
         }
 
-        legend.className = 'inline-block';
+        this.legend.className = 'inline-block';
     }
 
     clearLegend(){
         
-        var legend = document.getElementById('legend');
-        var legendContent = document.getElementById('legend-content');
-
-        if (legend !== null) {
+        if (this.legend !== null) {
             //CLEAR PREVIOUS CONTENT
-            legendContent.innerHTML = '';
-            legend.className = 'none-block';
+            this.legendContent.innerHTML = '';
+            this.legend.className = 'none-block';
         }
     }
 }

@@ -285,6 +285,7 @@ import Feature from 'ol/Feature';
             key: 'setVisible_',
             value: function setVisible_(map, lyr, visible) {
                 lyr.setVisible(visible);
+
                 var lyrId = lyr.get('layerId');
                 var mapView = map.get('mapViewer');
 
@@ -295,11 +296,9 @@ import Feature from 'ol/Feature';
                         map.getView().fit(sourceAux.getExtent(), {constrainResolution: false});
                         map.getView().setZoom(map.getView().getZoom() - 2);
                         mapView.createMetadata(lyrId);
-                        mapView.createLegend(lyrId);
                     }
                     else {
                         mapView.clearMetadata(lyrId);
-                        mapView.clearLegend(lyrId);
                     }
                 }
 
@@ -327,12 +326,12 @@ import Feature from 'ol/Feature';
 
                 if (allLayersInvisible) {
                     map.getView().fit(map.get('initExtent'), {constrainResolution: false});
-                    mapView.createEmptyStatsPanel();
+                    mapView.clearStatsPanel();
+                    mapView.clearLegend();
                 } else {
-                    var t0 = performance.now();
+                    mapView.updateLayersInMap();
                     mapView.updateStatsPanel();
-                    var t1 = performance.now();
-                    console.log('Call to doSomething took ' + (t1 - t0) + ' milliseconds.');
+                    mapView.createLegend();
                 }
             }
 

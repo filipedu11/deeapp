@@ -331,3 +331,37 @@ p {
 #board{
     margin-top: 17px;
 }
+
+#main-stats{
+    position: absolute;
+    width: 94%;
+}
+
+#content-stats{
+}
+
+#controller-stats{
+}
+
+#controller-stats button:focus{
+    box-shadow:none;
+}
+
+#controller-stats button:active {
+    -ms-transform: translateY(3px);
+    -webkit-transform: translateY(3px);
+    transform: translateY(3px);/*Move down*/
+    border-bottom: none;/*disappears*/
+}
+
+.info-table-button {
+    background-image: url("../img/table.png");
+}
+
+.piechart-button {
+    background-image: url("../img/pie_chart.png");
+}
+
+.combochart-button {
+    background-image: url("../img/combo_chart.png");
+}
