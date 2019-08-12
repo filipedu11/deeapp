@@ -5,13 +5,14 @@ import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import LayerGroup from 'ol/layer/Group';
 import Stamen from 'ol/source/Stamen.js';
+import XYZ from 'ol/source/XYZ.js';
 
-import LayerSwitcher from '../panels/Layer.js';
+import LayerSwitcher from '../panels/LayerSwitcher.js';
 import Sidebar from '../../static/js/sidebar.js';
 import { Progress } from '../../static/js/Progress.js';
 
-import { Classification } from './Classification';
-import { ClassificationDecode } from '../decode/ClassificationDecode';
+import { Layer, LayerEntity } from './LayerEntity';
+import { LayerDecode } from '../decode/LayerDecode';
 
 import {Style, Fill, Stroke} from 'ol/style';
 import geojsonvt from 'geojson-vt';
@@ -23,17 +24,40 @@ import VectorLayer from 'ol/layer/VectorTile';
 import Projection from 'ol/proj/Projection';
 
 import { FeaturesDecode } from '../decode/FeaturesDecode';
+import { Stats } from '../panels/Stats.js';
+
+import 'jquery';
+import 'highcharts/modules/exporting.js';
+import 'highcharts/modules/export-data.js';
+import 'highcharts/modules/offline-exporting.js';
+import { Legend } from '../panels/Legend.js';
+
+/*eslint no-undef: "error"*/
+/*eslint-env node*/
+var geojsonRbush = require('geojson-rbush').default;
 
 var BASE_TYPE_STRING = 'basemap';
 var CLASSIFICATION_TYPE_STRING = 'classification';
 var VALIDATION_STRING = 'validation';
+var EVALUATION_STRING = 'evaluation';
 
 export class MapViewer{
 
     constructor(){
 
+        this.baseDict = {};
+        this.baseArray = [];
+
+        this.classiArray = [];
+        this.valiArray = [];
+
+        this.allLayersDict = {};
+        this.lyrsSelected = [];
+
         //Create the initial map
         this.map =  this.createInitMap();
+        this.stats = new Stats();
+        this.legend = new Legend();
 
         //Add Sidebar control to map
         this.createSideBar();
@@ -46,6 +70,10 @@ export class MapViewer{
 
         //Render the layerswitcher
         this.loadLayerSwitcher();
+
+        this.clearStatsPanel();
+
+        this.map.set('mapViewer', this);
     }
 
     createInitMap(){
@@ -60,12 +88,6 @@ export class MapViewer{
         });
 
         map.set('initExtent', map.getView().getProjection().getExtent());
-
-        map.set('baseDict', {});
-        map.set('baseArray', []);
-        
-        map.set('classiDict', {});
-        map.set('classiLayer', []);
 
         return map;
     }
@@ -84,7 +106,7 @@ export class MapViewer{
         var base = new LayerGroup({
             title: 'Base Maps',
             fold: 'open',
-            typeBase: BASE_TYPE_STRING
+            typeBase: BASE_TYPE_STRING,
         });
 
         var classifications = new LayerGroup({
@@ -99,9 +121,16 @@ export class MapViewer{
             typeBase: VALIDATION_STRING
         });
 
+        var evaluations = new LayerGroup({
+            title: 'Evaluations',
+            fold: 'open',
+            typeBase: EVALUATION_STRING
+        });
+
         this.map.addLayer(base);
         this.map.addLayer(classifications);
         this.map.addLayer(validations);
+        this.map.addLayer(evaluations);
     }
 
     addLayerToMapGroup(typeGroup, newLayer){
@@ -114,31 +143,31 @@ export class MapViewer{
     }
 
     addBaseLayers(){
-        
+
         var base = new TileLayer({
             visible: true,
-            title: 'Stamen toner-background',
+            title: 'World Map - Dark',
             typeBase: BASE_TYPE_STRING,
-            source: new Stamen({
-                layer: 'toner-background'
+            source: new XYZ({
+                url:'http://{1-4}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
             })
         });
 
         var base2 = new TileLayer({
             visible: false,
-            title: 'Stamen watercolor',
+            title: 'World Map - Light',
             typeBase: BASE_TYPE_STRING,
-            source: new Stamen({
-                layer: 'watercolor'
+            source: new XYZ({
+                url:'http://{1-4}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
             })
         });
 
         this.addProgressStatus(base.getSource());
         this.addProgressStatus(base2.getSource());
 
-        this.map.get('baseDict').b1 = base;
-        this.map.get('baseDict').b2 = base2;
-        this.map.get('baseArray').push(base, base2);
+        this.baseDict.b1 = base;
+        this.baseDict.b2 = base2;
+        this.baseArray.push(base, base2);
 
         this.addLayerToMapGroup(BASE_TYPE_STRING, base);
         this.addLayerToMapGroup(BASE_TYPE_STRING, base2);
@@ -148,57 +177,101 @@ export class MapViewer{
         return this.map;
     }
 
-    addClassification(classiGeojson){
+    setLyrsSelected(lyrsSelected){
+        this.lyrsSelected = lyrsSelected;
+    }
 
-        var cD = new ClassificationDecode();
+    createLayerObj(layerGeojson, typeGroup) {
+        var cD = new LayerDecode();
+        var k = cD.key;
 
-        var classification = new Classification(
-            classiGeojson[cD.classificationID], 
-            classiGeojson[cD.classificationName], 
-            classiGeojson[cD.classificationDescription], 
-            classiGeojson[cD.classificationRasterFile], 
-            classiGeojson[cD.classificationSource], 
-            classiGeojson[cD.classificationStats], 
-            classiGeojson[cD.classificationStyle],
-            classiGeojson[cD.features],
-            classiGeojson
+        var id = layerGeojson[cD.layerID[k]];
+
+        var lyr = new LayerEntity(
+            id,
+            layerGeojson[cD.layerName[k]],
+            layerGeojson[cD.layerDescription[k]],
+            layerGeojson[cD.layerRasterFile[k]],
+            layerGeojson[cD.layerSource[k]],
+            layerGeojson[cD.layerStats[k]],
+            layerGeojson[cD.layerStyle[k]],
+            layerGeojson[cD.features[k]],
+            layerGeojson[cD.classNames[k]],
+            layerGeojson,
+            typeGroup
         );
 
-        var layer = this.createLayer(classiGeojson, classification);
+        this.allLayersDict[id] = lyr;
+        this.valiArray.push(lyr);
 
-        this.addLayerToMapGroup(CLASSIFICATION_TYPE_STRING, layer);
+        return lyr;
+    }
+
+    addClassification(classiGeojson){
+
+        var newLayer = this.createLayer(classiGeojson, this.createLayerObj(classiGeojson, CLASSIFICATION_TYPE_STRING));
+
+        this.addLayerToMapGroup(CLASSIFICATION_TYPE_STRING, newLayer);
+
+        this.loadLayerSwitcher();
+    }
+
+    addValidation(validationGeojson){
+
+        var newLayer = this.createLayer(validationGeojson, this.createLayerObj(validationGeojson, VALIDATION_STRING));
+
+        this.addLayerToMapGroup(VALIDATION_STRING, newLayer);
+
+        this.loadLayerSwitcher();
+    }
+
+    addEvaluation(evaluationGeojson){
+
+        var newLayer = this.createLayer(evaluationGeojson, this.createLayerObj(evaluationGeojson, EVALUATION_STRING));
+
+        this.addLayerToMapGroup(EVALUATION_STRING, newLayer);
+
+        this.loadLayerSwitcher();
+    }
+
+    removeEvaluation(evaluationLayer){
+
+        this.map.removeLayer(evaluationLayer);
 
         this.loadLayerSwitcher();
     }
 
     createStyle(lyr){
 
-        var classAux = lyr.get('class');
+        var classAux = this.getObjectLayer(lyr.get('layerId'));
 
-        var fD = new FeaturesDecode();
+        var fD = classAux.getDecode().featuresDecode;
+        var k = classAux.getDecode().key;
 
-        var mapAux = this.map;
+        var inactiveC = lyr.get('inactiveClasses');
 
         lyr.setStyle(function name(feature, resolution) {
-           
-            var colorAux = classAux.getColorOfClass(feature.get(fD.classId));
 
-            return [new Style({
-                // stroke: new Stroke({
-                //     color: 'rgba(255,255,255,0)',
-                //     width: 0
-                // }),
-                fill: new Fill({
-                    color: colorAux,
-                }),
-            })];
+            var colorAux = classAux.getColorOfClass(feature.get(fD.classId[k]));
+
+            if ( !inactiveC[feature.get(fD.classId[k])] ) {
+                return [new Style({
+                    // stroke: new Stroke({
+                    //     color: 'rgba(255,255,255,0)',
+                    //     width: 0
+                    // }),
+                    fill: new Fill({
+                        color: colorAux,
+                    }),
+                })];
+            }
         });
     }
 
-    createSource(classiGeojson){
+    createSource(lyrGeojson){
 
         var tileIndex = geojsonvt(
-            classiGeojson, {
+            lyrGeojson, {
                 tolerance:3,
                 maxZoom: this.map.getView().getMaxZoom()
             }
@@ -208,7 +281,7 @@ export class MapViewer{
 
         return new VectorSource({
             format: new GeoJSON(),
-            features: classiGeojson,
+            features: lyrGeojson,
             tileLoadFunction: function(tile) {
                 var format = tile.getFormat();
                 var tileCoord = tile.getTileCoord();
@@ -244,16 +317,87 @@ export class MapViewer{
         });
 
         var layer = new VectorLayer({
-            title: classObject.getName(),            
+            title: classObject.getName(),
             visible: false,
             source: source,
-            class: classObject,
-            sourceAux: vectorSource
+            layerId: classObject.getId(),
+            sourceAux: vectorSource,
+            inactiveClasses: {}
         });
 
         this.createStyle(layer);
 
         return layer;
+    }
+
+    createMetadata(lyrId){
+        var cl = this.getObjectLayer(lyrId);
+        cl.createMetadata();
+    }
+
+    clearMetadata(lyrId){
+        var cl = this.getObjectLayer(lyrId);
+        cl.clearMetadata();
+    }
+
+    createLegend(){
+        var lenSelectLayer = this.lyrsSelected.length;
+        if (lenSelectLayer > 0) this.legend.createLegend(this.getObjectLayer(this.lyrsSelected[lenSelectLayer-1].get('layerId')));
+    }
+
+    clearLegend(){
+        this.legend.clearLegend();
+    }
+
+    getObjectLayer(id){
+        return this.allLayersDict[id];
+    }
+
+    updateLayersInMap(){
+
+    }
+
+    updateStatsPanel(){
+
+        this.clearStatsPanel();
+
+        var lenSelectLayer = this.lyrsSelected.length;
+
+        if (lenSelectLayer > 0) {
+            this.createPieChartForArea(this.lyrsSelected[lenSelectLayer - 1]);
+
+            var foundEvalLayers = [];
+
+            for (let index = 0; index < this.lyrsSelected.length; index++) {
+                const lyr = this.getObjectLayer(this.lyrsSelected[index].get('layerId'));
+                if (lyr.getType() == EVALUATION_STRING) {
+                    foundEvalLayers.push(this.lyrsSelected[index]);
+                } 
+            }
+
+            if (foundEvalLayers.length > 0) {
+                this.createConfusionMatrix(foundEvalLayers[foundEvalLayers.length-1]);
+                this.createStatsController();
+            }
+        }
+    }
+
+    createPieChartForArea(lyr){
+        var dataLyr = this.getObjectLayer(lyr.get('layerId'));
+        this.stats.createPieChart(lyr, dataLyr);
+    }   
+    
+    createConfusionMatrix(lyr){
+        var dataLyr = this.getObjectLayer(lyr.get('layerId'));
+        this.stats.createConfusionMatrix(lyr, dataLyr);
+    }
+
+    createStatsController(){
+        this.stats.createStatsController();
+    }
+
+    clearStatsPanel(){
+        this.stats.clearStatsPanel();
     }
 
     /**

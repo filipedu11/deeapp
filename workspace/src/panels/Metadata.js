@@ -5,14 +5,7 @@ export class Metada {
         this.lyrObj = lyrObj;
     }
 
-    createReport(){
-        
-        var content = document.getElementById('content-metadata');
-
-        content.append(this.lyrObj.getContentReport());
-    }
-
-    clearReport(){
+    clearMetadataPanel(){
         var content = document.getElementById('content-metadata-'+this.lyrObj.getId());
 
         if (content !== null) {
