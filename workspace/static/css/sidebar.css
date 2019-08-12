@@ -21,19 +21,19 @@
 
 @media (min-width: 768px) and (max-width: 991px) {
   .sidebar {
-    width: 305px;
+    width: 45%;
   }
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {
   .sidebar {
-    width: 390px;
+    width: 40%;
   }
 }
 
 @media (min-width: 1200px) {
   .sidebar {
-    width: 460px;
+    width: 35%;
   }
 }
 
@@ -139,7 +139,7 @@
   bottom: 0;
   background-color: rgba(255, 255, 255, 0.95);
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .sidebar-left .sidebar-content {
@@ -170,26 +170,44 @@
 
 @media (min-width: 768px) and (max-width: 991px) {
   .sidebar-pane {
-    min-width: 265px;
+    min-width: 45%;
+  }
+
+  .container-stats{
+      height:100%;
+      width:100%;
+      position:absolute;
   }
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {
   .sidebar-pane {
-    min-width: 350px;
+    min-width: 40%;
+  }
+
+  .container-stats{
+      height:100%;
+      width:100%;
+      position:absolute;
   }
 }
 
 @media (min-width: 1200px) {
   .sidebar-pane {
-    min-width: 420px;
+    min-width: 35%;
+  }
+
+  .container-stats{
+      height:100%;
+      width:100%;
+      position:absolute;
   }
 }
 
 .sidebar-header {
   margin: -10px -20px 0;
   height: 40px;
-  padding: 0 40px;
+  padding: 0 30px;
   line-height: 40px;
   font-size: 25px;
   color: #fff;
@@ -257,14 +275,16 @@
 }
 
 .sidebar-left~.sidebar-map .ol-zoom,
-.sidebar-left~.sidebar-map .ol-scale-line {
+.sidebar-left~.sidebar-map .ol-scale-line, 
+.sidebar-left~.sidebar-map #stats-main-board {
   margin-left: 46px;
 }
 
 @media (min-width: 768px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
-  .sidebar-left~.sidebar-map .ol-scale-line {
+  .sidebar-left~.sidebar-map .ol-scale-line, 
+  .sidebar-left~.sidebar-map #stats-main-board {
     transition: margin-left 500ms;
   }
 }
@@ -272,31 +292,35 @@
 @media (min-width: 768px) and (max-width: 991px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
-  .sidebar-left~.sidebar-map .ol-scale-line {
-    margin-left: 317px;
+  .sidebar-left~.sidebar-map .ol-scale-line, 
+  .sidebar-left~.sidebar-map #stats-main-board {
+    margin-left: calc(45% + 10px);
   }
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
-  .sidebar-left~.sidebar-map .ol-scale-line {
-    margin-left: 402px;
+  .sidebar-left~.sidebar-map .ol-scale-line, 
+  .sidebar-left~.sidebar-map #stats-main-board {
+    margin-left: calc(40% + 10px);
   }
 }
 
 @media (min-width: 1200px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
-  .sidebar-left~.sidebar-map .ol-scale-line {
-    margin-left: 472px;
+  .sidebar-left~.sidebar-map .ol-scale-line,
+  .sidebar-left~.sidebar-map #stats-main-board {
+    margin-left: calc(35% + 10px);
   }
 }
 
 @media (min-width: 768px) {
 
   .sidebar-left.collapsed~.sidebar-map .ol-zoom,
-  .sidebar-left.collapsed~.sidebar-map .ol-scale-line {
+  .sidebar-left.collapsed~.sidebar-map .ol-scale-line, 
+  .sidebar-left.collapsed~.sidebar-map #stats-main-board {
     margin-left: 52px;
   }
 }

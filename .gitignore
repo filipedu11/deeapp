@@ -2,3 +2,9 @@ node_modules
 dist
 package-lock.json
 .vscode
+.cache
+python_scripts/convert_raster_to_geojson/__pycache__/
+python_scripts/convert_raster_to_geojson/build/
+python_scripts/convert_raster_to_geojson/convert_raster_to_geojson.spec
+python_scripts/data/*
+*.tif

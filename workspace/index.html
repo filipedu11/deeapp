@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <div id="legend"></div>
+
   <!-- START OF SIDEBAR DIV -->
   <div id="sidebar" class="sidebar collapsed">
 
@@ -18,7 +18,7 @@
       <ul role="tablist">
         <li><a href="#layers-panel" role="tab"><i class="fa fa-sliders-h"></i></a></li>
         <li><a href="#metadata" role="tab"><i class="fas fa-file-alt"></i></a></li>
-        <li><a href="#stats" role="tab"><i class="stats"></i></a></li>
+        <li id="stats-button"><a href="#stats" role="tab"><i class="stats"></i></a></li>
         <li><a href="#settings" role="tab"><i class="fa fa-cog"></i></a></li>
 
       </ul>
@@ -41,24 +41,47 @@
 
       <div class="sidebar-pane" id="metadata">
         <h1 class="sidebar-header">Metadata<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-        <div class="content" id="content-metadata"></div>
+        <div class="content">
+          <div id="content-metadata"></div>
+        </div>
       </div>
 
       <div class="sidebar-pane" id="stats">
         <h1 class="sidebar-header">Stats<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-        <div class="content" id="content-stats"></div>
+        <div class="content">
+            <div id="main-stats">
+              <div id="content-stats"></div>
+              <div id="controller-stats"></div>
+              <div id="filter-stats"></div>
+              <div id="info-stats"></div>
+            </div>
+        </div>
       </div>
 
       <div class="sidebar-pane" id="settings">
         <h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-        <div class="content" id="content-settings"></div>
+        <div class="content">
+          <div id="content-settings"></div>
+        </div>
       </div>
     </div>
   </div>
   <!-- END OF SIDEBAR DIV -->
 
-  <div id="map" class="sidebar-map"></div>
+  <div id="map" class="sidebar-map">
+    <!-- MAP LEGEND -->
+    <div id="legend" class="none-block"><div id="legend-content"></div></div>
+
+    <!-- STATS CONTENT BOARD -->
+    <div id="stats-main-board" class="none-block">
+      <button title="Close" id="close-button" class="btn"></button>
+      <div id="stats-board">
+
+      </div>
+    </div>
+  </div>
   <div id="progress"></div>
+  
   <script src="./index.js"></script>
 </body>
 
