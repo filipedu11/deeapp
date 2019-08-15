@@ -13,6 +13,25 @@ import os
 script = os.path.dirname(os.path.abspath(__file__)) +'/gdal_polygonize_64.py'
 
 
+def computeStatsForEachPolygon(feature):
+
+    source = osr.SpatialReference()
+    source.ImportFromEPSG(4326)
+    
+    target = osr.SpatialReference()
+    target.ImportFromEPSG(3857)
+    
+    transform = osr.CoordinateTransformation(source, target)
+    
+    poly = ogr.CreateGeometryFromJson(str(feature['geometry']))
+    poly.Transform(transform)
+
+    line = poly.Boundary()
+
+    # Return the area in hectare, perimeter in km and number of vertices of polygon
+    return poly.GetArea() * 0.0001, line.Length() * 0.0001, line.GetPointCount() - 1
+
+
 def convert_raster_to_geojson(in_dir):
     
     input_dir = in_dir
@@ -86,6 +105,14 @@ def convert_raster_to_geojson(in_dir):
 
                 # Set className input in feature properties
                 feature['properties']['className'] = CLASS_NAMES[str(feature['properties']['classId'])]
+                feature['properties']['areaInHectare'], feature['properties']['perimeterInKm'], feature['properties']['numVertices'] = computeStatsForEachPolygon(feature)
+
+                classesOfEvalFeat = feature['properties']['className'].split(' vs ')
+
+                if len(classesOfEvalFeat) > 1:
+                    feature['properties']['classificationClass'] = classesOfEvalFeat[0]
+                    feature['properties']['validationClass'] = classesOfEvalFeat[1]
+
 
             print("\n-------------- WRITE THE FINAL GEOJSON FILE ----------------\n")
 
