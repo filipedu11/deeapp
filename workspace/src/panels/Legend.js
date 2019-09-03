@@ -1,4 +1,4 @@
-
+var EVALUATION_STRING = 'evaluation';
 
 export class Legend {
 
@@ -11,11 +11,16 @@ export class Legend {
         const classKeys = lyrObj.getKeysOfClasses();
 
         this.legendContent.innerHTML = '<h6><b><u>Legend</u></b></h6>';
+
+        var classNames = lyrObj.getClassNames();
+
+        if (lyrObj.getType() == EVALUATION_STRING && (classKeys.length == 4)) {
+            classNames = lyrObj.getBinaryClassNamesForLegend();
+        }
                 
         for (let index = 0; index <classKeys.length; index++) {
-
             this.legendContent.innerHTML += 
-                '<li><span class="circle" style="background:' + lyrObj.getColorOfClass(classKeys[index]) + ';"></span> ' +  lyrObj.getNameOfClass(classKeys[index]) + ' </li>';
+                '<li><span class="circle" style="background:' + lyrObj.getColorOfClass(classKeys[index]) + ';"></span> ' +  classNames[classKeys[index]] + ' </li>';
         }
 
         this.legend.className = 'inline-block';
