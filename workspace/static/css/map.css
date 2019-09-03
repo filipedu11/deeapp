@@ -154,8 +154,18 @@ p {
     width: 95%;
 }
 
-.stats{
-    background-image: url("../img/stats.png");
+.stats-error-matrix{
+    background-image: url("../img/table.png");
+    display: inline-block;
+    content:"";
+    background-position: center;
+    background-size: 16px 16px;
+    width: 16px; 
+    height: 16px;
+}
+
+.stats-piechart{
+    background-image: url("../img/pie_chart.png");
     display: inline-block;
     content:"";
     background-position: center;
@@ -272,18 +282,6 @@ p {
     border-bottom: none;/*disappears*/
 }
 
-.info-table-button {
-    background-image: url("../img/table.png");
-}
-
-.piechart-button {
-    background-image: url("../img/pie_chart.png");
-}
-
-.combochart-button {
-    background-image: url("../img/combo_chart.png");
-}
-
 #stats-main-board{
     text-align: left;
     bottom: .5em;
@@ -337,12 +335,6 @@ p {
     width: 94%;
 }
 
-#content-stats{
-}
-
-#controller-stats{
-}
-
 #controller-stats button:focus{
     box-shadow:none;
 }
@@ -364,4 +356,24 @@ p {
 
 .combochart-button {
     background-image: url("../img/combo_chart.png");
+}
+
+#controls{
+    text-align: left;
+    top: .5em;
+    right: .5em;
+    max-width: calc(100% - 1.3em);
+    z-index: 30000;
+    position: absolute;
+    background: white;
+    opacity: 0.9;
+    border: 3px solid transparent;
+    border-radius: 4px;
+    background-color: rgba(200, 200, 200, 0.4);
+}
+
+#controls-content{
+    background-color: rgb(255, 255, 255);
+    padding: 6px;
+    border-radius: 2px;
 }

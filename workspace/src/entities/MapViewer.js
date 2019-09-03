@@ -24,13 +24,19 @@ import VectorLayer from 'ol/layer/VectorTile';
 import Projection from 'ol/proj/Projection';
 
 import { FeaturesDecode } from '../decode/FeaturesDecode';
-import { Stats } from '../panels/Stats.js';
+import { ErrorMatrix } from '../panels/ErrorMatrix.js';
+import { Piechart } from '../panels/Piechart.js';
+
+import {getArea, getLength} from 'ol/sphere.js';
 
 import 'jquery';
 import 'highcharts/modules/exporting.js';
 import 'highcharts/modules/export-data.js';
 import 'highcharts/modules/offline-exporting.js';
 import { Legend } from '../panels/Legend.js';
+import { Controllers } from '../panels/Controllers';
+
+import * as turf from '@turf/turf';
 
 /*eslint no-undef: "error"*/
 /*eslint-env node*/
@@ -56,8 +62,10 @@ export class MapViewer{
 
         //Create the initial map
         this.map =  this.createInitMap();
-        this.stats = new Stats();
+        this.errorMatrix = new ErrorMatrix();
+        this.piechart = new Piechart();
         this.legend = new Legend();
+        this.controllers = new Controllers();
 
         //Add Sidebar control to map
         this.createSideBar();
@@ -253,8 +261,12 @@ export class MapViewer{
         lyr.setStyle(function name(feature, resolution) {
 
             var colorAux = classAux.getColorOfClass(feature.get(fD.classId[k]));
+            
+            var areaNumber = document.getElementById('area-number');
+            var filterNumber = areaNumber ? areaNumber.value : 0;
+            var drawFeature =  filterNumber <= feature.get('areaInHectare');
 
-            if ( !inactiveC[feature.get(fD.classId[k])] ) {
+            if ( !inactiveC[feature.get(fD.classId[k])] && drawFeature ) {
                 return [new Style({
                     // stroke: new Stroke({
                     //     color: 'rgba(255,255,255,0)',
@@ -359,12 +371,9 @@ export class MapViewer{
 
     updateStatsPanel(){
 
-        this.clearStatsPanel();
-
         var lenSelectLayer = this.lyrsSelected.length;
 
         if (lenSelectLayer > 0) {
-            this.createPieChartForArea(this.lyrsSelected[lenSelectLayer - 1]);
 
             var foundEvalLayers = [];
 
@@ -375,29 +384,65 @@ export class MapViewer{
                 } 
             }
 
-            if (foundEvalLayers.length > 0) {
-                this.createConfusionMatrix(foundEvalLayers[foundEvalLayers.length-1]);
-                this.createStatsController();
+            var layerSel = foundEvalLayers.length > 0 ? foundEvalLayers[foundEvalLayers.length-1] : this.lyrsSelected[lenSelectLayer - 1];
+
+            
+            if ( this.currentLayer ) {
+                if ( this.currentLayer.get('layerId') != layerSel.get('layerId')) {
+                    this.clearStatsPanel();
+                }
             }
+            var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
+
+            if (foundEvalLayers.length > 0) {
+                this.createConfusionMatrix(layerSel);
+                this.createConfusionMatrixFiltered(dataLyr, 0);
+            }
+
+            this.createPieChartForArea(layerSel);
+            
+            if ( !this.controllers.isDisplayed )
+                this.createControllerPanel();
+
+            var eMatrixClass = this.errorMatrix;
+            var ePieChart = this.piechart;
+
+            var areaNumber = document.getElementById('area-number');
+            areaNumber.onchange = function(){
+                layerSel.getSource().dispatchEvent('change');
+                if (foundEvalLayers.length > 0) {
+                    eMatrixClass.createConfusionMatrixFiltered(dataLyr, areaNumber.value);
+                }
+                ePieChart.createPieChart(layerSel, dataLyr, areaNumber.value);
+            };
+            this.currentLayer = layerSel;
+        }
+        else {
+            this.controllers.clearControls();
         }
     }
 
     createPieChartForArea(lyr){
         var dataLyr = this.getObjectLayer(lyr.get('layerId'));
-        this.stats.createPieChart(lyr, dataLyr);
+        this.piechart.createPieChart(lyr, dataLyr, 0);
     }   
     
     createConfusionMatrix(lyr){
         var dataLyr = this.getObjectLayer(lyr.get('layerId'));
-        this.stats.createConfusionMatrix(lyr, dataLyr);
+        this.errorMatrix.createConfusionMatrix(lyr, dataLyr);
+    } 
+
+    createConfusionMatrixFiltered(dataLyr, areaToFilter){
+        this.errorMatrix.createConfusionMatrixFiltered(dataLyr, areaToFilter);
     }
 
-    createStatsController(){
-        this.stats.createStatsController();
+    createControllerPanel(){
+        this.controllers.createControllers();
     }
 
     clearStatsPanel(){
-        this.stats.clearStatsPanel();
+        this.piechart.clearStatsPanel();
+        this.errorMatrix.clearStatsPanel();
     }
 
     /**
