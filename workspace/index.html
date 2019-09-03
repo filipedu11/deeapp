@@ -18,7 +18,8 @@
       <ul role="tablist">
         <li><a href="#layers-panel" role="tab"><i class="fa fa-sliders-h"></i></a></li>
         <li><a href="#metadata" role="tab"><i class="fas fa-file-alt"></i></a></li>
-        <li id="stats-button"><a href="#stats" role="tab"><i class="stats"></i></a></li>
+        <li id="stats-button-error-matrix"><a href="#stats-error-matrix" role="tab"><i class="stats-error-matrix"></i></a></li>
+        <li id="stats-button-piechart"><a href="#stats-piechart" role="tab"><i class="stats-piechart"></i></a></li>
         <li><a href="#settings" role="tab"><i class="fa fa-cog"></i></a></li>
 
       </ul>
@@ -46,14 +47,22 @@
         </div>
       </div>
 
-      <div class="sidebar-pane" id="stats">
-        <h1 class="sidebar-header">Stats<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+      <div class="sidebar-pane" id="stats-error-matrix">
+        <h1 class="sidebar-header">Matriz de Confusão<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
         <div class="content">
             <div id="main-stats">
-              <div id="content-stats"></div>
-              <div id="controller-stats"></div>
-              <div id="filter-stats"></div>
-              <div id="info-stats"></div>
+              <div id="content-error-matrix"></div>
+              <div id="controller-error-matrix"></div>
+            </div>
+        </div>
+      </div>
+
+      <div class="sidebar-pane" id="stats-piechart">
+        <h1 class="sidebar-header">Piechart<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <div class="content">
+            <div id="main-stats">
+              <div id="content-piechart"></div>
+              <div id="controller-piechart"></div>
             </div>
         </div>
       </div>
@@ -69,8 +78,15 @@
   <!-- END OF SIDEBAR DIV -->
 
   <div id="map" class="sidebar-map">
-    <!-- MAP LEGEND -->
-    <div id="legend" class="none-block"><div id="legend-content"></div></div>
+
+      <!-- MAP LEGEND -->
+      <div id="controls" class="none-block">
+        <div id="controls-content">
+        </div>
+      </div>
+
+      <!-- MAP LEGEND -->
+      <div id="legend" class="none-block"><div id="legend-content">TESTE</div></div>
 
     <!-- STATS CONTENT BOARD -->
     <div id="stats-main-board" class="none-block">
