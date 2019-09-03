@@ -152,8 +152,8 @@ export class ErrorMatrix {
                 dataArea[pos] + turf.area(turf.polygon(polygon))/10000 : turf.area(turf.polygon(polygon))/10000;
         }
 
-        var xCategories = Object.keys(classNames);
-        var yCategories = xCategories.slice().reverse();
+        var yCategories = Object.keys(classNames);
+        var xCategories = yCategories.slice().reverse();
         var colors = dataLyr.getClassColors();
 
         var dataErrorMatrix = this.computeDataToErrorMatrix(yCategories, xCategories, dataArea, colors);
@@ -169,7 +169,7 @@ export class ErrorMatrix {
         var lenI = xCategories.length;
 
         //Construct classes data for error matrix  with horizontal total
-        var count = 0;
+        var count = 3;
         for (let i = 0; i < lenI; i++) {
             for (let j = 0; j < lenJ ; j++) {
                 dataErrorMatrix.push(
@@ -180,7 +180,7 @@ export class ErrorMatrix {
                         value: parseFloat(dataArea[count].toFixed(3)),
                     }
                 );
-                count += 1;
+                count -= 1;
             }
         }
 
@@ -304,8 +304,8 @@ export class ErrorMatrix {
             }
         }
 
-        var xCategories = Object.keys(classNames);
-        var yCategories = xCategories.slice().reverse();
+        var yCategories = Object.keys(classNames);
+        var xCategories = yCategories.slice().reverse();
         var colors = dataLyr.getClassColors();
 
         var dataErrorMatrix = this.computeDataToErrorMatrixFiltered(yCategories, xCategories, dataArea, colors);
@@ -321,7 +321,7 @@ export class ErrorMatrix {
         var lenI = xCategories.length;
 
         //Construct classes data for error matrix  with horizontal total
-        var count = 0;
+        var count = 3;
         for (let i = 0; i < lenI; i++) {
             for (let j = 0; j < lenJ ; j++) {
                 dataErrorMatrix.push(
@@ -332,10 +332,10 @@ export class ErrorMatrix {
                         value: parseFloat(dataArea[count].toFixed(3)),
                     }
                 );
-                count += 1;
+                count -= 1;
             }
         }
-
+        
         return dataErrorMatrix;
     }
 
