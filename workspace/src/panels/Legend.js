@@ -18,7 +18,7 @@ export class Legend {
             classNames = lyrObj.getBinaryClassNamesForLegend();
         }
                 
-        for (let index = 0; index <classKeys.length; index++) {
+        for (let index = classKeys.length - 1; index >= 0 ; index--) {
             this.legendContent.innerHTML += 
                 '<li><span class="circle" style="background:' + lyrObj.getColorOfClass(classKeys[index]) + ';"></span> ' +  classNames[classKeys[index]] + ' </li>';
         }
