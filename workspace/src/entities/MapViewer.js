@@ -264,7 +264,7 @@ export class MapViewer{
             
             var areaNumber = document.getElementById('area-number');
             var filterNumber = areaNumber ? areaNumber.value : 0;
-            var drawFeature =  filterNumber <= feature.get('areaInHectare');
+            var drawFeature =  filterNumber < feature.get('areaInHectare');
 
             if ( !inactiveC[feature.get(fD.classId[k])] && drawFeature ) {
                 return [new Style({
@@ -424,6 +424,7 @@ export class MapViewer{
 
     createPieChartForArea(lyr){
         var dataLyr = this.getObjectLayer(lyr.get('layerId'));
+        this.piechart.createPieChart(lyr, dataLyr);
         this.piechart.createPieChart(lyr, dataLyr, 0);
     }   
     
