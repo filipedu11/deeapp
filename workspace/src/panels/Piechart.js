@@ -15,55 +15,59 @@ export class Piechart {
 
     constructor(){
         this.content = document.getElementById('content-piechart');
-        this.controller = document.getElementById('controller-piechart');
+        this.content.className = 'row';
+        this.info = document.getElementById('info-piechart');
     }
 
     clearStatsPanel(){
         this.content.innerHTML = '';
-        this.controller.innerHTML = '';
+        this.info.innerHTML = '';
     }
 
-    createStatsController(){
+    // createStatsController(){
 
-        var tabToSelectStatsInfo = document.createElement('div');
-        tabToSelectStatsInfo.id = 'selection-button';
+    //     var tabToSelectStatsInfo = document.createElement('div');
+    //     tabToSelectStatsInfo.id = 'selection-button';
 
-        tabToSelectStatsInfo.className = 'attribute-content-panel';
+    //     tabToSelectStatsInfo.className = 'attribute-content-panel';
 
-        tabToSelectStatsInfo.innerHTML =
-            '<button title="View table" id="info-table-button" class="btn info-table-button"></button>' +
-            '<button title="View Piechart" id="piechart-button" class="btn piechart-button"></button>';
+    //     tabToSelectStatsInfo.innerHTML =
+    //         '<button title="View table" id="info-table-button" class="btn info-table-button"></button>' +
+    //         '<button title="View Piechart" id="piechart-button" class="btn piechart-button"></button>';
 
-        this.controller.appendChild(tabToSelectStatsInfo);
+    //     this.controller.appendChild(tabToSelectStatsInfo);
 
-        this.setEventListeners();
-    }
+    //     this.setEventListeners();
+    // }
 
-    setEventListeners(){
+    // setEventListeners(){
 
-        var piechart = document.getElementById('piechart');
-    }
+    //     var piechart = document.getElementById('piechart');
+    // }
 
     /**
      * Create the piechart for the given selected layer
      */
-    createPieChart(lyr, dataLyr, filterArea){
+    createPieChart(lyr, dataLyr, filterArea = -1){
 
         var dataPie = this.generateDataForPieChart(dataLyr, filterArea);
+        var idPiechart = filterArea == -1 ? 'piechart' : 'piechart-filter';
 
-        var dataPieDiv = document.getElementById('piechart');
+        var dataPieDiv = document.getElementById(idPiechart);
         
         if ( !dataPieDiv ) {
             dataPieDiv = document.createElement('div');
-            dataPieDiv.id = 'piechart';
-            dataPieDiv.style.width = '100%';
+            dataPieDiv.id = idPiechart;
+            dataPieDiv.style.width = '94%';
             dataPieDiv.style.marginBottom = '5px';
             dataPieDiv.style.marginTop = '5px';
+            dataPieDiv.style.padding = '0px';
+            dataPieDiv.className = 'col-md-6';
 
             this.content.appendChild(dataPieDiv);
 
             // Build the chart
-            this.pieHighChart = Highcharts.chart('piechart', {
+            var pieHighChart = Highcharts.chart(idPiechart, {
                 chart: {
                     backgroundColor:'rgba(255, 255, 255, 0.0)',
                     plotBorderWidth: null,
@@ -71,32 +75,41 @@ export class Piechart {
                     type: 'pie'
                 },
                 title: {
-                    text: dataLyr.getName()
+                    text: filterArea == -1 ? 'Global' : 'Filtrada'
+                },
+                subtitle: {
+                    text: filterArea == -1 ? '(em ha)' : 'Área < ' + filterArea + ' (em ha)'
                 },
                 tooltip: {
                     pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b><br/>{series.name}: <b>{point.y:.3f} ha</b>'
                 },
                 plotOptions: {
                     pie: {
-                        allowPointSelect: true,
-                        cursor: 'pointer',
+                        allowPointSelect: filterArea == -1 ? true : false,
+                        cursor: filterArea == -1 ? 'pointer' : 'auto',
                         dataLabels: {
                             enabled: false
                         },
-                        showInLegend: true,
+                        showInLegend:  true,
                         point: {
                             events: {
                                 legendItemClick: function(e) {
-                                    var C_ID = e['target']['id'];
-                                    lyr.get('inactiveClasses')[C_ID] = !lyr.get('inactiveClasses')[C_ID];
-                                    lyr.getSource().dispatchEvent('change');
+                                    if ( filterArea == -1 ) {
+                                        var C_ID = e['target']['id'];
+                                        lyr.get('inactiveClasses')[C_ID] = !lyr.get('inactiveClasses')[C_ID];
+                                        lyr.getSource().dispatchEvent('change');
+                                        
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
                                 }
-                            }
+                            },
                         }
                     }
                 },
                 series: [{
-                    name: 'Area',
+                    name: 'Occupied Area',
                     colorByPoint: true,
                     data: dataPie
                 }],
@@ -110,10 +123,20 @@ export class Piechart {
                         }
                     }
                 }
-            }); 
+            });
+
+            if (filterArea == -1) {
+                this.pieHighChart = pieHighChart;
+            } else {
+                this.pieHighChartFilter = pieHighChart;
+            }
+            
         } 
         else {
-            this.pieHighChart.series[0].setData(dataPie, true);
+            this.pieHighChartFilter.series[0].setData(dataPie, true);
+            this.pieHighChartFilter.setSubtitle({ 
+                text: 'Área < ' + filterArea + ' (em ha)'
+            });
         }
     }
 
@@ -163,26 +186,7 @@ export class Piechart {
         return dataPie;
     }
 
-    createThresholdToFilterAreas(dataLyr){
-        var slideCont = document.createElement('div');
-        slideCont.className= 'slidecontainer';
-        var slideLabel = document.createElement('label');
-        slideLabel.className= 'slidelabel';
-        slideLabel.innerHTML = '<b>Opacity</b>';
-        var inputTransp = document.createElement('input');
-        inputTransp.className = 'slider';
-        inputTransp.type = 'range';
-        inputTransp.min = 0;
-        inputTransp.max = 1;
-        inputTransp.step = 0.05;
-        inputTransp.value = lyr.getOpacity();
-        inputTransp.oninput = function(){
-            lyr.setOpacity(this.value);
-        };
+    createInfoPanel() {
 
-        slideLabel.appendChild(inputTransp);
-        slideCont.appendChild(slideLabel);
-
-        
     }
 }

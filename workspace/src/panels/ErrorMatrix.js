@@ -13,32 +13,35 @@ export class ErrorMatrix {
 
     constructor(){
         this.content = document.getElementById('content-error-matrix');
-        this.controller = document.getElementById('controller-error-matrix');
+        this.info = document.getElementById('info-error-matrix');
     }
 
     clearStatsPanel(){
         this.content.innerHTML = '';
-        this.controller.innerHTML = '';
+        this.info.innerHTML = '';
+
+        this.lastX = -1;
+        this.lastY = -1;
     }
 
-    createStatsController(){
+    // createStatsController(){
 
-        var tabToSelectStatsInfo = document.createElement('div');
-        tabToSelectStatsInfo.id = 'selection-button';
+    //     var tabToSelectStatsInfo = document.createElement('div');
+    //     tabToSelectStatsInfo.id = 'selection-button';
 
-        tabToSelectStatsInfo.className = 'attribute-content-panel';
+    //     tabToSelectStatsInfo.className = 'attribute-content-panel';
 
-        tabToSelectStatsInfo.innerHTML =
-            '<button title="View table" id="info-table-button" class="btn info-table-button"></button>' +
-            '<button title="View Piechart" id="piechart-button" class="btn piechart-button"></button>';
+    //     tabToSelectStatsInfo.innerHTML =
+    //         '<button title="View table" id="info-table-button" class="btn info-table-button"></button>' +
+    //         '<button title="View Piechart" id="piechart-button" class="btn piechart-button"></button>';
 
-        this.controller.appendChild(tabToSelectStatsInfo);
+    //     this.controller.appendChild(tabToSelectStatsInfo);
 
-        this.setEventListeners();
-    }
+    //     this.setEventListeners();
+    // }
 
-    setEventListeners(){
-    }
+    // setEventListeners(){
+    // }
 
     createConfusionMatrix(lyr, dataLyr){
         
@@ -215,6 +218,13 @@ export class ErrorMatrix {
 
         confusionMatrix.style.height = xCategories.length * 125 + 'px';
 
+        var erroMatrixClass = this;
+        var dataForInfoMetrics = [];
+
+        data.forEach(element => {
+            dataForInfoMetrics.push(element['value']);
+        });
+
         this.confusionMatrixFiltered = Highmaps.chart('confusion-matrix-filtered', {
             chart: {
                 type: 'heatmap',
@@ -234,7 +244,7 @@ export class ErrorMatrix {
                 title: {
                     enabled: true,
                     text: xAxisTitle
-                },           
+                }  
             },
             yAxis: {           
                 title: {
@@ -273,7 +283,45 @@ export class ErrorMatrix {
                         symbolFill: 'rgba(255,255,255,0)'
                     }
                 }
-            }
+            },
+            plotOptions: {
+                series: {
+                    point: {
+                        events: {
+                            click: function (event) {
+                                if (this.x + this.y == this.series.xAxis.max){
+                                    erroMatrixClass.addMetricsInfo(dataForInfoMetrics, this.x, this.y, xCategories);
+                                    erroMatrixClass.lastX = this.x;
+                                    erroMatrixClass.lastY = this.y;
+                                }
+                            },
+                            mouseOver: function (event) {
+                                if (this.x + this.y == this.series.xAxis.max) {
+                                    this.series.chart.renderer.setStyle(
+                                        {
+                                            cursor: 'pointer'
+                                        }
+                                    );
+                                }
+                                else {
+                                    this.series.chart.renderer.setStyle(
+                                        {
+                                            cursor: 'text'
+                                        }
+                                    );
+                                }
+                            },
+                            mouseOut: function (event) {
+                                this.series.chart.renderer.setStyle(
+                                    {
+                                        cursor: 'text'
+                                    }
+                                );
+                            },
+                        }
+                    }
+                },
+            },
         });
     }
 
@@ -316,9 +364,15 @@ export class ErrorMatrix {
     computeDataToErrorMatrixFiltered(yCategories, xCategories, dataArea, colors){
         
         var dataErrorMatrix = [];
+        var dataToComputeMetrics = [];
 
         var lenJ = yCategories.length;
         var lenI = xCategories.length;
+
+        if ( this.lastX == -1 && this.lastY == -1) {
+            this.lastX = 0;
+            this.lastY = lenJ - 1;
+        }
 
         //Construct classes data for error matrix  with horizontal total
         var count = 3;
@@ -332,33 +386,183 @@ export class ErrorMatrix {
                         value: parseFloat(dataArea[count].toFixed(3)),
                     }
                 );
+                dataToComputeMetrics.push(parseFloat(dataArea[count].toFixed(3)));
                 count -= 1;
             }
         }
-        
+
+        this.addMetricsInfo(dataToComputeMetrics, this.lastX, this.lastY, xCategories);
+
         return dataErrorMatrix;
     }
 
-    createThresholdToFilterAreas(dataLyr){
-        var slideCont = document.createElement('div');
-        slideCont.className= 'slidecontainer';
-        var slideLabel = document.createElement('label');
-        slideLabel.className= 'slidelabel';
-        slideLabel.innerHTML = '<b>Opacity</b>';
-        var inputTransp = document.createElement('input');
-        inputTransp.className = 'slider';
-        inputTransp.type = 'range';
-        inputTransp.min = 0;
-        inputTransp.max = 1;
-        inputTransp.step = 0.05;
-        inputTransp.value = lyr.getOpacity();
-        inputTransp.oninput = function(){
-            lyr.setOpacity(this.value);
-        };
+    addMetricsInfo(dataToComputeMetrics, col = 0, line = 0, xCategories) {
+        var oa = this.computeOA(dataToComputeMetrics);
+        var oaClassCircle = this.getCircleClassName(oa);
+        var f1 = this.computeF1(dataToComputeMetrics, col);
+        var f1ClassCircle = this.getCircleClassName(f1);
 
-        slideLabel.appendChild(inputTransp);
-        slideCont.appendChild(slideLabel);
+        var precision = this.computePrecision(dataToComputeMetrics, col);
+        var precisionClassCircle = this.getCircleClassName(precision);
+        var recall = this.computeRecall(dataToComputeMetrics, line);
+        var recallClassCircle = this.getCircleClassName(recall);
 
-        
+        this.info.innerHTML = '<br/><hr/>';  
+
+        this.info.innerHTML +=
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-12 text-center" style="padding:0;">' +
+                '<h5>Métricas Globais</h5>' +
+            '</div>' +
+        '</div>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-12 text-center" style="padding:0;">' +
+                '<h6>Overall Accuracy</h6>' +
+            '</div>' +
+        '</div>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-12" style="padding:0;">' +
+                '<div class="' + oaClassCircle + '">' +
+                    '<span>' + oa + '%</span>' +
+                    '<div class="slice">' +
+                        '<div class="bar"></div>' +
+                        '<div class="fill"></div>' +
+                    '</div>' +
+                '</div>'+
+            '</div>' +
+        '</div>' +
+        '<br/><br/>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-12 text-center" style="padding:0;">' +
+                '<h5>Métricas por classe</h5>' +
+                '<p>(classe selecionada: ' + xCategories[col] + ')</p>' +
+            '</div>' +
+        '</div>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-4 text-center" style="padding:0;">' +
+                '<h6>Precision</h6>' +
+            '</div>' +
+            '<div class="col col-md-4 text-center" style="padding:0;">' +
+                '<h6>Recall</h6>' +
+            '</div>' +
+            '<div class="col col-md-4 text-center" style="padding:0;">' +
+                '<h6>F1 score</h6>' +
+            '</div>' +
+        '</div>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-4" style="padding:0;">' +
+                '<div class="' + precisionClassCircle + '">' +
+                    '<span>' + precision + '%</span>' +
+                    '<div class="slice">' +
+                        '<div class="bar"></div>' +
+                        '<div class="fill"></div>' +
+                    '</div>' +
+                '</div>'+
+            '</div>' +
+            '<div class="col col-md-4" style="padding:0;">' +
+                '<div class="' + recallClassCircle + '">' +
+                '<span>' + recall + '%</span>' +
+                    '<div class="slice">' +
+                        '<div class="bar"></div>' +
+                        '<div class="fill"></div>' +
+                    '</div>' +
+                '</div>'+
+            '</div>'+
+            '<div class="col col-md-4" style="padding:0;">' +
+                '<div class="' + f1ClassCircle + '">' +
+                    '<span>' + f1 + '%</span>' +
+                    '<div class="slice">' +
+                        '<div class="bar"></div>' +
+                        '<div class="fill"></div>' +
+                    '</div>' +
+                '</div>'+
+            '</div>'+
+        '</div>';
+    }
+
+    getCircleClassName(value){
+        return 'c100 center p' + Math.round(value) + ' small ' + (value > 90 ? 'green' : value > 80 ? 'green dark' : value > 70 ? 'orange dark' : 'orange') ;
+    }
+
+    computeOA(dataToComputeMetrics){
+
+        var numerator = 0;
+        var divisor = 0;
+        var lenData = dataToComputeMetrics.length;
+        var step = Math.sqrt(lenData) + 1;
+        var oa = 0;
+
+        for (let index = 0; index < lenData; index++) {
+            const element = dataToComputeMetrics[index];
+            
+            numerator += (index % step == 0 ? element : 0);
+            divisor += element;
+        }
+
+        oa = ((numerator / divisor) * 100).toFixed(1);
+
+        return oa;
+    }
+
+    computeF1(dataToComputeMetrics, col=0){
+
+        var numerator = 0;
+        var divisor = 0;
+        var lenData = dataToComputeMetrics.length;
+        var step = Math.sqrt(lenData) + 1;
+        var f1 = 0;
+
+        for (let index = 0; index < lenData; index++) {
+            const element = dataToComputeMetrics[index];
+            
+            numerator += (col * step == index) ? element*2 : 0;
+            divisor += (index % step != 0 ? element : 0);
+        }
+
+        f1 = ((numerator / (divisor + numerator)) * 100).toFixed(1);
+
+        return f1;
+    }
+
+    computePrecision(dataToComputeMetrics, col=0){
+
+        var numerator = 0;
+        var divisor = 0;
+        var lenData = dataToComputeMetrics.length;
+        var len = Math.sqrt(lenData);
+        var startIndex = col * len;
+        var precision = 0;
+
+        for (let index = startIndex; index < len*(col+1); index++) {
+            const element = dataToComputeMetrics[index];
+            numerator += (col == index - startIndex) ? element : 0;
+            divisor += element;
+        }
+
+        precision = ((numerator / divisor) * 100).toFixed(1);
+
+        return precision;
+    }
+
+    computeRecall(dataToComputeMetrics, line=0){
+
+        var numerator = 0;
+        var divisor = 0;
+        var lenData = dataToComputeMetrics.length;
+        var step = Math.sqrt(lenData);
+        var recall = 0;
+        var startIndex = step - line - 1;
+
+        for (let index = startIndex; index < lenData; index+=step) {
+            const element = dataToComputeMetrics[index];
+            const isTP = ((startIndex*step) + startIndex%2 == index);
+
+            numerator += isTP ? element : 0;
+            divisor += element;
+        }
+
+        recall = ((numerator / divisor) * 100).toFixed(1);
+
+        return recall;
     }
 }

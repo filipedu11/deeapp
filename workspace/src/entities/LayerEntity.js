@@ -153,10 +153,10 @@ export class LayerEntity{
     
     getBinaryClassNamesForErrorMatrix(){
         return {
-            '01' : 'Verdadeiros Negativos',
-            '00' : 'Falsos Negativos', 
-            '11' : 'Falsos Positivos', 
-            '10' : 'Verdadeiros Positivos'
+            '00' : 'Falsos Positivos', 
+            '01' : 'Verdadeiros Positivos',
+            '10' : 'Verdadeiros Negativos',
+            '11' : 'Falsos Negativos'
         };
     }
 
