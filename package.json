@@ -10,6 +10,8 @@
     "@turf/turf": "^5.1.6",
     "@types/geojson": "^7946.0.7",
     "@types/jsts": "^0.17.0",
+    "acorn": "^7.0.0",
+    "acorn-jsx": "^5.0.2",
     "babel-eslint": "^10.0.1",
     "bootstrap": "^4.3.1",
     "braces": "^2.3.1",
@@ -29,6 +31,7 @@
     "module-name": "0.0.1-security",
     "ol": "^5.3.2",
     "ol-layerswitcher": "^3.2.0",
+    "openlayers": "^4.6.5",
     "parcel-bundler": "^1.12.3",
     "pg": "^7.11.0",
     "popper": "^1.0.1",
@@ -48,8 +51,8 @@
   },
   "scripts": {
     "test": "mocha --require @babel/register workspace/test",
-    "start": "cross-env NODE_OPTIONS=--max_old_space_size=4096 parcel workspace/index.html",
-    "build": "cross-env NODE_OPTIONS=--max_old_space_size=4096 parcel build --public-url . workspace/index.html"
+    "start": "cross-env NODE_OPTIONS=--max_old_space_size=8192 parcel workspace/index.html",
+    "build": "cross-env NODE_OPTIONS=--max_old_space_size=8192 parcel build --public-url . workspace/index.html"
   },
   "repository": {
     "type": "git",

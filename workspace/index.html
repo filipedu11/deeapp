@@ -82,22 +82,50 @@
       <!-- MAP LEGEND -->
       <div id="controls" class="none-block">
         <div id="controls-content">
+          <h6><b><u>Filtros</u></b></h6>
+          <div class="slidecontainer">
+            <label class="slidelabel controller-padding">
+                <b>Área em Ha ( > )</b><br/>
+                <input id="area-number" type="number" style="align-content: center; margin-top: 4px" value="0"/>
+            </label>
+          </div>
+          <div class="slidecontainer">
+            <label class="polygonlabel controller-padding">
+                <b>Filtrar por geometria:</b><br/>
+                <select id="type-geo" style="margin-top: 4px">
+                  <option value="None">
+                      ----
+                  </option>
+                  <option value="Box">
+                    Box
+                  </option>
+                  <option value="Polygon">
+                    Poligono
+                  </option>
+                  <option value="Free">
+                    Livre
+                </option>
+                </select>
+            </label>
+            <button id='clear-polygon-draw'>Clear</button>
+          </div>
         </div>
       </div>
 
       <!-- MAP LEGEND -->
       <div id="legend" class="none-block"><div id="legend-content">TESTE</div></div>
+      
+      <div id="loader" class="none-block"></div>
 
     <!-- STATS CONTENT BOARD -->
     <div id="stats-main-board" class="none-block">
       <button title="Close" id="close-button" class="btn"></button>
       <div id="stats-board">
-
       </div>
     </div>
   </div>
   <div id="progress"></div>
-  
+
   <script src="./index.js"></script>
 </body>
 

@@ -84,16 +84,6 @@ import Feature from 'ol/Feature';
         if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
     };
 
-
-
-
-
-
-
-
-
-
-
     var possibleConstructorReturn = function (self, call) {
         if (!self) {
             throw new ReferenceError('this hasn\'t been initialised - super() hasn\'t been called');
@@ -289,12 +279,14 @@ import Feature from 'ol/Feature';
                 var lyrId = lyr.get('layerId');
                 var mapView = map.get('mapViewer');
 
-                if (lyr.get('typeBase') !== 'basemap') {
+                if (lyr.get('typeBase') !== 'basemap' && lyr.get('typeBase') !== 'draw' ) {
                     
                     if (visible) {
                         var sourceAux = lyr.get('sourceAux');
-                        map.getView().fit(sourceAux.getExtent(), {constrainResolution: false});
-                        map.getView().setZoom(map.getView().getZoom() - 2);
+                        if (map.getView().getZoom() < 10) {
+                            map.getView().fit(sourceAux.getExtent(), {constrainResolution: false});
+                            map.getView().setZoom(map.getView().getZoom() - 2);
+                        }
                         mapView.createMetadata(lyrId);
                     }
                     else {
@@ -311,28 +303,7 @@ import Feature from 'ol/Feature';
                     });
                 }
 
-                var allLayersInvisible = true;
-                var lyrsSelected = [];
-                
-                LayerSwitcher.forEachRecursive(map, function (l, idx, a) {
-
-                    if (l.getVisible() && l.get('typeBase') !== 'basemap' && !l.getLayers) {
-                        allLayersInvisible = false;
-                        lyrsSelected.push(l);
-                    }
-                });
-
-                mapView.setLyrsSelected(lyrsSelected);
-
-                if (allLayersInvisible) {
-                    map.getView().fit(map.get('initExtent'), {constrainResolution: false});
-                    mapView.clearStatsPanel();
-                    mapView.clearLegend();
-                } else {
-                    mapView.updateLayersInMap();
-                    mapView.updateStatsPanel();
-                    mapView.createLegend();
-                }
+                LayerSwitcher.updateMap_(map, mapView, lyr);
             }
 
             /**
@@ -344,6 +315,33 @@ import Feature from 'ol/Feature';
         */
 
         }, {
+            key: 'updateMap_',
+            value: function updateMap(map, mapView, lyr){
+                var allLayersInvisible = true;
+                var lyrsSelected = [];
+                
+                LayerSwitcher.forEachRecursive(map, function (l, idx, a) {
+        
+                    if (l.getVisible() && l.get('typeBase') !== 'basemap' && l.get('typeBase') !== 'draw' && !l.getLayers) {
+                        allLayersInvisible = false;
+                        lyrsSelected.push(l);
+                    }
+                });
+        
+                mapView.setLyrsSelected(lyrsSelected);
+        
+                if (allLayersInvisible) {
+                    map.getView().fit(map.get('initExtent'), {constrainResolution: false});
+                    mapView.clearStatsPanel();
+                    mapView.clearLegend();
+                } else if (lyr.get('typeBase') !== 'basemap' && lyr.get('typeBase') !== 'draw') {
+                    mapView.updateLayersInMap();
+                    mapView.updateStatsPanel();
+                    mapView.createLegend();
+                }
+            }
+        },       
+        {
             key: 'renderLayer_',
             value: function renderLayer_(map, lyr, idx) {
 
@@ -384,7 +382,7 @@ import Feature from 'ol/Feature';
                             chosenClass: 'chosen',
                             onSort: function (evt) {
                                 var allLayers = document.getElementsByClassName('layer');
-
+                                var lastLayer = undefined;
                                 for (let index = allLayers.length - 1; index > -1; index--) {
                                     const element = allLayers[index];
                                     LayerSwitcher.forEachRecursive(map, function (l) {
@@ -392,9 +390,11 @@ import Feature from 'ol/Feature';
                                         if (element.childNodes[1].id === l.get('lyrId')){
                                             map.removeLayer(l);
                                             map.addLayer(l);
+                                            lastLayer = l;
                                         }
                                     });
                                 }
+                                LayerSwitcher.updateMap_(map, map.get('mapViewer'), lastLayer);
                             }
                         });
 

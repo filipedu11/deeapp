@@ -63,13 +63,14 @@ export class Piechart {
             dataPieDiv.style.marginTop = '5px';
             dataPieDiv.style.padding = '0px';
             dataPieDiv.className = 'col-md-6';
+            
 
             this.content.appendChild(dataPieDiv);
 
             // Build the chart
             var pieHighChart = Highcharts.chart(idPiechart, {
                 chart: {
-                    backgroundColor:'rgba(255, 255, 255, 0.0)',
+                    backgroundColor:'rgba(255, 255, 255, 0)',
                     plotBorderWidth: null,
                     plotShadow: false,
                     type: 'pie'
@@ -78,7 +79,7 @@ export class Piechart {
                     text: filterArea == -1 ? 'Global' : 'Filtrada'
                 },
                 subtitle: {
-                    text: filterArea == -1 ? '(em ha)' : 'Área < ' + filterArea + ' (em ha)'
+                    text: filterArea == -1 ? '(em ha)' : 'Área > ' + filterArea + ' (em ha)'
                 },
                 tooltip: {
                     pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b><br/>{series.name}: <b>{point.y:.3f} ha</b>'
@@ -88,7 +89,8 @@ export class Piechart {
                         allowPointSelect: filterArea == -1 ? true : false,
                         cursor: filterArea == -1 ? 'pointer' : 'auto',
                         dataLabels: {
-                            enabled: false
+                            enabled: false,
+                            format: '<b>{point.percentage:.2f}%</b><br/><b>{point.y:.3f} ha</b>'
                         },
                         showInLegend:  true,
                         point: {
@@ -98,11 +100,9 @@ export class Piechart {
                                         var C_ID = e['target']['id'];
                                         lyr.get('inactiveClasses')[C_ID] = !lyr.get('inactiveClasses')[C_ID];
                                         lyr.getSource().dispatchEvent('change');
-                                        
-                                        return true;
-                                    } else {
-                                        return false;
                                     }
+
+                                    return true;
                                 }
                             },
                         }
@@ -122,6 +122,41 @@ export class Piechart {
                             }
                         }
                     }
+                }
+            });
+            
+            var isFullscreen = false;
+            var height = pieHighChart.chartHeight;
+
+            document.addEventListener('fullscreenchange', function() {
+                isFullscreen = !isFullscreen;
+                if (isFullscreen) {
+                    pieHighChart.update({
+                        chart: {
+                            backgroundColor: 'rgba(255, 255, 255, 1)'
+                        },
+                        plotOptions: {
+                            pie: {
+                                dataLabels: {
+                                    enabled: true,
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    pieHighChart.update({
+                        chart: {
+                            backgroundColor: 'rgba(255, 255, 255, 0)',
+                            height: height
+                        },
+                        plotOptions: {
+                            pie: {
+                                dataLabels: {
+                                    enabled: false,
+                                }
+                            }
+                        }
+                    });
                 }
             });
 
