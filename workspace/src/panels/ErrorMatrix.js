@@ -9,6 +9,9 @@ exporting(Highmaps);
 
 import * as turf from '@turf/turf';
 
+/*eslint no-undef: "error"*/
+/*eslint-env node*/
+var geojsonRbush = require('geojson-rbush').default;
 export class ErrorMatrix {
 
     constructor(){
@@ -117,7 +120,7 @@ export class ErrorMatrix {
             },
             series: [{
                 name: 'Confusion matrix',
-                borderWidth: 0.5,
+                borderWidth: 0,
                 data: data,
                 dataLabels: {
                     enabled: true
@@ -190,7 +193,10 @@ export class ErrorMatrix {
         return dataErrorMatrix;
     }
 
-    createConfusionMatrixFiltered(dataLyr, areaToFilter){
+    createConfusionMatrixFiltered(dataLyr, areaToFilter, polygonFilter){
+
+        var loader = document.getElementById('loader');
+        loader.className = 'inline-block';
 
         var confusionMatrix = document.getElementById('confusion-matrix-filtered');
         
@@ -206,7 +212,7 @@ export class ErrorMatrix {
 
         var xCategories, yCategories, data;
         
-        var dataForErrorMatrix = this.getDataForErrorMatrixFiltered(dataLyr, areaToFilter);
+        var dataForErrorMatrix = this.getDataForErrorMatrixFiltered(dataLyr, areaToFilter, polygonFilter);
         var title = dataLyr.getName().split(' | ');
         var xAxisTitle = title[0];
         var yAxisTitle = title[1];
@@ -236,7 +242,7 @@ export class ErrorMatrix {
                 text: 'Filtrada'
             },
             subtitle: {
-                text: 'Área < ' + areaToFilter + ' (em ha)'
+                text: 'Área > ' + areaToFilter + ' (em ha)'
             },
             xAxis: {
                 categories: xCategories,
@@ -323,9 +329,12 @@ export class ErrorMatrix {
                 },
             },
         });
+
+        loader.className = 'none-block';
     }
 
-    getDataForErrorMatrixFiltered(dataLyr, areaToFilter){
+    getDataForErrorMatrixFiltered(dataLyr, areaToFilter, polygonFilter){
+
         var features = dataLyr.getFeatures();
         var classNames = dataLyr.getIndividualClassNames();
         var classKeys = dataLyr.getKeysOfClasses();
@@ -339,18 +348,61 @@ export class ErrorMatrix {
             dataArea[index] = 0;
         }
 
-        for (let index = 0, len = features.length; index < len; index++) {
-            const polygon = features[index]['geometry']['coordinates'];
-            const pos = classIndex[parseInt(features[index]['properties']['classId'])];
+        var calcArea;
+        if(!polygonFilter) {
+            for (let index = 0, len = features.length; index < len; index++) {
+                const polygon = features[index];
+                const pos = classIndex[parseInt(features[index]['properties']['classId'])];
 
-            //Convert area to hectares (ha = m^2 / 10000)
-            var calcArea = turf.area(turf.polygon(polygon)) / 10000;
-
-            if (calcArea > areaToFilter) {       
-                dataArea[pos] = dataArea[pos] != null ? 
-                    dataArea[pos] + calcArea : calcArea;
+                //Convert area to hectares (ha = m^2 / 10000)
+                calcArea = turf.area(polygon) / 10000;
+                if (calcArea > areaToFilter) {
+                    dataArea[pos] = dataArea[pos] != null ? 
+                        dataArea[pos] + calcArea : calcArea;
+                }
             }
+        } else {
+
+            var tree = geojsonRbush();
+            var rbush = tree.load(features);
+            var containElements = [];
+            if (rbush && polygonFilter) {
+                containElements.push(rbush.search(polygonFilter));
+                features = containElements[0].features;
+            }
+
+            var drawPolygons = polygonFilter.geometry.coordinates;
+            let lenDrawPolys = drawPolygons.length;
+
+            for (let j = 0; j < lenDrawPolys; j++) {
+
+                const coords = lenDrawPolys == 1 ? [drawPolygons[j]] : drawPolygons[j];
+                const poly = turf.polygon(coords);
+
+                
+                containElements[0] = rbush.search(poly);
+                features = containElements[0].features;
+
+                for (let index = 0, len = features.length; index < len; index++) {
+
+                    const polygon = features[index];
+                    const pos = classIndex[parseInt(features[index]['properties']['classId'])];
+
+                    var intersectArea = turf.intersect(polygon, poly);
+
+                    //Convert area to hectares (ha = m^2 / 10000)
+                    calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
+
+                    if (calcArea > areaToFilter) {       
+                        dataArea[pos] = dataArea[pos] != null ? 
+                            dataArea[pos] + calcArea : calcArea;
+                    }
+                }
+
+            }
+
         }
+        
 
         var yCategories = Object.keys(classNames);
         var xCategories = yCategories.slice().reverse();
@@ -481,7 +533,7 @@ export class ErrorMatrix {
     }
 
     getCircleClassName(value){
-        return 'c100 center p' + Math.round(value) + ' small ' + (value > 90 ? 'green' : value > 80 ? 'green dark' : value > 70 ? 'orange dark' : 'orange') ;
+        return 'c100 center p' + Math.round(value) + ' small ' + (value > 90 ? 'green' : value > 80 ? 'yellow' : value > 70 ? 'orange' : 'red') ;
     }
 
     computeOA(dataToComputeMetrics){

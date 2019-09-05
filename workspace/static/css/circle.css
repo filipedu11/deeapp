@@ -877,3 +877,17 @@
 .c100.orange.dark:hover > span {
   color: #e08833;
 }
+
+.c100.yellow .bar, .c100.yellow .fill {
+  border-color: #bbe71a !important;
+}
+.c100.yellow:hover > span {
+  color: #bbe71a;
+}
+
+.c100.red .bar, .c100.red .fill {
+  border-color: brown !important;
+}
+.c100.red:hover > span {
+  color: brown;
+}
