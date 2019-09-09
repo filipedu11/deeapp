@@ -17,6 +17,10 @@ export class ErrorMatrix {
     constructor(){
         this.content = document.getElementById('content-error-matrix');
         this.info = document.getElementById('info-error-matrix');
+        this.infoErrorMatrixGlobal = document.createElement('div');
+        this.infoErrorMatrixGlobal.id = 'info-error-matrix-global';
+        this.infoErrorMatrixFiltered = document.createElement('div');
+        this.infoErrorMatrixFiltered.id = 'info-error-matrix-filtered';
     }
 
     clearStatsPanel(){
@@ -170,9 +174,15 @@ export class ErrorMatrix {
     computeDataToErrorMatrix(yCategories, xCategories, dataArea, colors){
         
         var dataErrorMatrix = [];
+        var dataToComputeMetrics = [];
 
         var lenJ = yCategories.length;
         var lenI = xCategories.length;
+
+        if ( this.lastX == -1 && this.lastY == -1) {
+            this.lastX = 0;
+            this.lastY = lenJ - 1;
+        }
 
         //Construct classes data for error matrix  with horizontal total
         var count = 3;
@@ -186,17 +196,19 @@ export class ErrorMatrix {
                         value: parseFloat(dataArea[count].toFixed(3)),
                     }
                 );
+                dataToComputeMetrics.push(parseFloat(dataArea[count].toFixed(3)));
                 count -= 1;
             }
         }
+
+        this.addMetricsInfo(dataToComputeMetrics, this.lastX, this.lastY, xCategories, this.infoErrorMatrixGlobal);
 
         return dataErrorMatrix;
     }
 
     createConfusionMatrixFiltered(dataLyr, areaToFilter, polygonFilter){
 
-        var loader = document.getElementById('loader');
-        loader.className = 'inline-block';
+        var textPolyFilter = polygonFilter ? ' & Poligonos' : '';
 
         var confusionMatrix = document.getElementById('confusion-matrix-filtered');
         
@@ -209,6 +221,10 @@ export class ErrorMatrix {
 
             this.content.appendChild(confusionMatrix);
         }
+
+        confusionMatrix.onchange = function(){
+            document.getElementById('loader').className = 'inline-block';
+        };
 
         var xCategories, yCategories, data;
         
@@ -242,7 +258,7 @@ export class ErrorMatrix {
                 text: 'Filtrada'
             },
             subtitle: {
-                text: 'Área > ' + areaToFilter + ' (em ha)'
+                text: 'Área > ' + areaToFilter + ' (em ha) ' + textPolyFilter
             },
             xAxis: {
                 categories: xCategories,
@@ -329,8 +345,7 @@ export class ErrorMatrix {
                 },
             },
         });
-
-        loader.className = 'none-block';
+        document.getElementById('loader').className = 'none-block';
     }
 
     getDataForErrorMatrixFiltered(dataLyr, areaToFilter, polygonFilter){
@@ -443,12 +458,12 @@ export class ErrorMatrix {
             }
         }
 
-        this.addMetricsInfo(dataToComputeMetrics, this.lastX, this.lastY, xCategories);
+        this.addMetricsInfo(dataToComputeMetrics, this.lastX, this.lastY, xCategories, this.infoErrorMatrixFiltered);
 
         return dataErrorMatrix;
     }
 
-    addMetricsInfo(dataToComputeMetrics, col = 0, line = 0, xCategories) {
+    addMetricsInfo(dataToComputeMetrics, col = 0, line = 0, xCategories, infoMatrix) {
         var oa = this.computeOA(dataToComputeMetrics);
         var oaClassCircle = this.getCircleClassName(oa);
         var f1 = this.computeF1(dataToComputeMetrics, col);
@@ -459,12 +474,15 @@ export class ErrorMatrix {
         var recall = this.computeRecall(dataToComputeMetrics, line);
         var recallClassCircle = this.getCircleClassName(recall);
 
-        this.info.innerHTML = '<br/><hr/>';  
+        infoMatrix.innerHTML = '<br/><hr/>';
 
-        this.info.innerHTML +=
+        var matrixTitle = infoMatrix.id == 'info-error-matrix-global' ? '' : '(filtrada)';
+        
+
+        infoMatrix.innerHTML +=
         '<div class="row justify-content-md-center">' +
             '<div class="col col-md-12 text-center" style="padding:0;">' +
-                '<h5>Métricas Globais</h5>' +
+                '<h5 style="display: inline">Métricas Globais</h5><h6 style="display: inline">' + matrixTitle + '</h6>' +
             '</div>' +
         '</div>' +
         '<div class="row justify-content-md-center">' +
@@ -486,7 +504,7 @@ export class ErrorMatrix {
         '<br/><br/>' +
         '<div class="row justify-content-md-center">' +
             '<div class="col col-md-12 text-center" style="padding:0;">' +
-                '<h5>Métricas por classe</h5>' +
+                '<h5 style="display: inline">Métricas por classe</h5><h6 style="display: inline">' + matrixTitle + '</h6>' +
                 '<p>(classe selecionada: ' + xCategories[col] + ')</p>' +
             '</div>' +
         '</div>' +
@@ -530,6 +548,8 @@ export class ErrorMatrix {
                 '</div>'+
             '</div>'+
         '</div>';
+
+        this.info.appendChild(infoMatrix);
     }
 
     getCircleClassName(value){
