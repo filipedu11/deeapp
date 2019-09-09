@@ -29,7 +29,6 @@
 
 ::-webkit-scrollbar
 {
-	width: 8px;
 	background-color: #F5F5F5;
 }
 
@@ -146,8 +145,6 @@ p {
 }
 
 .content{
-    padding-top: 10px;
-    padding-left: 10px;
     overflow-y:auto;
     position: absolute;
     top: 40px;
@@ -333,7 +330,7 @@ p {
 
 #main-stats{
     position: absolute;
-    width: 94%;
+    width: 100%;
 }
 
 #controller-stats button:focus{

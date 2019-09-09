@@ -58,9 +58,7 @@ export class Piechart {
         if ( !dataPieDiv ) {
             dataPieDiv = document.createElement('div');
             dataPieDiv.id = idPiechart;
-            dataPieDiv.style.width = '94%';
-            dataPieDiv.style.marginBottom = '5px';
-            dataPieDiv.style.marginTop = '5px';
+            dataPieDiv.style.width = '100%';
             dataPieDiv.style.padding = '0px';
             dataPieDiv.className = 'col-md-6';
             

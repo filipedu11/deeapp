@@ -476,7 +476,7 @@ export class ErrorMatrix {
 
         infoMatrix.innerHTML = '<br/><hr/>';
 
-        var matrixTitle = infoMatrix.id == 'info-error-matrix-global' ? '' : '(filtrada)';
+        var matrixTitle = infoMatrix.id == 'info-error-matrix-global' ? '' : ' (filtrada)';
         
 
         infoMatrix.innerHTML +=
