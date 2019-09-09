@@ -462,7 +462,6 @@ export class MapViewer{
         var draw; // global so we can remove it later
         var typeSelect = document.getElementById('type-geo');
         var clearPolygon = document.getElementById('clear-polygon-draw');
-        var loader =  document.getElementById('loader');
         
         this.map.addLayer(this.vectorDraw);
 
@@ -485,7 +484,7 @@ export class MapViewer{
 
         };
 
-        function addInteraction(mapObj) {
+        function addInteraction() {
             var value = typeSelect.value;
             var geometryFunction;
             var freehand = false;
@@ -505,11 +504,7 @@ export class MapViewer{
                     geometryFunction: geometryFunction,
                     freehand: freehand
                 });
-                mapObj.addInteraction(draw);
-                
-                draw.on('drawend', function (e) {
-                    loader.className = 'inline-block';
-                });
+                mapAux.addInteraction(draw);
                 
                 vectorAux.getSource().on('addfeature', function(e){
                     var format = new GeoJSON();
@@ -537,9 +532,6 @@ export class MapViewer{
                         var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
                         eMatrixClass.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value,  featAux);
                     }
-
-                    loader.className = 'none-block';
-
                 });
             }
         }

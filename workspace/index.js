@@ -29,8 +29,8 @@ var readFiles = new ReadFiles();
 
 // app.addValidation(readFiles.readValidationBurnedArea());
 // app.addClassification(readFiles.readClassificationContinuousNaiveBayes());
-// app.addEvaluation(readFiles.readEvaluationContinuousNaiveBayes());
-// app.addEvaluation(readFiles.readEvaluationRandomForest());
+app.addEvaluation(readFiles.readEvaluationContinuousNaiveBayes());
+app.addEvaluation(readFiles.readEvaluationRandomForest());
 app.addEvaluation(readFiles.readEvaluationGmoMaxEnt());
 // app.addClassification(readFiles.readClassificationWinnow());
 // app.addClassification(readFiles.readClassificationCart());
