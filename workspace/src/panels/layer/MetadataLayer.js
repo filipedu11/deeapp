@@ -11,7 +11,7 @@ export class MetadaLayer extends Metada{
         var obj = this.lyrObj;
 
         var content = document.getElementById('content-metadata');
-        content.style.marginRight = '15px';
+        content.style.margin = '15px';
         
         var sourceC = document.getElementById('content-metadata-'+obj.getId());
 
