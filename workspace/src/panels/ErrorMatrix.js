@@ -179,11 +179,15 @@ export class ErrorMatrix {
         var lenJ = yCategories.length;
         var lenI = xCategories.length;
 
+<<<<<<< Updated upstream
         if ( this.lastX == -1 && this.lastY == -1) {
             this.lastX = 0;
             this.lastY = lenJ - 1;
         }
 
+=======
+        console.log(dataArea);
+>>>>>>> Stashed changes
         //Construct classes data for error matrix  with horizontal total
         var count = 3;
         for (let i = 0; i < lenI; i++) {
@@ -193,7 +197,7 @@ export class ErrorMatrix {
                         x: i,
                         y: lenJ - (j + 1),
                         color: colors[count + 1], 
-                        value: parseFloat(dataArea[count].toFixed(3)),
+                        value: dataArea[count] ? parseFloat(dataArea[count].toFixed(3)) : 0,
                     }
                 );
                 dataToComputeMetrics.push(parseFloat(dataArea[count].toFixed(3)));
@@ -450,7 +454,7 @@ export class ErrorMatrix {
                         x: i,
                         y: lenJ - (j + 1),
                         color: colors[count + 1], 
-                        value: parseFloat(dataArea[count].toFixed(3)),
+                        value: dataArea[count] ? parseFloat(dataArea[count].toFixed(3)) : 0,
                     }
                 );
                 dataToComputeMetrics.push(parseFloat(dataArea[count].toFixed(3)));
