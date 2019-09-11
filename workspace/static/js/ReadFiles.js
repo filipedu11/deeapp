@@ -24,10 +24,10 @@ export class ReadFiles{
     readEvaluationRandomForest(){
         return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_randomForest_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
     }
-
-    readEvaluationGmoMaxEnt(){
-        return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_gmoMaxEnt_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
-    }
+    
+    // readEvaluationGmoMaxEnt(){
+    //     return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_gmoMaxEnt_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
+    // }
 
     // readTestClassification(){
     //     return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_out.geojson', 'utf8').trim());

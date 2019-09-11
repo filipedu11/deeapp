@@ -168,6 +168,8 @@ export class ErrorMatrix {
 
         var dataErrorMatrix = this.computeDataToErrorMatrix(yCategories, xCategories, dataArea, colors);
 
+        this.dataForErrorMatrixGlobal = dataErrorMatrix;
+
         return [xCategories, yCategories, dataErrorMatrix];
     }
 
@@ -188,15 +190,16 @@ export class ErrorMatrix {
         var count = 3;
         for (let i = 0; i < lenI; i++) {
             for (let j = 0; j < lenJ ; j++) {
+                const value = dataArea[count] ? parseFloat(dataArea[count].toFixed(3)) : 0;
                 dataErrorMatrix.push(
                     {
                         x: i,
                         y: lenJ - (j + 1),
                         color: colors[count + 1], 
-                        value: parseFloat(dataArea[count].toFixed(3)),
+                        value: value,
                     }
                 );
-                dataToComputeMetrics.push(parseFloat(dataArea[count].toFixed(3)));
+                dataToComputeMetrics.push(value);
                 count -= 1;
             }
         }
@@ -212,6 +215,9 @@ export class ErrorMatrix {
 
         var confusionMatrix = document.getElementById('confusion-matrix-filtered');
         
+        var infoErrorMatrixGlobal = this.infoErrorMatrixGlobal;
+        var infoErrorMatrixFiltered = this.infoErrorMatrixFiltered;
+
         if ( !confusionMatrix ) {
             confusionMatrix = document.createElement('div');
             confusionMatrix.id = 'confusion-matrix-filtered';
@@ -228,23 +234,29 @@ export class ErrorMatrix {
 
         var xCategories, yCategories, data;
         
-        var dataForErrorMatrix = this.getDataForErrorMatrixFiltered(dataLyr, areaToFilter, polygonFilter);
+        var dataForErrorMatrixFiltered = this.getDataForErrorMatrixFiltered(dataLyr, areaToFilter, polygonFilter);
+        var dataForErrorMatrixGlobal = this.dataForErrorMatrixGlobal;
         var title = dataLyr.getName().split(' | ');
         var xAxisTitle = title[0];
         var yAxisTitle = title[1];
 
-        xCategories = dataForErrorMatrix[0];
-        yCategories = dataForErrorMatrix[1];
-        data = dataForErrorMatrix[2];
+        xCategories = dataForErrorMatrixFiltered[0];
+        yCategories = dataForErrorMatrixFiltered[1];
+        data = dataForErrorMatrixFiltered[2];
         var resultLabel = dataLyr.getBinaryClassNamesForErrorMatrix();
 
         confusionMatrix.style.height = xCategories.length * 125 + 'px';
 
         var erroMatrixClass = this;
-        var dataForInfoMetrics = [];
+        var dataForInfoMetricsFiltered = [];
+        var dataForInfoMetricsGlobal = [];
 
         data.forEach(element => {
-            dataForInfoMetrics.push(element['value']);
+            dataForInfoMetricsFiltered.push(element['value']);
+        });
+
+        dataForErrorMatrixGlobal.forEach(element => {
+            dataForInfoMetricsGlobal.push(element['value']);
         });
 
         this.confusionMatrixFiltered = Highmaps.chart('confusion-matrix-filtered', {
@@ -312,7 +324,8 @@ export class ErrorMatrix {
                         events: {
                             click: function (event) {
                                 if (this.x + this.y == this.series.xAxis.max){
-                                    erroMatrixClass.addMetricsInfo(dataForInfoMetrics, this.x, this.y, xCategories);
+                                    erroMatrixClass.addMetricsInfo(dataForInfoMetricsGlobal, this.x, this.y, xCategories, infoErrorMatrixGlobal);
+                                    erroMatrixClass.addMetricsInfo(dataForInfoMetricsFiltered, this.x, this.y, xCategories, infoErrorMatrixFiltered);
                                     erroMatrixClass.lastX = this.x;
                                     erroMatrixClass.lastY = this.y;
                                 }
@@ -345,7 +358,6 @@ export class ErrorMatrix {
                 },
             },
         });
-        document.getElementById('loader').className = 'none-block';
     }
 
     getDataForErrorMatrixFiltered(dataLyr, areaToFilter, polygonFilter){
@@ -394,10 +406,6 @@ export class ErrorMatrix {
                 const coords = lenDrawPolys == 1 ? [drawPolygons[j]] : drawPolygons[j];
                 const poly = turf.polygon(coords);
 
-                
-                containElements[0] = rbush.search(poly);
-                features = containElements[0].features;
-
                 for (let index = 0, len = features.length; index < len; index++) {
 
                     const polygon = features[index];
@@ -445,15 +453,16 @@ export class ErrorMatrix {
         var count = 3;
         for (let i = 0; i < lenI; i++) {
             for (let j = 0; j < lenJ ; j++) {
+                const value = dataArea[count] ? parseFloat(dataArea[count].toFixed(3)) : 0;
                 dataErrorMatrix.push(
                     {
                         x: i,
                         y: lenJ - (j + 1),
                         color: colors[count + 1], 
-                        value: parseFloat(dataArea[count].toFixed(3)),
+                        value: value,
                     }
                 );
-                dataToComputeMetrics.push(parseFloat(dataArea[count].toFixed(3)));
+                dataToComputeMetrics.push(value);
                 count -= 1;
             }
         }

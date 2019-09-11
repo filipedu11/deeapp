@@ -60,7 +60,7 @@ export class Piechart {
             dataPieDiv.id = idPiechart;
             dataPieDiv.style.width = '100%';
             dataPieDiv.style.padding = '0px';
-            dataPieDiv.className = 'col-md-6';
+            dataPieDiv.className = 'col-md-12';
             
 
             this.content.appendChild(dataPieDiv);
@@ -94,11 +94,12 @@ export class Piechart {
                         point: {
                             events: {
                                 legendItemClick: function(e) {
-                                    if ( filterArea == -1 ) {
-                                        var C_ID = e['target']['id'];
-                                        lyr.get('inactiveClasses')[C_ID] = !lyr.get('inactiveClasses')[C_ID];
-                                        lyr.getSource().dispatchEvent('change');
-                                    }
+                                    
+                                    // if ( filterArea == -1 ) {
+                                    //     var C_ID = e['target']['id'];
+                                    //     lyr.get('inactiveClasses')[C_ID] = !lyr.get('inactiveClasses')[C_ID];
+                                    //     lyr.getSource().dispatchEvent('change');
+                                    // }
 
                                     return true;
                                 }

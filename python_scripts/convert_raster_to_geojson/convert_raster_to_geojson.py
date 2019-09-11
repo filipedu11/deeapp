@@ -98,11 +98,14 @@ def convert_raster_to_geojson(in_dir):
                 feature['properties']['areaInHectare'], feature['properties']['perimeterInKm'], feature['properties']['numVertices'] = computeStatsForEachPolygon(feature)
 
                 classesOfEvalFeat = feature['properties']['className'].split(' | ')
+                lenClassesOfEvalFeat = len(classesOfEvalFeat)
 
-                if len(classesOfEvalFeat) > 1:
+                if lenClassesOfEvalFeat == 2:
                     feature['properties']['classificationClass'] = classesOfEvalFeat[0]
                     feature['properties']['validationClass'] = classesOfEvalFeat[1]
-
+                elif lenClassesOfEvalFeat > 2:
+                    feature['properties']['classificationClass'] = ' , '.join(classesOfEvalFeat[0:int(lenClassesOfEvalFeat/2)])
+                    feature['properties']['validationClass'] = ' , '.join(classesOfEvalFeat[int(lenClassesOfEvalFeat/2):lenClassesOfEvalFeat])
 
             print("\n-------------- WRITE THE FINAL GEOJSON FILE ----------------\n")
 
