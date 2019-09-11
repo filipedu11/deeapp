@@ -63,13 +63,13 @@ def create_map_raster(
     print("\n ======================================== \n")
 
 def create_json(classes, classMap, classification_json_file, validation_json_file, json_output_filepath):
-    
+
     classification_json_object = json.load(open(classification_json_file, encoding='utf-8-sig'))
     validation_json_object = json.load(open(validation_json_file, encoding='utf-8-sig'))
 
     content_json = {
         "layerID": "{}_vs_{}".format(classification_json_object["layerID"], validation_json_object["layerID"]),
-        "layerName": "{} | {}".format(classification_json_object["layerName"] + ' (v)', validation_json_object["layerName"] + ' (c)'),
+        "layerName": "{} | {}".format('(' + ','.join(classification_json_object["layerName"].split('|')) + ') (e1)', '(' + ','.join(validation_json_object["layerName"].split('|')) + ') (e2)'),
         "layerDescription": "Evaluation map for comparing {} with {}".format(classification_json_object["layerName"], validation_json_object["layerName"]),
         "layerRasterFile": "",
         "layerSource": {
@@ -100,9 +100,14 @@ def create_json(classes, classMap, classification_json_file, validation_json_fil
         
         color_palette.extend(sns.dark_palette(rgbTuple, n_colors=nClasses+1, reverse=True)[1:nClasses])
 
+    
+
     for i, c1 in enumerate(classes, 0):
         for c2 in classes:
-            className = classification_json_object["classNames"][str(c1)] + ' (c)' + " | " + validation_json_object["classNames"][str(c2)] + ' (v)'
+            className1 = '(' + ','.join(classification_json_object["classNames"][str(c1)].split('|')) + ')'
+            className2 = '(' + ','.join(classification_json_object["classNames"][str(c2)].split('|')) + ')'
+
+            className = className1 + ' (e1)' + " | " + className2 + ' (e2)'
             content_json["classNames"][str(classMap[(c1,c2)])] = className
 
             color = classification_json_object["layerStyle"]["color"][str(c1)]
@@ -128,38 +133,45 @@ if __name__ == '__main__':
     classification_files =  glob.glob(args.source_filepaths + "/*.tif")
     classification_json_files = glob.glob(args.source_filepaths + "/*.json")
 
-    output_dirpath = os.path.abspath(os.path.join(args.target_filepaths, os.pardir)) + "/evaluation"
+    output_dirpath = os.path.abspath(os.path.join(args.target_filepaths, os.pardir)) + "/aggrement"
 
     print("\n ======================================== \n")
 
+    comparedFiles = {}
+
     for j, filepath_t in enumerate(validation_files):
         print("Validation map selected: {}  ({}/{})".format(os.path.basename(filepath_t), j+1, len(validation_files)))
+        
+        file2 = re.match("(.*).tif", os.path.basename(filepath_t))
+        file2 = file2.groups(1)[0]
+
         for i, filepath in enumerate(classification_files):
             print("Generating difference map for file: {}  ({}/{})".format(os.path.basename(filepath), i+1, len(classification_files)))
 
             file1 = re.match("(.*).tif", os.path.basename(filepath))
             file1 = file1.groups(1)[0]
-            file2 = re.match("(.*).tif", os.path.basename(filepath_t))
-            file2 = file2.groups(1)[0]
 
-            if not countFiles:
-                try:
-                    os.makedirs(output_dirpath)
-                    countFiles = True
-                except OSError as e:
-                    if countFiles == 0:
-                        shutil.rmtree(output_dirpath)
+            if file1 != file2 and not comparedFiles.get(file1):
+                if not countFiles:
+                    try:
                         os.makedirs(output_dirpath)
                         countFiles = True
-                    elif e.errno == errno.EEXIST:
-                        pass
-                    else:
-                        raise
+                    except OSError as e:
+                        if countFiles == 0:
+                            shutil.rmtree(output_dirpath)
+                            os.makedirs(output_dirpath)
+                            countFiles = True
+                        elif e.errno == errno.EEXIST:
+                            pass
+                        else:
+                            raise
 
-            map_output_filepath = output_dirpath + "/{}_VS_{}_difference_map.tif".format(file1, file2)
-            json_output_filepath = output_dirpath + "/{}_VS_{}_difference_map.json".format(file1, file2)
+                map_output_filepath = output_dirpath + "/{}_VS_{}_difference_map.tif".format(file1, file2)
+                json_output_filepath = output_dirpath + "/{}_VS_{}_difference_map.json".format(file1, file2)
 
-            print(map_output_filepath)
-            print(json_output_filepath)
+                print(map_output_filepath)
+                print(json_output_filepath)
 
-            create_map_raster(filepath, classification_json_files[i], filepath_t, validation_json_files[j], map_output_filepath, json_output_filepath)
+                create_map_raster(filepath, classification_json_files[i], filepath_t, validation_json_files[j], map_output_filepath, json_output_filepath)
+
+        comparedFiles[file2] = True
