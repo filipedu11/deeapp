@@ -375,7 +375,9 @@ export class MapViewer{
 
     createLegend(){
         var lenSelectLayer = this.lyrsSelected.length;
-        if (lenSelectLayer > 0) this.legend.createLegend(this.getObjectLayer(this.lyrsSelected[lenSelectLayer-1].get('layerId')));
+        var layerSel = this.lyrsSelected[lenSelectLayer-1];
+
+        if (lenSelectLayer > 0) this.legend.createLegend(this.getObjectLayer(layerSel.get('layerId')), layerSel);
     }
 
     clearLegend(){
@@ -479,9 +481,8 @@ export class MapViewer{
         clearPolygon.onclick = function(){
             if (vectorAux.getSource().getFeatures().length > 0 )
                 vectorAux.getSource().removeFeature(vectorAux.getSource().getFeatures()[0]);
-
+                
             eMatrixClass.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value, null);
-
         };
 
         function addInteraction() {
@@ -504,9 +505,11 @@ export class MapViewer{
                     geometryFunction: geometryFunction,
                     freehand: freehand
                 });
+
                 mapAux.addInteraction(draw);
-                
+
                 vectorAux.getSource().on('addfeature', function(e){
+
                     var format = new GeoJSON();
                     var featGeo, unionFeat;
                     var allFeatures = vectorAux.getSource().getFeatures();
