@@ -23,19 +23,19 @@ export class Legend {
             this.legendContent.innerHTML += 
                 '<li><span id="circle-legend-' + index + '" class="circle" style="cursor: pointer;"></span> ' +  classNames[classKeys[index]] + ' </li>';
             
-            document.getElementById('circle-legend-' + index).style.background = layerOL.get('inactiveClasses')[index + 1] ? 'rgba(0,0,0,0)' : lyrObj.getColorOfClass(classKeys[index]) ;
-            document.getElementById('circle-legend-' + index).style.border = layerOL.get('inactiveClasses')[index + 1] ? 'solid' : 'none';
-            document.getElementById('circle-legend-' + index).style.borderWidth = layerOL.get('inactiveClasses')[index + 1] ? '0.5px' : '0px';
+            document.getElementById('circle-legend-' + index).style.background = layerOL.get('inactiveClasses')[classKeys[index]] ? 'rgba(0,0,0,0)' : lyrObj.getColorOfClass(classKeys[index]) ;
+            document.getElementById('circle-legend-' + index).style.border = layerOL.get('inactiveClasses')[classKeys[index]] ? 'solid' : 'none';
+            document.getElementById('circle-legend-' + index).style.borderWidth = layerOL.get('inactiveClasses')[classKeys[index]] ? '0.5px' : '0px';
             
             layerOL.getSource().dispatchEvent('change');
         }   
 
         for (let index = classKeys.length - 1; index >= 0 ; index--) {
             document.getElementById('circle-legend-' + index).onclick = function(){
-                document.getElementById('circle-legend-' + index).style.background = !layerOL.get('inactiveClasses')[index + 1] ? 'rgba(0,0,0,0)' : lyrObj.getColorOfClass(classKeys[index]) ;
-                document.getElementById('circle-legend-' + index).style.border = !layerOL.get('inactiveClasses')[index + 1] ? 'solid' : 'none';
-                document.getElementById('circle-legend-' + index).style.borderWidth = !layerOL.get('inactiveClasses')[index + 1] ? '0.5px' : '0px';
-                layerOL.get('inactiveClasses')[index + 1] = !layerOL.get('inactiveClasses')[index + 1];
+                document.getElementById('circle-legend-' + index).style.background = !layerOL.get('inactiveClasses')[classKeys[index]] ? 'rgba(0,0,0,0)' : lyrObj.getColorOfClass(classKeys[index]) ;
+                document.getElementById('circle-legend-' + index).style.border = !layerOL.get('inactiveClasses')[classKeys[index]] ? 'solid' : 'none';
+                document.getElementById('circle-legend-' + index).style.borderWidth = !layerOL.get('inactiveClasses')[classKeys[index]] ? '0.5px' : '0px';
+                layerOL.get('inactiveClasses')[classKeys[index]] = !layerOL.get('inactiveClasses')[classKeys[index]];
                 layerOL.getSource().dispatchEvent('change');
             };
         }

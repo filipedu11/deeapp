@@ -6,6 +6,7 @@ import TileLayer from 'ol/layer/Tile';
 import LayerGroup from 'ol/layer/Group';
 import Stamen from 'ol/source/Stamen.js';
 import XYZ from 'ol/source/XYZ.js';
+import Static from 'ol/source/ImageStatic.js';
 
 import LayerSwitcher from '../panels/LayerSwitcher.js';
 import Sidebar from '../../static/js/sidebar.js';
@@ -22,6 +23,10 @@ import VectorSource from 'ol/source/VectorTile';
 import Vector from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/VectorTile';
 import VectorL from 'ol/layer/Vector';
+import Tile from 'ol/layer/Tile';
+import OSM from 'ol/layer/Tile';
+import ImageLayer from 'ol/layer/Image.js';
+
 import Projection from 'ol/proj/Projection';
 import Draw, {createBox, createRegularPolygon}  from 'ol/interaction/Draw.js';
 
@@ -63,6 +68,9 @@ export class MapViewer{
 
         this.allLayersDict = {};
         this.lyrsSelected = [];
+
+        this.extendStudyArea = null;
+        this.projStudyArea = null;
 
         //Create the initial map
         this.map =  this.createInitMap();
@@ -236,6 +244,27 @@ export class MapViewer{
         return lyr;
     }
 
+    addClassifiedImage(classifiedImage){
+    
+        var projection = this.projStudyArea;
+        var extent = this.extendStudyArea;
+        
+        var newLayer = new ImageLayer({
+            source: new Static({
+                url: classifiedImage,
+                projection: projection,
+                imageExtent: extent
+            }),
+            visible: false,
+            title: 'Imagem Satélite',
+            typeBase: BASE_TYPE_STRING
+        });
+
+        this.addLayerToMapGroup(BASE_TYPE_STRING, newLayer);
+
+        this.loadLayerSwitcher();
+    }
+
     addClassification(classiGeojson){
 
         var newLayer = this.createLayer(classiGeojson, this.createLayerObj(classiGeojson, CLASSIFICATION_TYPE_STRING));
@@ -348,6 +377,11 @@ export class MapViewer{
         var vectorSource = new Vector({
             features: (new GeoJSON()).readFeatures(geojsonObject, {featureProjection: 'EPSG:3857'})
         });
+
+        if (!this.extendStudyArea){
+            this.extendStudyArea = vectorSource.getExtent();
+            this.projStudyArea = vectorSource.getProjection();
+        }
 
         var layer = new VectorLayer({
             title: classObject.getName(),

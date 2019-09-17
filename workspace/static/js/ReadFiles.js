@@ -5,17 +5,17 @@ export class ReadFiles{
 
     constructor(){}
     
-    // readValidationBurnedArea(){
-    //     return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/validation_burned_area_out.geojson', 'utf8').trim());
-    // }
+    readValidationBurnedArea(){
+        return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/validation_burned_area_out.geojson', 'utf8').trim());
+    }
 
     // readClassificationCart(){
     //     return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_cart_out.geojson', 'utf8').trim());
     // }
 
-    // readClassificationContinuousNaiveBayes(){
-    //     return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_continuousNaiveBayes_out.geojson', 'utf8').trim());
-    // }
+    readClassificationContinuousNaiveBayes(){
+        return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_continuousNaiveBayes_out.geojson', 'utf8').trim());
+    }
 
     readEvaluationContinuousNaiveBayes(){
         return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_continuousNaiveBayes_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
@@ -23,6 +23,10 @@ export class ReadFiles{
 
     readEvaluationRandomForest(){
         return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_randomForest_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
+    }
+
+    readClassifiedImage(){
+        return 'http://192.168.1.83:8080/classifiedImage.png';
     }
     
     // readEvaluationGmoMaxEnt(){
