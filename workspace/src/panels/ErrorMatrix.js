@@ -196,7 +196,7 @@ export class ErrorMatrix {
                         x: i,
                         y: lenJ - (j + 1),
                         color: colors[count + 1], 
-                        value: value,
+                        value: dataArea[count] ? parseFloat(dataArea[count].toFixed(3)) : 0,
                     }
                 );
                 dataToComputeMetrics.push(value);
@@ -459,7 +459,7 @@ export class ErrorMatrix {
                         x: i,
                         y: lenJ - (j + 1),
                         color: colors[count + 1], 
-                        value: value,
+                        value: dataArea[count] ? parseFloat(dataArea[count].toFixed(3)) : 0,
                     }
                 );
                 dataToComputeMetrics.push(value);

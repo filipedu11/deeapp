@@ -63,7 +63,6 @@ def create_map_raster(
     print("\n ======================================== \n")
 
 def create_json(classes, classMap, classification_json_file, validation_json_file, json_output_filepath):
-    
     classification_json_object = json.load(open(classification_json_file, encoding='utf-8-sig'))
     validation_json_object = json.load(open(validation_json_file, encoding='utf-8-sig'))
 
@@ -128,7 +127,7 @@ if __name__ == '__main__':
     classification_files =  glob.glob(args.source_filepaths + "/*.tif")
     classification_json_files = glob.glob(args.source_filepaths + "/*.json")
 
-    output_dirpath = os.path.abspath(os.path.join(args.target_filepaths, os.pardir)) + "/evaluation"
+    output_dirpath = os.path.abspath(os.path.join(args.target_filepaths, os.pardir)) + "/evaluation1"
 
     print("\n ======================================== \n")
 
