@@ -10,6 +10,10 @@ export class Main {
         this.classificationMap = {};
     }
 
+    addClassifiedImage(classifiedImageTiff){
+        this.mapViewer.addClassifiedImage(classifiedImageTiff);
+    }
+
     addClassification(classificationGeojson){
         this.mapViewer.addClassification(classificationGeojson);
     }

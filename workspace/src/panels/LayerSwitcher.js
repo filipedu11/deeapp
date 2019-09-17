@@ -331,7 +331,7 @@ import Feature from 'ol/Feature';
                 mapView.setLyrsSelected(lyrsSelected);
         
                 if (allLayersInvisible) {
-                    map.getView().fit(map.get('initExtent'), {constrainResolution: false});
+                    //map.getView().fit(map.get('initExtent'), {constrainResolution: false});
                     mapView.clearStatsPanel();
                     mapView.clearLegend();
                 } else if (lyr.get('typeBase') !== 'basemap' && lyr.get('typeBase') !== 'draw') {
