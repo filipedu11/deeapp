@@ -69,7 +69,7 @@ html, body {
     display: table-row;
 }
   
-.slidecontainer {
+.controller-content {
     width: 100%;
     font-size: 12px;
 }
@@ -371,7 +371,27 @@ p {
     background-color: rgba(200, 200, 200, 0.4);
 }
 
+#controls2{
+    text-align: left;
+    right: .5em;
+    max-width: calc(100% - 1.3em);
+    z-index: 30000;
+    position: absolute;
+    background: white;
+    opacity: 0.9;
+    border: 3px solid transparent;
+    border-radius: 4px;
+    background-color: rgba(200, 200, 200, 0.4);
+    margin-top: 7.5px;
+}
+
 #controls-content{
+    background-color: rgb(255, 255, 255);
+    padding: 6px;
+    border-radius: 2px;
+}
+
+#controls-content-area-plot{
     background-color: rgb(255, 255, 255);
     padding: 6px;
     border-radius: 2px;

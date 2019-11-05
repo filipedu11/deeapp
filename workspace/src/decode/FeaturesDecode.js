@@ -14,5 +14,6 @@ export class FeaturesDecode {
         this.areaInPixels = ['areaInPixels', 'Area in pixels'];
         this.perimeterInMeters = ['perimeterInMeters', 'Perimeter in meters'];
         this.numVertices = ['numVertices', 'Number of Vertices'];
+        this.featureId = ['featureId', 'Feature ID'];
     }
 }
