@@ -134,12 +134,30 @@ export class LayerEntity{
         var cN;
 
         Object.values(this.classNames).forEach(cName => {    
-            cN = cName.split(' vs ')[0];
+            cN = cName.split(' | ')[0].replace('(c)','').replace('(v)','');
             if( !categories[cN] ) categories[cN] = true;
 
         });
 
         return categories;
+    }
+
+    getBinaryClassNamesForLegend(){
+        return {
+            1: 'Verdadeiros Negativos',
+            2: 'Falsos Negativos', 
+            3: 'Falsos Positivos', 
+            4: 'Verdadeiros Positivos'
+        };
+    }
+    
+    getBinaryClassNamesForErrorMatrix(){
+        return {
+            '00' : 'Falsos Positivos', 
+            '01' : 'Verdadeiros Positivos',
+            '10' : 'Verdadeiros Negativos',
+            '11' : 'Falsos Negativos'
+        };
     }
 
     getClassColors(){
