@@ -32,13 +32,8 @@ import Draw, {createBox}  from 'ol/interaction/Draw.js';
 import Highcharts from 'highcharts';
 import Highmore from 'highcharts/highcharts-more';
 import Histogram from 'highcharts/modules/histogram-bellcurve';
-import { StatisticsMath } from '../../static/js/StatisticsMath.js';
 
 import { ErrorMatrixOA } from '../panels/ErrorMatrixOA';
-import { ErrorMatrixPA } from '../panels/ErrorMatrixPA';
-import { ErrorMatrixUA } from '../panels/ErrorMatrixUA';
-
-import { Piechart } from '../panels/Piechart.js';
 
 import { Legend } from '../panels/Legend.js';
 import { Controllers } from '../panels/Controllers';
@@ -81,9 +76,6 @@ export class MapViewer{
         //Create the initial map
         this.map =  this.createInitMap();
         this.errorMatrixOA = new ErrorMatrixOA();
-        this.errorMatrixPA = new ErrorMatrixPA();
-        this.errorMatrixUA = new ErrorMatrixUA();
-        this.piechart = new Piechart();
         this.legend = new Legend();
         this.controllers = new Controllers();
 
@@ -465,8 +457,6 @@ export class MapViewer{
 
         if (foundEvalLayers.length > 0) {
             this.createConfusionMatrixOA(layerSel);
-            this.createConfusionMatrixPA(layerSel);
-            this.createConfusionMatrixUA(layerSel);
 
             var featsFilter = vectorDraw.getSource().getFeatures();
 
@@ -476,23 +466,7 @@ export class MapViewer{
                 featsFilter.length > 0 ? 
                     format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
             );
-
-            this.createConfusionMatrixFilteredPA(
-                dataLyr, 
-                0, 
-                featsFilter.length > 0 ? 
-                    format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-            );
-
-            this.createConfusionMatrixFilteredUA(
-                dataLyr, 
-                0, 
-                featsFilter.length > 0 ? 
-                    format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-            );
         }
-
-        this.createPieChartForArea(layerSel);
    
         if ( !this.controllers.isDisplayed ){
             this.createControllerPanel();
@@ -512,22 +486,6 @@ export class MapViewer{
         //             featsFilter.length > 0 ? 
         //                 format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
         //         );
-
-        //         eMatrixClassPA.createConfusionMatrixFiltered(
-        //             dataLyr, 
-        //             areaNumber.value, 
-        //             featsFilter.length > 0 ? 
-        //                 format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-        //         );
-
-        //         eMatrixClassUA.createConfusionMatrixFiltered(
-        //             dataLyr, 
-        //             areaNumber.value, 
-        //             featsFilter.length > 0 ? 
-        //                 format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-        //         );
-        //     }
-        //     ePieChart.createPieChart(layerSel, dataLyr, areaNumber.value);
         // };
 
         layerSel.getSource().dispatchEvent('change');
@@ -620,20 +578,6 @@ export class MapViewer{
                                 featsFilter.length > 0 ? 
                                     format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
                             );
-            
-                            mapViewer.errorMatrixPA.createConfusionMatrixFiltered(
-                                dataLyr, 
-                                mapViewer.featsUnselected, 
-                                featsFilter.length > 0 ? 
-                                    format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-                            );
-            
-                            mapViewer.errorMatrixUA.createConfusionMatrixFiltered(
-                                dataLyr, 
-                                mapViewer.featsUnselected, 
-                                featsFilter.length > 0 ? 
-                                    format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-                            );
 
                             return false;
                         } else {
@@ -712,20 +656,6 @@ export class MapViewer{
                             featsFilter.length > 0 ? 
                                 format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
                         );
-        
-                        mapViewer.errorMatrixPA.createConfusionMatrixFiltered(
-                            dataLyr, 
-                            mapViewer.featsUnselected, 
-                            featsFilter.length > 0 ? 
-                                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-                        );
-        
-                        mapViewer.errorMatrixUA.createConfusionMatrixFiltered(
-                            dataLyr, 
-                            mapViewer.featsUnselected, 
-                            featsFilter.length > 0 ? 
-                                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-                        );
                     }
                 })
                 .add();
@@ -777,25 +707,20 @@ export class MapViewer{
         
         this.map.addLayer(this.vectorDraw);
 
-        var mapAux = this.map;
-        var vectorAux = this.vectorDraw;
+        var mapViewer = this;
 
         var eMatrixClassOA = this.errorMatrixOA;
-        var eMatrixClassPA = this.errorMatrixPA;
-        var eMatrixClassUA = this.errorMatrixUA;
 
         typeSelect.onchange = function() {
-            mapAux.removeInteraction(draw);
-            addInteraction(mapAux);
+            mapViewer.map.removeInteraction(draw);
+            addInteraction(mapViewer.map);
         };
 
         clearPolygon.onclick = function(){
-            if (vectorAux.getSource().getFeatures().length > 0 )
-                vectorAux.getSource().removeFeature(vectorAux.getSource().getFeatures()[0]);
+            if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
+                mapViewer.vectorDraw.getSource().removeFeature(mapViewer.vectorDraw.getSource().getFeatures()[0]);
                 
             eMatrixClassOA.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value, null);
-            eMatrixClassPA.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value, null);
-            eMatrixClassUA.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value, null);
         };
 
         function addInteraction() {
@@ -813,54 +738,46 @@ export class MapViewer{
 
             if (value !== 'None') {
                 draw = new Draw({
-                    source: vectorAux.getSource(),
+                    source: mapViewer.vectorDraw.getSource(),
                     type: /** @type {ol.geom.GeometryType} */ value,
                     geometryFunction: geometryFunction,
                     freehand: freehand
                 });
 
-                mapAux.addInteraction(draw);
+                mapViewer.map.addInteraction(draw);
 
                 // eslint-disable-next-line no-unused-vars
-                vectorAux.getSource().on('addfeature', function(e){
+                mapViewer.vectorDraw.getSource().on('addfeature', function(e){
 
                     var format = new GeoJSON();
                     var featGeo, unionFeat;
-                    var allFeatures = vectorAux.getSource().getFeatures();
+                    var allFeatures = mapViewer.vectorDraw.getSource().getFeatures();
                     var mainFeat = allFeatures[0];
 
                     if (allFeatures.length > 1) {
 
                         var mainFeatGeo = format.writeFeatureObject(mainFeat);
-                        vectorAux.getSource().removeFeature(mainFeat);
+                        mapViewer.vectorDraw.getSource().removeFeature(mainFeat);
 
                         for (let index = 1; index < allFeatures.length; index++) {
 
                             const feat = allFeatures[index];
                             featGeo = format.writeFeatureObject(feat);
                             mainFeatGeo = turf.union(mainFeatGeo,featGeo);
-                            vectorAux.getSource().removeFeature(feat);
+                            mapViewer.vectorDraw.getSource().removeFeature(feat);
                         }
                         
                         unionFeat = format.readFeature(mainFeatGeo);
-                        vectorAux.getSource().addFeature(unionFeat);
+                        mapViewer.vectorDraw.getSource().addFeature(unionFeat);
                         
                     } else if (allFeatures.length == 1) {
                         var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
                         eMatrixClassOA.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value,  featAux);
-                        eMatrixClassPA.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value,  featAux);
-                        eMatrixClassUA.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value,  featAux);
                     }
                 });
             }
         }
     }
-
-    createPieChartForArea(lyr){
-        var dataLyr = this.getObjectLayer(lyr.get('layerId'));
-        this.piechart.createPieChart(lyr, dataLyr);
-        this.piechart.createPieChart(lyr, dataLyr, 0);
-    }   
 
     createConfusionMatrixOA(lyr){
         var dataLyr = this.getObjectLayer(lyr.get('layerId'));
@@ -871,30 +788,11 @@ export class MapViewer{
         this.errorMatrixOA.createConfusionMatrixFiltered(dataLyr, areaToFilter, polygonFilter);
     }
 
-    createConfusionMatrixPA(lyr){
-        var dataLyr = this.getObjectLayer(lyr.get('layerId'));
-        this.errorMatrixPA.createConfusionMatrix(lyr, dataLyr);
-    } 
-
-    createConfusionMatrixFilteredPA(dataLyr, areaToFilter, polygonFilter){
-        this.errorMatrixPA.createConfusionMatrixFiltered(dataLyr, areaToFilter, polygonFilter);
-    }
-
-    createConfusionMatrixUA(lyr){
-        var dataLyr = this.getObjectLayer(lyr.get('layerId'));
-        this.errorMatrixUA.createConfusionMatrix(lyr, dataLyr);
-    } 
-
-    createConfusionMatrixFilteredUA(dataLyr, areaToFilter, polygonFilter){
-        this.errorMatrixUA.createConfusionMatrixFiltered(dataLyr, areaToFilter, polygonFilter);
-    }
-
     createControllerPanel(){
         this.controllers.createControllers();
     }
 
     clearStatsPanel(){
-        this.piechart.clearStatsPanel();
         this.errorMatrixOA.clearStatsPanel();
         this.controllers.clearControls();
 
