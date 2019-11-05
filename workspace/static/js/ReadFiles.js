@@ -21,12 +21,12 @@ export class ReadFiles{
         return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_continuousNaiveBayes_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
     }
 
-    readEvaluationRandomForest(){
-        return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_randomForest_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
-    }
+    // readEvaluationRandomForest(){
+    //     return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_randomForest_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
+    // }
 
     readClassifiedImage(){
-        return 'http://192.168.1.83:8080/classifiedImage.png';
+        return 'http://127.0.0.1:8080/classifiedImage.png';
     }
     
     // readEvaluationGmoMaxEnt(){

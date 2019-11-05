@@ -336,8 +336,10 @@ import Feature from 'ol/Feature';
                     mapView.clearLegend();
                 } else if (lyr.get('typeBase') !== 'basemap' && lyr.get('typeBase') !== 'draw') {
                     mapView.updateLayersInMap();
-                    mapView.updateStatsPanel();
                     mapView.createLegend();
+                    if (lyr.get('typeBase') === 'evaluation' ) {
+                        mapView.updateStatsPanel();
+                    }
                 }
             }
         },       
@@ -430,7 +432,7 @@ import Feature from 'ol/Feature';
 
                     
                     var slideCont = document.createElement('div');
-                    slideCont.className= 'slidecontainer';
+                    slideCont.className= 'controller-content';
                     var slideLabel = document.createElement('label');
                     slideLabel.className= 'slidelabel';
                     slideLabel.innerHTML = '<b>Opacity</b>';
