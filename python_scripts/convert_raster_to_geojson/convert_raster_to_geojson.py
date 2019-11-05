@@ -9,27 +9,17 @@ import math
 import shapely.wkt
 import argparse
 import os
+from area import area
 
 script = os.path.dirname(os.path.abspath(__file__)) +'/gdal_polygonize_64.py'
 
 
 def computeStatsForEachPolygon(feature):
 
-    source = osr.SpatialReference()
-    source.ImportFromEPSG(4326)
+    poly = feature['geometry']
     
-    target = osr.SpatialReference()
-    target.ImportFromEPSG(3857)
-    
-    transform = osr.CoordinateTransformation(source, target)
-    
-    poly = ogr.CreateGeometryFromJson(str(feature['geometry']))
-    poly.Transform(transform)
-
-    line = poly.Boundary()
-
     # Return the area in hectare, perimeter in km and number of vertices of polygon
-    return poly.GetArea() * 0.0001, line.Length() * 0.0001, line.GetPointCount() - 1
+    return area(poly)/10000, 0, 0
 
 
 def convert_raster_to_geojson(in_dir):
@@ -107,12 +97,15 @@ def convert_raster_to_geojson(in_dir):
                 feature['properties']['className'] = CLASS_NAMES[str(feature['properties']['classId'])]
                 feature['properties']['areaInHectare'], feature['properties']['perimeterInKm'], feature['properties']['numVertices'] = computeStatsForEachPolygon(feature)
 
-                classesOfEvalFeat = feature['properties']['className'].split(' vs ')
+                classesOfEvalFeat = feature['properties']['className'].split(' | ')
+                lenClassesOfEvalFeat = len(classesOfEvalFeat)
 
-                if len(classesOfEvalFeat) > 1:
+                if lenClassesOfEvalFeat == 2:
                     feature['properties']['classificationClass'] = classesOfEvalFeat[0]
                     feature['properties']['validationClass'] = classesOfEvalFeat[1]
-
+                elif lenClassesOfEvalFeat > 2:
+                    feature['properties']['classificationClass'] = ' , '.join(classesOfEvalFeat[0:int(lenClassesOfEvalFeat/2)])
+                    feature['properties']['validationClass'] = ' , '.join(classesOfEvalFeat[int(lenClassesOfEvalFeat/2):lenClassesOfEvalFeat])
 
             print("\n-------------- WRITE THE FINAL GEOJSON FILE ----------------\n")
 

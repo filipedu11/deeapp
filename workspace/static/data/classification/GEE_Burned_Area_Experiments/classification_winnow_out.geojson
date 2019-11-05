@@ -13,7 +13,10 @@
       "properties": {
         "featureId": 1,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.128921517478144,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -68,7 +71,10 @@
       "properties": {
         "featureId": 2,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.10617642821921577,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -115,7 +121,10 @@
       "properties": {
         "featureId": 3,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.10618041355386504,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -166,7 +175,10 @@
       "properties": {
         "featureId": 4,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.07590205916161702,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -209,7 +221,10 @@
       "properties": {
         "featureId": 5,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.2884521832767061,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -264,7 +279,10 @@
       "properties": {
         "featureId": 6,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.030363551017814655,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -299,7 +317,10 @@
       "properties": {
         "featureId": 7,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.5465436733840333,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -366,7 +387,10 @@
       "properties": {
         "featureId": 8,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.04554544900968179,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -401,7 +425,10 @@
       "properties": {
         "featureId": 9,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.2429115109138004,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -460,7 +487,10 @@
       "properties": {
         "featureId": 10,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.04554606139088447,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -495,7 +525,10 @@
       "properties": {
         "featureId": 11,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.04554814341426756,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -530,7 +563,10 @@
       "properties": {
         "featureId": 12,
         "classId": 0,
-        "className": "Área não ardida"
+        "className": "Área não ardida",
+        "areaInHectare": 0.03036542894399363,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -565,7 +601,10 @@
       "properties": {
         "featureId": 13,
         "classId": 0,
-        "className": "Área não ardida"
+        "className": "Área não ardida",
+        "areaInHectare": 0.045548388350898014,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -600,7 +639,10 @@
       "properties": {
         "featureId": 14,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.045548388350898014,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -635,7 +677,10 @@
       "properties": {
         "featureId": 15,
         "classId": 0,
-        "className": "Área não ardida"
+        "className": "Área não ardida",
+        "areaInHectare": 0.12146236893802523,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -670,7 +715,10 @@
       "properties": {
         "featureId": 16,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.19737614540899653,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -721,7 +769,10 @@
       "properties": {
         "featureId": 17,
         "classId": 0,
-        "className": "Área não ardida"
+        "className": "Área não ardida",
+        "areaInHectare": 0.045548510819213246,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -756,7 +807,10 @@
       "properties": {
         "featureId": 18,
         "classId": 0,
-        "className": "Área não ardida"
+        "className": "Área não ardida",
+        "areaInHectare": 0.04554863328235981,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -791,7 +845,10 @@
       "properties": {
         "featureId": 19,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 3.51482244970162,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1150,7 +1207,10 @@
       "properties": {
         "featureId": 20,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.15182898171885326,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1209,7 +1269,10 @@
       "properties": {
         "featureId": 21,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.04554900068041394,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1244,7 +1307,10 @@
       "properties": {
         "featureId": 22,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.030367796536686524,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1279,7 +1345,10 @@
       "properties": {
         "featureId": 23,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.007591964440772783,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1314,7 +1383,10 @@
       "properties": {
         "featureId": 24,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.4099941512717772,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1369,7 +1441,10 @@
       "properties": {
         "featureId": 25,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.030373591994832333,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1404,7 +1479,10 @@
       "properties": {
         "featureId": 26,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.713792307001519,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1483,7 +1561,10 @@
       "properties": {
         "featureId": 27,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.13668789703948062,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1530,7 +1611,10 @@
       "properties": {
         "featureId": 28,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.04556565178494785,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1565,7 +1649,10 @@
       "properties": {
         "featureId": 29,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.030383138975709083,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1600,7 +1687,10 @@
       "properties": {
         "featureId": 30,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.2582786048293398,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1663,7 +1753,10 @@
       "properties": {
         "featureId": 31,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.030386034898329972,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1698,7 +1791,10 @@
       "properties": {
         "featureId": 32,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.022789714805413662,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1745,7 +1841,10 @@
       "properties": {
         "featureId": 33,
         "classId": 1,
-        "className": "Área ardida"
+        "className": "Área ardida",
+        "areaInHectare": 0.2582859460883735,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",
@@ -1804,7 +1903,10 @@
       "properties": {
         "featureId": 34,
         "classId": 0,
-        "className": "Área não ardida"
+        "className": "Área não ardida",
+        "areaInHectare": 41598.23222468576,
+        "perimeterInKm": 0,
+        "numVertices": 0
       },
       "geometry": {
         "type": "Polygon",

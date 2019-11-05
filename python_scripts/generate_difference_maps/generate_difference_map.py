@@ -63,17 +63,12 @@ def create_map_raster(
     print("\n ======================================== \n")
 
 def create_json(classes, classMap, classification_json_file, validation_json_file, json_output_filepath):
-
-    cFileOpen = open(classification_json_file, encoding='utf8')
-    vFileOpen = open(validation_json_file, encoding='utf8')
-    
-    
-    classification_json_object = json.load(cFileOpen)
-    validation_json_object = json.load(vFileOpen)
+    classification_json_object = json.load(open(classification_json_file, encoding='utf-8-sig'))
+    validation_json_object = json.load(open(validation_json_file, encoding='utf-8-sig'))
 
     content_json = {
         "layerID": "{}_vs_{}".format(classification_json_object["layerID"], validation_json_object["layerID"]),
-        "layerName": "{} vs {}".format(classification_json_object["layerName"], validation_json_object["layerName"]),
+        "layerName": "{} | {}".format(classification_json_object["layerName"] + ' (v)', validation_json_object["layerName"] + ' (c)'),
         "layerDescription": "Evaluation map for comparing {} with {}".format(classification_json_object["layerName"], validation_json_object["layerName"]),
         "layerRasterFile": "",
         "layerSource": {
@@ -87,7 +82,8 @@ def create_json(classes, classMap, classification_json_file, validation_json_fil
         "layerStyle": {
             "color": {}
         },
-        "classNames": {}  
+        "classNames": {},
+        "classNamesEval": {}  
     }
 
 
@@ -105,13 +101,12 @@ def create_json(classes, classMap, classification_json_file, validation_json_fil
 
     for i, c1 in enumerate(classes, 0):
         for c2 in classes:
-            className = classification_json_object["classNames"][str(c1)] + " vs " + validation_json_object["classNames"][str(c2)]
+            className = classification_json_object["classNames"][str(c1)] + ' (c)' + " | " + validation_json_object["classNames"][str(c2)] + ' (v)'
             content_json["classNames"][str(classMap[(c1,c2)])] = className
 
             color = classification_json_object["layerStyle"]["color"][str(c1)]
-
+            
             if c1 != c2:
-
                 color = 'rgb({},{},{})'.format(int(color_palette[i][0]*255), int(color_palette[i][1]*255), int(color_palette[i][2]*255))
 
             content_json["layerStyle"]["color"][str(classMap[(c1,c2)])] = color
@@ -132,7 +127,7 @@ if __name__ == '__main__':
     classification_files =  glob.glob(args.source_filepaths + "/*.tif")
     classification_json_files = glob.glob(args.source_filepaths + "/*.json")
 
-    output_dirpath = os.path.abspath(os.path.join(args.target_filepaths, os.pardir)) + "/evaluation"
+    output_dirpath = os.path.abspath(os.path.join(args.target_filepaths, os.pardir)) + "/evaluation1"
 
     print("\n ======================================== \n")
 
