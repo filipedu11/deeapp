@@ -33,7 +33,7 @@ import Highcharts from 'highcharts';
 import Highmore from 'highcharts/highcharts-more';
 import Histogram from 'highcharts/modules/histogram-bellcurve';
 
-import { ErrorMatrixOA } from '../panels/ErrorMatrixOA';
+import { ErrorMatrix } from '../panels/ErrorMatrix';
 
 import { Legend } from '../panels/Legend.js';
 import { Controllers } from '../panels/Controllers';
@@ -75,7 +75,7 @@ export class MapViewer{
 
         //Create the initial map
         this.map =  this.createInitMap();
-        this.errorMatrixOA = new ErrorMatrixOA();
+        this.errorMatrix = new ErrorMatrix();
         this.legend = new Legend();
         this.controllers = new Controllers();
 
@@ -453,16 +453,14 @@ export class MapViewer{
         }
         
         var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
-        var vectorDraw = this.vectorDraw;
 
         if (foundEvalLayers.length > 0) {
-            this.createConfusionMatrixOA(layerSel);
+            this.createConfusionMatrix(layerSel);
 
-            var featsFilter = vectorDraw.getSource().getFeatures();
 
-            this.createConfusionMatrixFilteredOA(
+            this.createConfusionMatrixFiltered(
                 dataLyr, 
-                0, 
+                [min.value, max.value], 
                 featsFilter.length > 0 ? 
                     format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
             );
@@ -693,6 +691,11 @@ export class MapViewer{
             } else {
                 splitedDataArea[1].push(element);
             }
+            mapViewer.errorMatrix.createConfusionMatrixFiltered(
+                dataLyr, 
+                [minAreaInput.value, maxAreaInput.value], 
+                filterPoly);
+        });
 
         }
 
@@ -709,8 +712,6 @@ export class MapViewer{
 
         var mapViewer = this;
 
-        var eMatrixClassOA = this.errorMatrixOA;
-
         typeSelect.onchange = function() {
             mapViewer.map.removeInteraction(draw);
             addInteraction(mapViewer.map);
@@ -719,8 +720,13 @@ export class MapViewer{
         clearPolygon.onclick = function(){
             if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
                 mapViewer.vectorDraw.getSource().removeFeature(mapViewer.vectorDraw.getSource().getFeatures()[0]);
-                
-            eMatrixClassOA.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value, null);
+            
+            layerSel.getFilters().forEach(f => {
+                layerSel.removeFilter(f);
+            });
+
+
+            mapViewer.errorMatrix.createConfusionMatrixFiltered(dataLyr, [min.value, max.value], null);
         };
 
         function addInteraction() {
@@ -772,28 +778,27 @@ export class MapViewer{
                         
                     } else if (allFeatures.length == 1) {
                         var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
-                        eMatrixClassOA.createConfusionMatrixFiltered(dataLyr, document.getElementById('area-number').value,  featAux);
+                        mapViewer.errorMatrix.createConfusionMatrixFiltered(
+                            dataLyr, 
+                            [min.value, max.value],
+                            featAux);
                     }
                 });
             }
         }
     }
 
-    createConfusionMatrixOA(lyr){
+    createConfusionMatrix(lyr){
         var dataLyr = this.getObjectLayer(lyr.get('layerId'));
-        this.errorMatrixOA.createConfusionMatrix(lyr, dataLyr);
+        this.errorMatrix.createConfusionMatrix(lyr, dataLyr);
     } 
 
-    createConfusionMatrixFilteredOA(dataLyr, areaToFilter, polygonFilter){
-        this.errorMatrixOA.createConfusionMatrixFiltered(dataLyr, areaToFilter, polygonFilter);
-    }
-
-    createControllerPanel(){
-        this.controllers.createControllers();
+    createConfusionMatrixFiltered(dataLyr, filterAreaInterval, polygonFilter){
+        this.errorMatrix.createConfusionMatrixFiltered(dataLyr, filterAreaInterval, polygonFilter);
     }
 
     clearStatsPanel(){
-        this.errorMatrixOA.clearStatsPanel();
+        this.errorMatrix.clearStatsPanel();
         this.controllers.clearControls();
 
         this.vectorDraw.getSource().getFeatures().forEach(feat => {
