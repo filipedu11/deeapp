@@ -71,11 +71,12 @@
       <!-- MAP LEGEND -->
       <div id="controls" class="none-block">
         <div id="controls-content">
-          <h6><b><u>Filtros</u></b></h6>
+          <h4>Filtros</h4>
+          <hr style="margin-top:0em;">
           <div class="controller-content">
             <label class="slidelabel controller-padding">
-                <b>Área em Ha ( > )</b><br/>
-                <input id="area-number" type="number" style="align-content: center; margin-top: 4px" value="0"/>
+                <b>Área em Ha</b><br/><br/>
+                <input id="area-min-number"/><label id="area-number-slider"></label><input id="area-max-number"/>
             </label>
           </div>
           <div class="controller-content">
@@ -106,7 +107,7 @@
       <!-- MAP LEGEND -->
         
       <div id="controls2" class="none-block">
-        <div id="controls-content-area-plot">
+        <div id="controls-content-metrics-plot">
         </div>
       </div>
 

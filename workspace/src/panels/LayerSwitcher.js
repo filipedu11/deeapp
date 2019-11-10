@@ -335,6 +335,10 @@ import Feature from 'ol/Feature';
                     mapView.clearStatsPanel();
                     mapView.clearLegend();
                 } else if (lyr.get('typeBase') !== 'basemap' && lyr.get('typeBase') !== 'draw') {
+                    if (lyr.get('typeBase') !== 'evaluation' ) {
+                        mapView.clearStatsPanel();
+                        mapView.clearLegend();
+                    }
                     mapView.updateLayersInMap();
                     mapView.createLegend();
                     if (lyr.get('typeBase') === 'evaluation' ) {

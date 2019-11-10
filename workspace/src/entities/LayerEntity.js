@@ -2,6 +2,7 @@
 import { LayerDecode } from '../decode/LayerDecode';
 import { MetadaLayer } from '../panels/layer/MetadataLayer';
 import { Legend } from '../panels/Legend';
+import * as turf from '@turf/turf';
 
 export class LayerEntity{
 
@@ -22,6 +23,9 @@ export class LayerEntity{
         this.classNames = classNames;
         this.geojsonFile = geojsonFile;
         this.type = type;
+        this.occupiedAreaOfEachFeatures = this.computeOccupiedArea(features);
+        this.minOccupiedArea = Math.min(...this.occupiedAreaOfEachFeatures);
+        this.maxOccupiedArea = Math.max(...this.occupiedAreaOfEachFeatures);
 
         //Create panel for layer
         this.metadataPanel = new MetadaLayer(this);
@@ -106,23 +110,44 @@ export class LayerEntity{
         return this.features[index][this.getDecode().statsDecode.polygonProperties[this.getDecode().key]];
     }
 
+    /**
+     * Return the features from layers
+     */
     getFeatures(){
         return this.features;
     }
 
+    /**
+     * 
+     * Return the define color of a class by giving the class id
+     * 
+     * @param {number} classId 
+     */
     getColorOfClass(classId){
         var colorDict = this.layerStyle[this.getDecode().color[this.getDecode().key]];
         return colorDict[classId];
     }
 
+    /**
+     * 
+     * Return the class name by giving the class id
+     * 
+     * @param {number} classId 
+     */
     getNameOfClass(classId){
         return this.classNames[classId];
     }
 
+    /**
+     * Return the keys of classNames dictionary
+     */
     getKeysOfClasses(){
         return Object.keys(this.classNames);
     }
 
+    /**
+     * Return the list of class names
+     */
     getClassNames(){
         return this.classNames;
     }
@@ -170,5 +195,27 @@ export class LayerEntity{
 
     clearMetadata(){
         this.metadataPanel.clearMetadataPanel();
+    }
+
+    computeOccupiedArea(features){
+
+        var dataArea = [];
+
+        for (let index = 0, len = features.length; index < len; index++) {
+            const polygon = features[index]['geometry']['coordinates'];
+
+            //Convert area to hectares (ha = m^2 / 10000)
+            dataArea.push(turf.area(turf.polygon(polygon))/10000);
+        }
+
+        return dataArea;
+    }
+
+    getMinimumOccupiedArea(){
+        return this.minOccupiedArea;
+    }
+
+    getMaximumOccupiedArea(){
+        return this.maxOccupiedArea;
     }
 }
