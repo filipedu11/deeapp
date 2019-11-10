@@ -25,6 +25,8 @@ import Vector from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/VectorTile';
 import VectorL from 'ol/layer/Vector';
 import ImageLayer from 'ol/layer/Image.js';
+import Control from 'ol/control';
+import Mask from 'ol-ext/filter/Mask';
 
 import Projection from 'ol/proj/Projection';
 import Draw, {createBox}  from 'ol/interaction/Draw.js';
@@ -39,6 +41,9 @@ import { Legend } from '../panels/Legend.js';
 import { Controllers } from '../panels/Controllers';
 
 import * as turf from '@turf/turf';
+
+import noUiSlider from 'nouislider';
+import wNumb from 'wnumb';
 
 Highmore(Highcharts);
 Histogram(Highcharts);
@@ -104,9 +109,6 @@ export class MapViewer{
                 wrapX: false
             }),
             style: new Style({
-                fill: new Fill({
-                    color: 'rgba(255, 255, 255, 0.2)'
-                }),
                 stroke: new Stroke({
                     color: 'rgba(15, 133, 240)',
                     width: 2
@@ -308,14 +310,15 @@ export class MapViewer{
 
         var inactiveC = lyr.get('inactiveClasses');
 
-        var mapViewer = this;
+        var min = document.getElementById('area-min-number');
+        var max = document.getElementById('area-max-number');
 
         // eslint-disable-next-line no-unused-vars
         lyr.setStyle(function name(feature, resolution) {
 
             var colorAux = classAux.getColorOfClass(feature.get(fD.classId[k]));
 
-            var drawFeature = !mapViewer.featsUnselected[feature.get(fD.featureId[k])];
+            var drawFeature =  min.value <= feature.get('areaInHectare') && feature.get('areaInHectare') <= max.value;
 
             if ( !inactiveC[feature.get(fD.classId[k])] && drawFeature ) {
                 return [new Style({
@@ -457,6 +460,10 @@ export class MapViewer{
         if (foundEvalLayers.length > 0) {
             this.createConfusionMatrix(layerSel);
 
+            
+            var min = document.getElementById('area-min-number');
+            var max = document.getElementById('area-max-number');
+            var featsFilter = this.vectorDraw.getSource().getFeatures();
 
             this.createConfusionMatrixFiltered(
                 dataLyr, 
@@ -467,242 +474,69 @@ export class MapViewer{
         }
    
         if ( !this.controllers.isDisplayed ){
-            this.createControllerPanel();
-            this.createPolygonInteraction(dataLyr);
-            this.createAreaPlot(dataLyr, layerSel);
+            this.controllers.createControllers();
+            this.createPolygonInteraction(dataLyr, layerSel);
+            this.createAreaFilterInteraction(dataLyr, layerSel);
         }
-
-        // var areaNumber = document.getElementById('area-number');
-        // areaNumber.onchange = function(){
-        //     layerSel.getSource().dispatchEvent('change');
-        //     if (foundEvalLayers.length > 0) {
-        //         var featsFilter = vectorDraw.getSource().getFeatures();
-
-        //         eMatrixClassOA.createConfusionMatrixFiltered(
-        //             dataLyr, 
-        //             areaNumber.value, 
-        //             featsFilter.length > 0 ? 
-        //                 format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-        //         );
-        // };
 
         layerSel.getSource().dispatchEvent('change');
         this.currentLayer = layerSel;
     }
 
-    createAreaPlot(dataLyr, layerSel){
+    createAreaFilterInteraction(dataLyr, layerSel){ 
 
-        var features = dataLyr.getFeatures();
-        var dataArea = [];
+        var min = dataLyr.getMinimumOccupiedArea();
+        var max = dataLyr.getMaximumOccupiedArea();
 
-        for (let index = 0, len = features.length; index < len; index++) {
-            const polygon = features[index]['geometry']['coordinates'];
-            const id = features[index]['properties']['featureId'];
+        var minAreaInput = document.getElementById('area-min-number');
+        var maxAreaInput = document.getElementById('area-max-number');
 
-            //Convert area to hectares (ha = m^2 / 10000)
-            const calcArea = parseFloat((turf.area(turf.polygon(polygon))/10000).toFixed(4));
-            dataArea.push({
-                area: calcArea,
-                id: id
-            });
-        }
-
-        dataArea.sort(function(a, b) {
-            return a.area - b.area;
-        });
-
-        let area = dataArea.map(d => d.area);
-        let id = dataArea.map(d => d.id);
+        var slideArea = document.getElementById('area-number-slider');
 
         var mapViewer = this;
-        var featsFilter = mapViewer.vectorDraw.getSource().getFeatures();
+
+        noUiSlider.create(slideArea, {
+            start: [min, max],
+            connect: true,
+            range: {
+                'min': min,
+                'max': max
+            },
+            format: wNumb({
+                decimals: 5
+            })
+        });
+
         var format = new GeoJSON();
 
-        Highcharts.chart('controls-content-area-plot', {
-            title: {
-                text: 'Distribução de área ocupada (em ha) dos polígonos'
-            },
-            chart: {
-                zoomType: 'x',
-                zoomKey: 'ctrl',
-                height: 300,
-                width: 400,
-                marginTop: 125,
-                resetZoomButton: {
-                    theme: {
-                        display: 'none'
-                    }
-                },
-                events: {
-                    load: function() {
-                        let chart = this;
-                        chart.ctrlPressed = false;
-                        
-                        document.addEventListener('keydown', (event) => {
-                            chart.ctrlPressed = event.ctrlKey;
-                        });
-                        
-                        document.addEventListener('keyup', (event) => {
-                            chart.ctrlPressed = event.ctrlKey;
-                        });
-                        
-                    },
+        // eslint-disable-next-line no-unused-vars
+        slideArea.noUiSlider.on('update', function (values, handle) {
+            minAreaInput.value = values[0];
+            maxAreaInput.value = values[1];
 
-                    selection: function(event) {
+            layerSel.getSource().dispatchEvent('change');
+            var featAux = mapViewer.vectorDraw.getSource().getFeatures();
+            var filterPoly = null;
 
-                        this.pointsSelect = [];
-
-                        if (this.ctrlPressed) {
-
-                            for (let i = 0, len = this.series[0].data.length; i < len; i++) {
-                                const point = this.series[0].data[i];
-
-                                if ((point.x > event.xAxis[0].min &&
-                                    point.x < event.xAxis[0].max) || mapViewer.featsUnselected[id[point.x]] === false) {
-                                    point.select(true, true);
-                                    mapViewer.featsUnselected[id[point.x]] = false;
-                                    this.pointsSelect.push(point);
-                                }
-                                else {
-                                    mapViewer.featsUnselected[id[point.x]] = true;
-                                }
-                            }
-
-                            layerSel.getSource().dispatchEvent('change');
+            if (featAux.length == 1 )
+                filterPoly =  format.writeFeatureObject(featAux[0], {featureProjection: 'EPSG:3857'});
             
-                            mapViewer.errorMatrixOA.createConfusionMatrixFiltered(
-                                dataLyr, 
-                                mapViewer.featsUnselected, 
-                                featsFilter.length > 0 ? 
-                                    format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-                            );
-
-                            return false;
-                        } else {
-                            return true;
-                        }
-                            
-                    },
-                },
-            },
-            yAxis: {
-                type: 'logarithmic',
-                zoomEnabled: false,
-                title: {
-                    text: null
-                }
-            },
-            xAxis: {
-                max: id.length + 5,
-                min: -5,
-                visible: false
-            },
-            boost: {
-                useGPUTranslations: true,
-                usePreAllocated: true
-            },
-
-            plotOptions: {
-                series: {
-                    // general options for all series
-                },
-                histogram: {
-                    // shared options for all histogram series
-                }
-            },
-
-            tooltip: {
-                positioner: function() {
-                    return {
-                        x: this.chart.plotLeft,
-                        y: this.chart.plotTop
-                    };
-                },
-                shared: true,
-                headerFormat: '',
-                pointFormat: 'Área ocupada: <b>{point.y}</b><br/>',
-                valueDecimals: 2,
-                shadow: false,
-                borderWidth: 0,
-                backgroundColor: 'rgba(255,255,255,0.8)'
-            },
-
-            series: [{
-                showInLegend:false,
-                data: area,
-                type: 'scatter'
-            }]
-        },
-        function (chart) { // on complete    
-            chart.renderer.button('Remover Selecção',0,70)
-                .attr({
-                    zIndex: 3,
-                    fill: 'white',
-                    stroke: 'silver',
-                    scaleX: 0.75,
-                    scaleY: 0.75
-                })
-                .on('click', function () {
-                    if (chart.pointsSelect && chart.pointsSelect.length > 0) {
-                        chart.pointsSelect[0].select(false,false);
-                        mapViewer.featsUnselected = {};
-                        layerSel.getSource().dispatchEvent('change');
-
-                        mapViewer.errorMatrixOA.createConfusionMatrixFiltered(
-                            dataLyr, 
-                            mapViewer.featsUnselected, 
-                            featsFilter.length > 0 ? 
-                                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-                        );
-                    }
-                })
-                .add();
-
-            chart.renderer.button('Zoom Out',100,70)
-                .attr({
-                    zIndex: 3,
-                    fill: 'white',
-                    stroke: 'silver',
-                    scaleX: 0.75,
-                    scaleY: 0.75
-                })
-                .on('click', function () {
-                    chart.zoomOut();
-                })
-                .add();
-    
-        });
-    }
-
-    computeDataForHistogram(dataArea){
-        var splitedDataArea = [[],[]];
-
-        var length = dataArea.length;
-        var minimum = dataArea[0];
-        var maximum = dataArea[length - 1];
-
-        var binWidth = parseFloat(((maximum - minimum) / length).toFixed(3));
-
-        for (let index = 0; index < dataArea.length; index++) {
-            const element = dataArea[index];
-            
-            if (element < binWidth) {
-                splitedDataArea[0].push(element);
-            } else {
-                splitedDataArea[1].push(element);
-            }
             mapViewer.errorMatrix.createConfusionMatrixFiltered(
                 dataLyr, 
                 [minAreaInput.value, maxAreaInput.value], 
                 filterPoly);
         });
 
-        }
+        minAreaInput.addEventListener('change', function () {
+            slideArea.noUiSlider.set([this.value, null]);
+        });
 
-        return splitedDataArea;
+        maxAreaInput.addEventListener('change', function () {
+            slideArea.noUiSlider.set([null, this.value]);
+        });
     }
  
-    createPolygonInteraction(dataLyr){
+    createPolygonInteraction(dataLyr, layerSel){
 
         var draw; // global so we can remove it later
         var typeSelect = document.getElementById('type-geo');
@@ -714,8 +548,12 @@ export class MapViewer{
 
         typeSelect.onchange = function() {
             mapViewer.map.removeInteraction(draw);
-            addInteraction(mapViewer.map);
+            addInteraction();
         };
+
+        var min = document.getElementById('area-min-number');
+        var max = document.getElementById('area-max-number');
+
 
         clearPolygon.onclick = function(){
             if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
@@ -752,10 +590,11 @@ export class MapViewer{
 
                 mapViewer.map.addInteraction(draw);
 
+                var format = new GeoJSON();
+
                 // eslint-disable-next-line no-unused-vars
                 mapViewer.vectorDraw.getSource().on('addfeature', function(e){
 
-                    var format = new GeoJSON();
                     var featGeo, unionFeat;
                     var allFeatures = mapViewer.vectorDraw.getSource().getFeatures();
                     var mainFeat = allFeatures[0];
@@ -777,6 +616,15 @@ export class MapViewer{
                         mapViewer.vectorDraw.getSource().addFeature(unionFeat);
                         
                     } else if (allFeatures.length == 1) {
+
+                        const mask = new Mask({ feature: mainFeat, inner:false, fill: new Fill({ color:[255,255,255,0.8] }) });
+                        
+                        layerSel.getFilters().forEach(f => {
+                            layerSel.removeFilter(f);
+                        });
+
+                        layerSel.addFilter(mask);
+
                         var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
                         mapViewer.errorMatrix.createConfusionMatrixFiltered(
                             dataLyr, 
