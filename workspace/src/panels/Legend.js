@@ -10,7 +10,7 @@ export class Legend {
     createLegend(lyrObj, layerOL){
         const classKeys = lyrObj.getKeysOfClasses();
 
-        this.legendContent.innerHTML = '<h6><b><u>Legend</u></b></h6>';
+        this.legendContent.innerHTML = '<h6><b><u>Legenda</u></b></h6>';
 
         var classNames = lyrObj.getClassNames();
 

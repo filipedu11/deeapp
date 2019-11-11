@@ -71,11 +71,34 @@ html, body {
   
 .controller-content {
     width: 100%;
-    font-size: 12px;
 }
 
 .controller-padding {
     padding-left: 10px;
+}
+
+.noUi-horizontal {
+    height: 10px !important;
+}
+
+.noUi-handle {
+    width: 10px !important;
+    height: 20px !important;
+    right: -5px !important; /*  must be (width / 2) * -1 */
+ }
+
+.noUi-handle:before, .noUi-handle:after {
+    display: none !important;
+}
+
+#area-number-slider {
+    width: 52%;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+#area-min-number, #area-max-number {
+    width: 20%;
 }
 
 .slider {
@@ -391,10 +414,11 @@ p {
     border-radius: 2px;
 }
 
-#controls-content-area-plot{
+#controls-content-metrics-plot{
     background-color: rgb(255, 255, 255);
     padding: 6px;
     border-radius: 2px;
+    display: none;
 }
 
 /* Center the loader */
