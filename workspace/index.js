@@ -11,6 +11,8 @@ import './static/css/ol-layerswitcher.css';
 import './static/css/sidebar.css';
 import './static/css/map.css';
 import './static/css/circle.css';
+import 'nouislider/distribute/nouislider.css';
+
 
 
 /**
