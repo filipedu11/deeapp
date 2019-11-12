@@ -28,7 +28,7 @@ export class ErrorMatrix {
         this.lastY = -1;
     }
 
-    createConfusionMatrix(lyr, dataLyr){
+    createConfusionMatrix(dataLyr){
         
         var confusionMatrix = document.getElementById('confusion-matrix-global-oa');
         
