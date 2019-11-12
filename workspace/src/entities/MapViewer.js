@@ -96,8 +96,6 @@ export class MapViewer{
         //Render the layerswitcher
         this.loadLayerSwitcher();
 
-        this.clearStatsPanel();
-
         this.map.set('mapViewer', this);
     }
 
@@ -320,12 +318,8 @@ export class MapViewer{
 
             var drawFeature =  min.value <= feature.get('areaInHectare') && feature.get('areaInHectare') <= max.value;
 
-            if ( !inactiveC[feature.get(fD.classId[k])] && drawFeature ) {
+            if ( !inactiveC[feature.get(fD.classId[k])] && ( drawFeature || classAux.getType() !== EVALUATION_STRING )) {
                 return [new Style({
-                    // stroke: new Stroke({
-                    //     color: 'rgba(255,255,255,0)',
-                    //     width: 0
-                    // }),
                     fill: new Fill({
                         color: colorAux,
                     }),
@@ -413,74 +407,57 @@ export class MapViewer{
         cl.clearMetadata();
     }
 
-    createLegend(){
-        var lenSelectLayer = this.lyrsSelected.length;
-        var layerSel = this.lyrsSelected[lenSelectLayer-1];
-
-        if (lenSelectLayer > 0) this.legend.createLegend(this.getObjectLayer(layerSel.get('layerId')), layerSel);
+    updateLegend(){
+        if (this.currentLayer) 
+            this.legend.createLegend(this.getObjectLayer(this.currentLayer.get('layerId')), this.currentLayer);
+        else
+            this.legend.clearLegend();
     }
-
-    clearLegend(){
-        this.legend.clearLegend();
-    }
-
+    
     getObjectLayer(id){
         return this.allLayersDict[id];
     }
 
-    updateLayersInMap(){
-
+    isLayerSelectDiffThanCurrent(layerSel){
+        if (!this.currentLayer)
+            return true;
+        
+        return this.currentLayer.get('layerId') !== layerSel.get('layerId');
     }
 
-    updateStatsPanel(){
+    createControllersFilter(layerSel) {
 
-        var lenSelectLayer = this.lyrsSelected.length;
-
-        var foundEvalLayers = [];
-        var format = new GeoJSON();
-
-        for (let index = 0; index < this.lyrsSelected.length; index++) {
-            const lyr = this.getObjectLayer(this.lyrsSelected[index].get('layerId'));
-            if (lyr.getType() == EVALUATION_STRING) {
-                foundEvalLayers.push(this.lyrsSelected[index]);
-            } 
+        if ( this.controllers.isDisplayed ){
+            this.clearFilterControllers();
         }
 
-        var layerSel = foundEvalLayers.length > 0 ? foundEvalLayers[foundEvalLayers.length-1] : this.lyrsSelected[lenSelectLayer - 1];
-
-            
-        if ( this.currentLayer ) {
-            if ( this.currentLayer.get('layerId') != layerSel.get('layerId')) {
-                this.clearStatsPanel();
-            }
-        }
-        
         var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
 
-        if (foundEvalLayers.length > 0) {
-            this.createConfusionMatrix(layerSel);
-
-            
-            var min = document.getElementById('area-min-number');
-            var max = document.getElementById('area-max-number');
-            var featsFilter = this.vectorDraw.getSource().getFeatures();
-
-            this.createConfusionMatrixFiltered(
-                dataLyr, 
-                [min.value, max.value], 
-                featsFilter.length > 0 ? 
-                    format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
-            );
-        }
-   
-        if ( !this.controllers.isDisplayed ){
-            this.controllers.createControllers();
-            this.createPolygonInteraction(dataLyr, layerSel);
-            this.createAreaFilterInteraction(dataLyr, layerSel);
-        }
+        this.controllers.displayControllers();
+        this.createPolygonInteraction(dataLyr, layerSel);
+        this.createAreaFilterInteraction(dataLyr, layerSel);
 
         layerSel.getSource().dispatchEvent('change');
         this.currentLayer = layerSel;
+    }
+
+    createStatsPanel(layerSel) {
+        var format = new GeoJSON();
+                    
+        var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
+
+        var min = document.getElementById('area-min-number');
+        var max = document.getElementById('area-max-number');
+        var featsFilter = this.vectorDraw.getSource().getFeatures();
+
+        this.createConfusionMatrix(dataLyr);
+
+        this.createConfusionMatrixFiltered(
+            dataLyr, 
+            [min.value, max.value], 
+            featsFilter.length > 0 ? 
+                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
+        );
     }
 
     createAreaFilterInteraction(dataLyr, layerSel){ 
@@ -503,7 +480,7 @@ export class MapViewer{
                 'max': max
             },
             format: wNumb({
-                decimals: 5
+                decimals: 4
             })
         });
 
@@ -553,7 +530,6 @@ export class MapViewer{
 
         var min = document.getElementById('area-min-number');
         var max = document.getElementById('area-max-number');
-
 
         clearPolygon.onclick = function(){
             if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
@@ -636,9 +612,8 @@ export class MapViewer{
         }
     }
 
-    createConfusionMatrix(lyr){
-        var dataLyr = this.getObjectLayer(lyr.get('layerId'));
-        this.errorMatrix.createConfusionMatrix(lyr, dataLyr);
+    createConfusionMatrix(dataLyr){
+        this.errorMatrix.createConfusionMatrix(dataLyr);
     } 
 
     createConfusionMatrixFiltered(dataLyr, filterAreaInterval, polygonFilter){
@@ -647,12 +622,24 @@ export class MapViewer{
 
     clearStatsPanel(){
         this.errorMatrix.clearStatsPanel();
+    }
+
+    clearFilterControllers(){
         this.controllers.clearControls();
 
         this.vectorDraw.getSource().getFeatures().forEach(feat => {
             this.vectorDraw.getSource().removeFeature(feat);
         });
+
+        document.getElementById('area-number-slider').noUiSlider.destroy();
+
         this.map.removeLayer(this.vectorDraw);
+    }
+
+    resetMap(l) {
+        this.currentLayer = l;
+        this.clearStatsPanel();
+        this.clearFilterControllers();
     }
 
     /**

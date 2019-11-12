@@ -6,7 +6,7 @@ export class Controllers {
         this.isDisplayed = false;
     }
 
-    createControllers(){
+    displayControllers(){
         this.controls.className = 'inline-block';
         this.controls2.className = 'inline-block';
         this.controls2.style.top = (this.controls.offsetHeight) + 'px';
