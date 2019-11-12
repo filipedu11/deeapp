@@ -317,34 +317,35 @@ import Feature from 'ol/Feature';
         }, {
             key: 'updateMap_',
             value: function updateMap(map, mapView, lyr){
-                var allLayersInvisible = true;
+                var noneEvalLayerSelected = true;
                 var lyrsSelected = [];
+                var lyrSelected = null;
                 
                 LayerSwitcher.forEachRecursive(map, function (l, idx, a) {
-        
                     if (l.getVisible() && l.get('typeBase') !== 'basemap' && l.get('typeBase') !== 'draw' && !l.getLayers) {
-                        allLayersInvisible = false;
                         lyrsSelected.push(l);
+                        lyrSelected = l;
                     }
                 });
-        
+                                
                 mapView.setLyrsSelected(lyrsSelected);
-        
-                if (allLayersInvisible) {
-                    //map.getView().fit(map.get('initExtent'), {constrainResolution: false});
-                    mapView.clearStatsPanel();
-                    mapView.clearLegend();
-                } else if (lyr.get('typeBase') !== 'basemap' && lyr.get('typeBase') !== 'draw') {
-                    if (lyr.get('typeBase') !== 'evaluation' ) {
-                        mapView.clearStatsPanel();
-                        mapView.clearLegend();
+
+                if (lyrSelected && lyrSelected.get('typeBase') === 'evaluation' ) {
+                    if (mapView.isLayerSelectDiffThanCurrent(lyrSelected)) {
+                        mapView.createControllersFilter(lyrSelected);
+                        mapView.createStatsPanel(lyrSelected);
                     }
-                    mapView.updateLayersInMap();
-                    mapView.createLegend();
-                    if (lyr.get('typeBase') === 'evaluation' ) {
-                        mapView.updateStatsPanel();
-                    }
+                    noneEvalLayerSelected = false;
                 }
+                
+                if (noneEvalLayerSelected) {
+                    //map.getView().fit(map.get('initExtent'), {constrainResolution: false});
+                    mapView.resetMap(lyrSelected);
+                }
+
+                mapView.updateLegend();
+
+                lyrSelected.getSource().dispatchEvent('change');
             }
         },       
         {
