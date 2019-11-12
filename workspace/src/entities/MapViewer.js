@@ -412,7 +412,6 @@ export class MapViewer{
             this.legend.createLegend(this.getObjectLayer(this.currentLayer.get('layerId')), this.currentLayer);
         else
             this.legend.clearLegend();
-
     }
     
     getObjectLayer(id){
@@ -420,9 +419,8 @@ export class MapViewer{
     }
 
     isLayerSelectDiffThanCurrent(layerSel){
-        if (!this.currentLayer) {
+        if (!this.currentLayer)
             return true;
-        }
         
         return this.currentLayer.get('layerId') !== layerSel.get('layerId');
     }
@@ -430,7 +428,6 @@ export class MapViewer{
     createControllersFilter(layerSel) {
 
         if ( this.controllers.isDisplayed ){
-            this.clearStatsPanel();
             this.clearFilterControllers();
         }
 
@@ -483,7 +480,7 @@ export class MapViewer{
                 'max': max
             },
             format: wNumb({
-                decimals: 5
+                decimals: 4
             })
         });
 
@@ -635,10 +632,6 @@ export class MapViewer{
         });
 
         document.getElementById('area-number-slider').noUiSlider.destroy();
-
-        var objLyr = this.getObjectLayer(this.currentLayer.get('layerId'));
-        document.getElementById('area-min-number').value = this.currentLayer ? objLyr.getMinimumOccupiedArea() : 0;
-        document.getElementById('area-max-number').value = this.currentLayer ? objLyr.getMaximumOccupiedArea() : 0;
 
         this.map.removeLayer(this.vectorDraw);
     }
