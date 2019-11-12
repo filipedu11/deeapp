@@ -212,10 +212,10 @@ export class LayerEntity{
     }
 
     getMinimumOccupiedArea(){
-        return this.minOccupiedArea;
+        return Math.floor(this.minOccupiedArea * 10000) / 10000;
     }
 
     getMaximumOccupiedArea(){
-        return this.maxOccupiedArea;
+        return Math.ceil(this.maxOccupiedArea * 10000) / 10000;
     }
 }

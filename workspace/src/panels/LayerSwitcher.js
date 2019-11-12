@@ -317,7 +317,6 @@ import Feature from 'ol/Feature';
         }, {
             key: 'updateMap_',
             value: function updateMap(map, mapView, lyr){
-                var noneEvalLayerSelected = true;
                 var lyrsSelected = [];
                 var lyrSelected = null;
                 
@@ -332,17 +331,15 @@ import Feature from 'ol/Feature';
 
                 if (lyrSelected && lyrSelected.get('typeBase') === 'evaluation' ) {
                     if (mapView.isLayerSelectDiffThanCurrent(lyrSelected)) {
-                        mapView.createControllersFilter(lyrSelected);
                         mapView.createStatsPanel(lyrSelected);
+                        mapView.createControllersFilter(lyrSelected);
                     }
-                    noneEvalLayerSelected = false;
                 }
-                
-                if (noneEvalLayerSelected) {
+                else {
                     //map.getView().fit(map.get('initExtent'), {constrainResolution: false});
                     mapView.resetMap(lyrSelected);
                 }
-
+                
                 mapView.updateLegend();
 
                 lyrSelected.getSource().dispatchEvent('change');
