@@ -74,7 +74,7 @@ export class ErrorMatrix {
                 backgroundColor:'rgba(255, 255, 255, 0.0)'
             },
             title: {
-                text: '<b>Com Filtros</b>'
+                text: isFilter ? '<b>Com Filtros</b>' : '<b>Sem Filtros</b>' 
             },
             xAxis: {
                 categories: xCategories,
