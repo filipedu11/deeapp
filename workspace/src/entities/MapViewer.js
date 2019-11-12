@@ -454,6 +454,7 @@ export class MapViewer{
 
         this.createConfusionMatrixFiltered(
             dataLyr, 
+            true,
             [min.value, max.value], 
             featsFilter.length > 0 ? 
                 format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
@@ -498,8 +499,9 @@ export class MapViewer{
             if (featAux.length == 1 )
                 filterPoly =  format.writeFeatureObject(featAux[0], {featureProjection: 'EPSG:3857'});
             
-            mapViewer.errorMatrix.createConfusionMatrixFiltered(
+            mapViewer.errorMatrix.createConfusionMatrix (
                 dataLyr, 
+                true,
                 [minAreaInput.value, maxAreaInput.value], 
                 filterPoly);
         });
@@ -540,7 +542,7 @@ export class MapViewer{
             });
 
 
-            mapViewer.errorMatrix.createConfusionMatrixFiltered(dataLyr, [min.value, max.value], null);
+            mapViewer.errorMatrix.createConfusionMatrix (dataLyr, true, [min.value, max.value], null);
         };
 
         function addInteraction() {
@@ -602,8 +604,9 @@ export class MapViewer{
                         layerSel.addFilter(mask);
 
                         var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
-                        mapViewer.errorMatrix.createConfusionMatrixFiltered(
+                        mapViewer.errorMatrix.createConfusionMatrix (
                             dataLyr, 
+                            true,
                             [min.value, max.value],
                             featAux);
                     }
@@ -616,8 +619,8 @@ export class MapViewer{
         this.errorMatrix.createConfusionMatrix(dataLyr);
     } 
 
-    createConfusionMatrixFiltered(dataLyr, filterAreaInterval, polygonFilter){
-        this.errorMatrix.createConfusionMatrixFiltered(dataLyr, filterAreaInterval, polygonFilter);
+    createConfusionMatrixFiltered(dataLyr, isFilter, filterAreaInterval, polygonFilter){
+        this.errorMatrix.createConfusionMatrix(dataLyr, isFilter, filterAreaInterval, polygonFilter);
     }
 
     clearStatsPanel(){
