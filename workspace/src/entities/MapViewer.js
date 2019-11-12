@@ -61,6 +61,11 @@ var EVALUATION_STRING = 'evaluation';
 
 export class MapViewer{
 
+    /**
+     * Constructor of MapViewer class
+     * 
+     * 1. The initialization of aplication is done here
+     */
     constructor(){
 
         this.baseDict = {};
@@ -99,6 +104,9 @@ export class MapViewer{
         this.map.set('mapViewer', this);
     }
 
+    /**
+     * Method to create the initial openalayers map
+     */
     createInitMap(){
 
         this.vectorDraw = new VectorL({
@@ -129,16 +137,30 @@ export class MapViewer{
         return map;
     }
 
+    /**
+     * Method to create the sidebar panel
+     */
     createSideBar(){
         var sidebar = new Sidebar({ element: 'sidebar', position: 'left' });
         this.map.addControl(sidebar);
     }
 
+    /**
+     * Method to create the layer switcher
+     */
     loadLayerSwitcher(){
         var toc = document.getElementById('layers');
         LayerSwitcher.renderPanel(this.map, toc);
     }
 
+    /**
+     * Method to create the 4 different groups of layers
+     * 
+     *  1. Evaluation
+     *  2. Classification
+     *  3. Validation
+     *  4. Base
+     */
     initLayersGroup(){
         var base = new LayerGroup({
             title: 'Base Maps',
@@ -170,6 +192,12 @@ export class MapViewer{
         this.map.addLayer(evaluations);
     }
 
+    /**
+     * Method to add one layer to the given group
+     * 
+     * @param {string} typeGroup 
+     * @param {*} newLayer 
+     */
     addLayerToMapGroup(typeGroup, newLayer){
 
         this.map.getLayers().forEach(function(layer) {
@@ -179,6 +207,9 @@ export class MapViewer{
         });
     }
 
+    /**
+     * Add base layers to map
+     */
     addBaseLayers(){
 
         var base = new TileLayer({
@@ -210,14 +241,28 @@ export class MapViewer{
         this.addLayerToMapGroup(BASE_TYPE_STRING, base2);
     }
 
+    /**
+     * Method to return the map
+     */
     getMap(){
         return this.map;
     }
 
+    /**
+     * Set the selected layers in layer switch
+     * 
+     * @param {[]} lyrsSelected 
+     */
     setLyrsSelected(lyrsSelected){
         this.lyrsSelected = lyrsSelected;
     }
 
+    /**
+     * Create the LayerEntity object with the given geojson file and type group
+     * 
+     * @param {*} layerGeojson 
+     * @param {string} typeGroup 
+     */
     createLayerObj(layerGeojson, typeGroup) {
         var cD = new LayerDecode();
         var k = cD.key;
@@ -244,6 +289,10 @@ export class MapViewer{
         return lyr;
     }
 
+    /**
+     * Add classified image (png/tiff) to map 
+     * @param {*} classifiedImage 
+     */
     addClassifiedImage(classifiedImage){
     
         var projection = this.projStudyArea;
@@ -265,6 +314,11 @@ export class MapViewer{
         this.loadLayerSwitcher();
     }
 
+    /**
+     * Add classification layer to map
+     * 
+     * @param {*} classiGeojson 
+     */
     addClassification(classiGeojson){
 
         var newLayer = this.createLayer(classiGeojson, this.createLayerObj(classiGeojson, CLASSIFICATION_TYPE_STRING));
@@ -274,6 +328,10 @@ export class MapViewer{
         this.loadLayerSwitcher();
     }
 
+    /**
+     * Add validation layer to map
+     * @param {*} validationGeojson 
+     */
     addValidation(validationGeojson){
 
         var newLayer = this.createLayer(validationGeojson, this.createLayerObj(validationGeojson, VALIDATION_STRING));
@@ -283,6 +341,10 @@ export class MapViewer{
         this.loadLayerSwitcher();
     }
 
+    /**
+     * Add evaluation layer to map
+     * @param {*} evaluationGeojson 
+     */
     addEvaluation(evaluationGeojson){
 
         var newLayer = this.createLayer(evaluationGeojson, this.createLayerObj(evaluationGeojson, EVALUATION_STRING));
@@ -292,6 +354,11 @@ export class MapViewer{
         this.loadLayerSwitcher();
     }
 
+    /**
+     * Remove evaluation layer in map
+     * 
+     * @param {*} evaluationLayer 
+     */
     removeEvaluation(evaluationLayer){
 
         this.map.removeLayer(evaluationLayer);
@@ -299,6 +366,11 @@ export class MapViewer{
         this.loadLayerSwitcher();
     }
 
+    /**
+     * Define the openlayer style for the given lyr
+     * 
+     * @param {*} lyr 
+     */
     createStyle(lyr){
 
         var classAux = this.getObjectLayer(lyr.get('layerId'));
@@ -328,6 +400,10 @@ export class MapViewer{
         });
     }
 
+    /**
+     * Create source to set in layer (openlayer object)
+     * @param {*} lyrGeojson 
+     */
     createSource(lyrGeojson){
 
         var tileIndex = geojsonvt(
@@ -366,6 +442,11 @@ export class MapViewer{
 
     }
 
+    /**
+     * Create layer (openlayer object) to insert in map
+     * @param {*} geojsonObject 
+     * @param {*} classObject 
+     */
     createLayer(geojsonObject, classObject){
 
         var source = this.createSource(geojsonObject);
@@ -397,16 +478,29 @@ export class MapViewer{
         return layer;
     }
 
+    /**
+     * Create metadata panel for the specified layer
+     * 
+     * @param {*} lyrId 
+     */
     createMetadata(lyrId){
         var cl = this.getObjectLayer(lyrId);
         cl.createMetadata();
     }
 
+    /**
+     * Clear metadata panel for the specified layer
+     * 
+     * @param {*} lyrId 
+     */
     clearMetadata(lyrId){
         var cl = this.getObjectLayer(lyrId);
         cl.clearMetadata();
     }
 
+    /**
+     * Update legend that correspond to the top layer
+     */
     updateLegend(){
         if (this.currentLayer) 
             this.legend.createLegend(this.getObjectLayer(this.currentLayer.get('layerId')), this.currentLayer);
@@ -414,10 +508,18 @@ export class MapViewer{
             this.legend.clearLegend();
     }
     
+    /**
+     * Get LayerEntity object by giving the id
+     * @param {*} id 
+     */
     getObjectLayer(id){
         return this.allLayersDict[id];
     }
 
+    /**
+     * Check if the select layer is diff than the previous selected
+     * @param {*} layerSel 
+     */
     isLayerSelectDiffThanCurrent(layerSel){
         if (!this.currentLayer)
             return true;
@@ -425,6 +527,11 @@ export class MapViewer{
         return this.currentLayer.get('layerId') !== layerSel.get('layerId');
     }
 
+    /**
+     * Create the controller filter panel
+     * 
+     * @param {*} layerSel 
+     */
     createControllersFilter(layerSel) {
 
         if ( this.controllers.isDisplayed ){
@@ -441,6 +548,11 @@ export class MapViewer{
         this.currentLayer = layerSel;
     }
 
+    /**
+     * Create the Stats panel with error matrix
+     * 
+     * @param {*} layerSel 
+     */
     createStatsPanel(layerSel) {
         var format = new GeoJSON();
                     
@@ -450,17 +562,28 @@ export class MapViewer{
         var max = document.getElementById('area-max-number');
         var featsFilter = this.vectorDraw.getSource().getFeatures();
 
-        this.createConfusionMatrix(dataLyr);
-
-        this.createConfusionMatrixFiltered(
-            dataLyr, 
-            true,
+        var calcArea = this.calcOccupiedAreaForEachClass(dataLyr);
+        var calcAreaFilter = this.calcOccupiedAreaForEachClass(
+            dataLyr,  
             [min.value, max.value], 
             featsFilter.length > 0 ? 
-                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null
+                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null);
+
+        this.errorMatrix.createConfusionMatrix(dataLyr, calcArea);
+
+        this.errorMatrix.createConfusionMatrix(
+            dataLyr, 
+            calcAreaFilter,
+            true
         );
     }
 
+    /**
+     * Create the area filter interaction to add in controller panel
+     * 
+     * @param {*} dataLyr 
+     * @param {*} layerSel 
+     */
     createAreaFilterInteraction(dataLyr, layerSel){ 
 
         var min = dataLyr.getMinimumOccupiedArea();
@@ -498,12 +621,16 @@ export class MapViewer{
 
             if (featAux.length == 1 )
                 filterPoly =  format.writeFeatureObject(featAux[0], {featureProjection: 'EPSG:3857'});
-            
-            mapViewer.errorMatrix.createConfusionMatrix (
-                dataLyr, 
-                true,
+                
+            var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
+                dataLyr,  
                 [minAreaInput.value, maxAreaInput.value], 
                 filterPoly);
+
+            mapViewer.errorMatrix.createConfusionMatrix (
+                dataLyr,
+                calcAreaFilter,
+                true);
         });
 
         minAreaInput.addEventListener('change', function () {
@@ -515,6 +642,12 @@ export class MapViewer{
         });
     }
  
+    /**
+     * Create the polygon interaction to add in controller panel
+     * 
+     * @param {*} dataLyr 
+     * @param {*} layerSel 
+     */
     createPolygonInteraction(dataLyr, layerSel){
 
         var draw; // global so we can remove it later
@@ -541,8 +674,15 @@ export class MapViewer{
                 layerSel.removeFilter(f);
             });
 
+            var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
+                dataLyr,  
+                [min.value, max.value], 
+                null);
 
-            mapViewer.errorMatrix.createConfusionMatrix (dataLyr, true, [min.value, max.value], null);
+            mapViewer.errorMatrix.createConfusionMatrix (
+                dataLyr,
+                calcAreaFilter,
+                true);
         };
 
         function addInteraction() {
@@ -604,29 +744,105 @@ export class MapViewer{
                         layerSel.addFilter(mask);
 
                         var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
-                        mapViewer.errorMatrix.createConfusionMatrix (
-                            dataLyr, 
-                            true,
-                            [min.value, max.value],
+                        var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
+                            dataLyr,  
+                            [min.value, max.value], 
                             featAux);
+            
+                        mapViewer.errorMatrix.createConfusionMatrix (
+                            dataLyr,
+                            calcAreaFilter,
+                            true);
                     }
                 });
             }
         }
     }
 
-    createConfusionMatrix(dataLyr){
-        this.errorMatrix.createConfusionMatrix(dataLyr);
-    } 
+    /**
+     * Compute the data for the error matrix according with:
+     * 
+     *  1. Selected interval area
+     *  2. Polygon draw
+     * 
+     * calcOccupiedAreaForEachClass(dataLayer) -> data for error matrix without filter
+     * calcOccupiedAreaForEachClass(dataLayer, filterAreaInterval, polygonFilter) -> data for error matrix with filter
+     * 
+     * @param {*} dataLyr 
+     * @param {*} filterAreaInterval 
+     * @param {*} polygonFilter 
+     */    
+    calcOccupiedAreaForEachClass(dataLyr, filterAreaInterval, polygonFilter){
 
-    createConfusionMatrixFiltered(dataLyr, isFilter, filterAreaInterval, polygonFilter){
-        this.errorMatrix.createConfusionMatrix(dataLyr, isFilter, filterAreaInterval, polygonFilter);
+        var classKeys = dataLyr.getKeysOfClasses();
+        var features = dataLyr.getFeatures();
+
+        var dataArea = [];
+        var classIndex = {};
+
+        for (let index = 0, len = classKeys.length ; index < len; index++) {
+            const key = classKeys[index];
+            classIndex[key] = index;
+            dataArea[index] = 0;
+        }
+
+        var calcArea;
+
+        if(polygonFilter) {
+
+            var tree = geojsonRbush();
+            var rbush = tree.load(features);
+            var containElements = [];
+            if (rbush && polygonFilter) {
+                containElements.push(rbush.search(polygonFilter));
+                features = containElements[0].features;
+            }
+
+            var drawPolygons = polygonFilter.geometry.coordinates;
+            let lenDrawPolys = drawPolygons.length;
+
+            for (let j = 0; j < lenDrawPolys; j++) {
+
+                const coords = lenDrawPolys == 1 ? [drawPolygons[j]] : drawPolygons[j];
+                const poly = turf.polygon(coords);
+
+                for (let index = 0, len = features.length; index < len; index++) {
+
+                    const polygon = features[index];
+                    const pos = classIndex[parseInt(features[index]['properties']['classId'])];
+
+                    var intersectArea = turf.intersect(polygon, poly);
+
+                    //Convert area to hectares (ha = m^2 / 10000)
+                    calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
+
+                    if (filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
+                        dataArea[pos] = dataArea[pos] != null ? 
+                            dataArea[pos] + calcArea : calcArea;
+                    }
+                }
+            }
+        } else {
+
+            for (let index = 0, len = features.length; index < len; index++) {
+                const polygon = features[index];
+                const pos = classIndex[parseInt(features[index]['properties']['classId'])];
+
+                //Convert area to hectares (ha = m^2 / 10000)
+                calcArea = turf.area(polygon) / 10000;
+                if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
+                    dataArea[pos] = dataArea[pos] != null ? 
+                        dataArea[pos] + calcArea : calcArea;
+                }
+            }
+        }
+
+        return dataArea;
     }
 
-    clearStatsPanel(){
-        this.errorMatrix.clearStatsPanel();
-    }
-
+    /**
+     * Remove the controller panel
+     */
     clearFilterControllers(){
         this.controllers.clearControls();
 
@@ -639,9 +855,14 @@ export class MapViewer{
         this.map.removeLayer(this.vectorDraw);
     }
 
+    /**
+     * Clear the map and define the new layer
+     * 
+     * @param {*} l 
+     */
     resetMap(l) {
         this.currentLayer = l;
-        this.clearStatsPanel();
+        this.errorMatrix.clearStatsPanel();
         this.clearFilterControllers();
     }
 

@@ -28,7 +28,7 @@ export class ErrorMatrix {
         this.lastY = -1;
     }
 
-    createConfusionMatrix(dataLyr, isFilter = false, filterAreaInterval = null, polygonFilter = null){
+    createConfusionMatrix(dataLyr, dataArea, isFilter = false){
 
         var idMatrix = 
             isFilter ? 
@@ -53,7 +53,7 @@ export class ErrorMatrix {
 
         var xCategories, yCategories, data;
         
-        var dataForErrorMatrix = this.getDataForErrorMatrix(dataLyr, filterAreaInterval, polygonFilter);
+        var dataForErrorMatrix = this.getDataForErrorMatrix(dataLyr, dataArea);
         var title = dataLyr.getName().split(' | ');
         var xAxisTitle = '<b>' + title[0] + '</b>';
         var yAxisTitle = '<b>' + title[1] + '</b>';
@@ -131,71 +131,9 @@ export class ErrorMatrix {
         });
     }
 
-    getDataForErrorMatrix(dataLyr, filterAreaInterval, polygonFilter){
+    getDataForErrorMatrix(dataLyr, dataArea){
 
-        var features = dataLyr.getFeatures();
         var classNames = dataLyr.getIndividualClassNames();
-        var classKeys = dataLyr.getKeysOfClasses();
-
-        var dataArea = [];
-        var classIndex = {};
-
-        for (let index = 0, len = classKeys.length ; index < len; index++) {
-            const key = classKeys[index];
-            classIndex[key] = index;
-            dataArea[index] = 0;
-        }
-
-        var calcArea;
-
-        if(polygonFilter) {
-
-            var tree = geojsonRbush();
-            var rbush = tree.load(features);
-            var containElements = [];
-            if (rbush && polygonFilter) {
-                containElements.push(rbush.search(polygonFilter));
-                features = containElements[0].features;
-            }
-
-            var drawPolygons = polygonFilter.geometry.coordinates;
-            let lenDrawPolys = drawPolygons.length;
-
-            for (let j = 0; j < lenDrawPolys; j++) {
-
-                const coords = lenDrawPolys == 1 ? [drawPolygons[j]] : drawPolygons[j];
-                const poly = turf.polygon(coords);
-
-                for (let index = 0, len = features.length; index < len; index++) {
-
-                    const polygon = features[index];
-                    const pos = classIndex[parseInt(features[index]['properties']['classId'])];
-
-                    var intersectArea = turf.intersect(polygon, poly);
-
-                    //Convert area to hectares (ha = m^2 / 10000)
-                    calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-
-                    if (filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                        dataArea[pos] = dataArea[pos] != null ? 
-                            dataArea[pos] + calcArea : calcArea;
-                    }
-                }
-            }
-        } else {
-
-            for (let index = 0, len = features.length; index < len; index++) {
-                const polygon = features[index];
-                const pos = classIndex[parseInt(features[index]['properties']['classId'])];
-
-                //Convert area to hectares (ha = m^2 / 10000)
-                calcArea = turf.area(polygon) / 10000;
-                if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                    dataArea[pos] = dataArea[pos] != null ? 
-                        dataArea[pos] + calcArea : calcArea;
-                }
-            }
-        }
 
         var yCategories = Object.keys(classNames);
         var xCategories = yCategories.slice().reverse();
