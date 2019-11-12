@@ -13,7 +13,10 @@ import LayerSwitcher from '../panels/LayerSwitcher.js';
 import Sidebar from '../../static/js/sidebar.js';
 import { Progress } from '../../static/js/Progress.js';
 
-import { LayerEntity } from './LayerEntity';
+import { ValidationEntity } from './ValidationEntity';
+import { ClassificationEntity } from './ClassificationEntity';
+import { EvaluationEntity } from './EvalutationEntity';
+
 import { LayerDecode } from '../decode/LayerDecode';
 
 import {Style, Fill, Stroke} from 'ol/style';
@@ -70,9 +73,6 @@ export class MapViewer{
 
         this.baseDict = {};
         this.baseArray = [];
-
-        this.classiArray = [];
-        this.valiArray = [];
 
         this.allLayersDict = {};
         this.lyrsSelected = [];
@@ -258,18 +258,75 @@ export class MapViewer{
     }
 
     /**
-     * Create the LayerEntity object with the given geojson file and type group
+     * Create the ValidationEntity object with the given geojson file
      * 
      * @param {*} layerGeojson 
-     * @param {string} typeGroup 
      */
-    createLayerObj(layerGeojson, typeGroup) {
+    createValidationLayerObj(layerGeojson) {
         var cD = new LayerDecode();
         var k = cD.key;
 
         var id = layerGeojson[cD.layerID[k]];
 
-        var lyr = new LayerEntity(
+        var lyr = new ValidationEntity(
+            id,
+            layerGeojson[cD.layerName[k]],
+            layerGeojson[cD.layerDescription[k]],
+            layerGeojson[cD.layerRasterFile[k]],
+            layerGeojson[cD.layerSource[k]],
+            layerGeojson[cD.layerStats[k]],
+            layerGeojson[cD.layerStyle[k]],
+            layerGeojson[cD.features[k]],
+            layerGeojson[cD.classNames[k]],
+            layerGeojson
+        );
+
+        this.allLayersDict[id] = lyr;
+
+        return lyr;
+    }
+
+    /**
+     * Create the Classification object with the given geojson file
+     * 
+     * @param {*} layerGeojson 
+     */
+    createClassificationLayerObj(layerGeojson) {
+        var cD = new LayerDecode();
+        var k = cD.key;
+
+        var id = layerGeojson[cD.layerID[k]];
+
+        var lyr = new ClassificationEntity(
+            id,
+            layerGeojson[cD.layerName[k]],
+            layerGeojson[cD.layerDescription[k]],
+            layerGeojson[cD.layerRasterFile[k]],
+            layerGeojson[cD.layerSource[k]],
+            layerGeojson[cD.layerStats[k]],
+            layerGeojson[cD.layerStyle[k]],
+            layerGeojson[cD.features[k]],
+            layerGeojson[cD.classNames[k]],
+            layerGeojson
+        );
+
+        this.allLayersDict[id] = lyr;
+
+        return lyr;
+    }
+
+    /**
+     * Create the EvaluationEntity object with the given geojson file
+     * 
+     * @param {*} layerGeojson 
+     */
+    createEvaluationnLayerObj(layerGeojson, validation, classification) {
+        var cD = new LayerDecode();
+        var k = cD.key;
+
+        var id = layerGeojson[cD.layerID[k]];
+
+        var lyr = new EvaluationEntity(
             id,
             layerGeojson[cD.layerName[k]],
             layerGeojson[cD.layerDescription[k]],
@@ -280,11 +337,11 @@ export class MapViewer{
             layerGeojson[cD.features[k]],
             layerGeojson[cD.classNames[k]],
             layerGeojson,
-            typeGroup
+            validation, 
+            classification
         );
 
         this.allLayersDict[id] = lyr;
-        this.valiArray.push(lyr);
 
         return lyr;
     }
@@ -321,11 +378,13 @@ export class MapViewer{
      */
     addClassification(classiGeojson){
 
-        var newLayer = this.createLayer(classiGeojson, this.createLayerObj(classiGeojson, CLASSIFICATION_TYPE_STRING));
+        var newLayer = this.createLayer(classiGeojson, this.createClassificationLayerObj(classiGeojson));
 
         this.addLayerToMapGroup(CLASSIFICATION_TYPE_STRING, newLayer);
 
         this.loadLayerSwitcher();
+
+        return newLayer;
     }
 
     /**
@@ -334,20 +393,22 @@ export class MapViewer{
      */
     addValidation(validationGeojson){
 
-        var newLayer = this.createLayer(validationGeojson, this.createLayerObj(validationGeojson, VALIDATION_STRING));
+        var newLayer = this.createLayer(validationGeojson, this.createValidationLayerObj(validationGeojson));
 
         this.addLayerToMapGroup(VALIDATION_STRING, newLayer);
 
         this.loadLayerSwitcher();
+
+        return newLayer;
     }
 
     /**
      * Add evaluation layer to map
      * @param {*} evaluationGeojson 
      */
-    addEvaluation(evaluationGeojson){
+    addEvaluation(evaluationGeojson, validation, classification){
 
-        var newLayer = this.createLayer(evaluationGeojson, this.createLayerObj(evaluationGeojson, EVALUATION_STRING));
+        var newLayer = this.createLayer(evaluationGeojson, this.createEvaluationnLayerObj(evaluationGeojson, validation, classification));
 
         this.addLayerToMapGroup(EVALUATION_STRING, newLayer);
 
