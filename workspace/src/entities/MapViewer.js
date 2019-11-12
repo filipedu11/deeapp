@@ -919,12 +919,19 @@ export class MapViewer{
     /**
      * Clear the map and define the new layer
      * 
-     * @param {*} l 
      */
-    resetMap(l) {
-        this.currentLayer = l;
+    resetMap() {
         this.errorMatrix.clearStatsPanel();
         this.clearFilterControllers();
+    }
+
+    /**
+     * define the new layer
+     * 
+     * @param {*} l 
+     */
+    setCurrentLayer(l){
+        this.currentLayer = l;
     }
 
     /**
