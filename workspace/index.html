@@ -67,7 +67,6 @@
   <!-- END OF SIDEBAR DIV -->
 
   <div id="map" class="sidebar-map">
-
       <!-- MAP LEGEND -->
       <div id="controls" class="none-block">
         <div id="controls-content">
@@ -81,7 +80,34 @@
           </div>
           <div class="controller-content">
             <label class="polygonlabel controller-padding">
-                <b>Filtrar por geometria:</b><br/>
+                <b>Buffer em km </b><br/>
+                <select id="class-buffer" style="margin-top: 4px">
+                  <option value="-1">
+                      ----
+                  </option>
+                </select>
+                <select id="area-buffer" style="margin-top: 4px">
+                  <option value="0.1">
+                      0.1
+                  </option>
+                  <option value="0.2">
+                    0.2
+                  </option>
+                  <option value="0.3">
+                    0.3
+                  </option>
+                  <option value="0.4">
+                    0.4
+                  </option>
+                  <option value="0.5">
+                    0.5
+                  </option>
+                </select>
+              </label>
+          </div>
+          <div class="controller-content">
+            <label class="polygonlabel controller-padding">
+                <b>Filtrar por geometria</b><br/>
                 <select id="type-geo" style="margin-top: 4px">
                   <option value="None">
                       ----
@@ -94,14 +120,14 @@
                   </option>
                   <option value="Free">
                     Livre
-                </option>
+                  </option>
                 </select>
             </label>
             <button id='clear-polygon-draw'>Clear</button>
           </div>
-          </div>
         </div>
       </div>
+    </div>
 
       
       <!-- MAP LEGEND -->

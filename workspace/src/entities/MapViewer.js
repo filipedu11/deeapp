@@ -601,9 +601,12 @@ export class MapViewer{
 
         var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
 
+        this.addChangeListenerVectorDraw(dataLyr, layerSel);
+
         this.controllers.displayControllers();
         this.createPolygonInteraction(dataLyr, layerSel);
         this.createAreaFilterInteraction(dataLyr, layerSel);
+        this.createBufferFilter(dataLyr, layerSel);
 
         layerSel.getSource().dispatchEvent('change');
         this.currentLayer = layerSel;
@@ -637,6 +640,86 @@ export class MapViewer{
             calcAreaFilter,
             true
         );
+    }
+
+    /**
+     * 
+     * @param {*} dataLyr 
+     * @param {*} layerSel 
+     */
+    createBufferFilter(dataLyr, layerSel){
+        var mapViewer = this;
+        var format = new GeoJSON();
+        
+        var buffer = document.getElementById('area-buffer');
+        var classBuffer = document.getElementById('class-buffer');
+
+        var valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
+        var allFeatures = valLayer.getFeatures();
+
+        for (const key of valLayer.getKeysOfClasses()) {
+            const className = valLayer.getNameOfClass(key);
+
+            var option = document.createElement('option');
+            option.text = className;
+            option.value = key;
+
+            classBuffer.add(option);
+        }
+
+        classBuffer.addEventListener('change', function () {
+            computeBuffer();
+        });
+
+        buffer.addEventListener('change', function () {
+            computeBuffer();
+        });
+
+        function computeBuffer() {
+            if (classBuffer.value != -1) {
+                if (allFeatures.length > 1) {
+
+                    var mainFeat = null;
+
+                    for (let index = 0; index < 30/*allFeatures.length*/; index++) {
+
+                        if (allFeatures[index].properties.classId == classBuffer.value) {  
+                            if (mainFeat) {
+                                const feat = allFeatures[index];
+
+                                const bufferFeatPos = turf.buffer(feat, buffer.value);
+                                const bufferFeatNeg = turf.buffer(feat, -buffer.value);
+                                const bufferFeat = turf.difference(bufferFeatPos, bufferFeatNeg);
+
+                                mainFeat = turf.union(mainFeat,bufferFeat);
+
+                            } else {                                
+                                const feat = allFeatures[index];
+
+                                const bufferFeatPos = turf.buffer(feat, buffer.value);
+                                const bufferFeatNeg = turf.buffer(feat, -buffer.value);
+                                const bufferFeat = turf.difference(bufferFeatPos, bufferFeatNeg);
+
+                                mainFeat = bufferFeat;
+                            }
+                        }
+
+                    }
+                    if (mainFeat) {
+                        if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
+                            mapViewer.vectorDraw.getSource().removeFeature(mapViewer.vectorDraw.getSource().getFeatures()[0]);
+                        
+                        layerSel.getFilters().forEach(f => {
+                            layerSel.removeFilter(f);
+                        });
+
+
+                        mapViewer.vectorDraw.getSource().addFeature(format.readFeature(mainFeat, {featureProjection: 'EPSG:3857'}));
+                    }
+                }
+            }
+        }
+
     }
 
     /**
@@ -768,56 +851,62 @@ export class MapViewer{
                 });
 
                 mapViewer.map.addInteraction(draw);
-
-                var format = new GeoJSON();
-
-                // eslint-disable-next-line no-unused-vars
-                mapViewer.vectorDraw.getSource().on('addfeature', function(e){
-
-                    var featGeo, unionFeat;
-                    var allFeatures = mapViewer.vectorDraw.getSource().getFeatures();
-                    var mainFeat = allFeatures[0];
-
-                    if (allFeatures.length > 1) {
-
-                        var mainFeatGeo = format.writeFeatureObject(mainFeat);
-                        mapViewer.vectorDraw.getSource().removeFeature(mainFeat);
-
-                        for (let index = 1; index < allFeatures.length; index++) {
-
-                            const feat = allFeatures[index];
-                            featGeo = format.writeFeatureObject(feat);
-                            mainFeatGeo = turf.union(mainFeatGeo,featGeo);
-                            mapViewer.vectorDraw.getSource().removeFeature(feat);
-                        }
-                        
-                        unionFeat = format.readFeature(mainFeatGeo);
-                        mapViewer.vectorDraw.getSource().addFeature(unionFeat);
-                        
-                    } else if (allFeatures.length == 1) {
-
-                        const mask = new Mask({ feature: mainFeat, inner:false, fill: new Fill({ color:[255,255,255,0.8] }) });
-                        
-                        layerSel.getFilters().forEach(f => {
-                            layerSel.removeFilter(f);
-                        });
-
-                        layerSel.addFilter(mask);
-
-                        var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
-                        var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
-                            dataLyr,  
-                            [min.value, max.value], 
-                            featAux);
-            
-                        mapViewer.errorMatrix.createConfusionMatrix (
-                            dataLyr,
-                            calcAreaFilter,
-                            true);
-                    }
-                });
             }
         }
+    }
+
+    addChangeListenerVectorDraw(dataLyr, layerSel) {
+        var format = new GeoJSON();
+        var mapViewer = this;
+
+        var min = document.getElementById('area-min-number');
+        var max = document.getElementById('area-max-number');
+        
+        // eslint-disable-next-line no-unused-vars
+        mapViewer.vectorDraw.getSource().on('addfeature', function(e){
+
+            var featGeo, unionFeat;
+            var allFeatures = mapViewer.vectorDraw.getSource().getFeatures();
+            var mainFeat = allFeatures[0];
+
+            if (allFeatures.length > 1) {
+
+                var mainFeatGeo = format.writeFeatureObject(mainFeat);
+                mapViewer.vectorDraw.getSource().removeFeature(mainFeat);
+
+                for (let index = 1; index < allFeatures.length; index++) {
+
+                    const feat = allFeatures[index];
+                    featGeo = format.writeFeatureObject(feat);
+                    mainFeatGeo = turf.union(mainFeatGeo,featGeo);
+                    mapViewer.vectorDraw.getSource().removeFeature(feat);
+                }
+                        
+                unionFeat = format.readFeature(mainFeatGeo);
+                mapViewer.vectorDraw.getSource().addFeature(unionFeat);
+                        
+            } else if (allFeatures.length == 1) {
+
+                const mask = new Mask({ feature: mainFeat, inner:false, fill: new Fill({ color:[0,0,0,0.8] }) });
+                        
+                layerSel.getFilters().forEach(f => {
+                    layerSel.removeFilter(f);
+                });
+
+                layerSel.addFilter(mask);
+
+                var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
+                var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
+                    dataLyr,
+                    [min.value, max.value],
+                    featAux);
+            
+                mapViewer.errorMatrix.createConfusionMatrix (
+                    dataLyr,
+                    calcAreaFilter,
+                    true);
+            }
+        });
     }
 
     /**
