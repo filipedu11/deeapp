@@ -657,16 +657,6 @@ export class MapViewer{
         var valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
         var allFeatures = valLayer.getFeatures();
 
-        for (const key of valLayer.getKeysOfClasses()) {
-            const className = valLayer.getNameOfClass(key);
-
-            var option = document.createElement('option');
-            option.text = className;
-            option.value = key;
-
-            classBuffer.add(option);
-        }
-
         classBuffer.addEventListener('change', function () {
             computeBuffer();
         });
@@ -684,10 +674,18 @@ export class MapViewer{
 
                     for (let index = 0, len = allFeatures.length; index < len; index++) {
                         const feat = allFeatures[index];
-                        if (feat.properties.classId == classBuffer.value) {
+                        
+                        if (feat.properties.classId == 1) {
 
-                            let featLine = turf.polygonToLine(turf.simplify(feat, options));
-                            let bufferLine = turf.buffer(featLine, buffer.value);
+                            let featBuffer;
+
+                            if (0 == classBuffer.value) {
+                                featBuffer = turf.polygonToLine(turf.simplify(feat, options));
+                            } else {
+                                featBuffer = turf.simplify(feat, options);
+                            }
+
+                            let bufferLine = turf.buffer(featBuffer, buffer.value);
                             mainFeats.push(turf.simplify(bufferLine, options));
                         }
                     }
@@ -935,7 +933,7 @@ export class MapViewer{
             var drawPolygons = polygonFilter.geometry.coordinates;
             let lenDrawPolys = drawPolygons.length;
 
-            for (let j = 0; j < lenDrawPolys; j++) {
+            for (let j = 0; j < 1/*lenDrawPolys*/; j++) {
 
                 const coords = lenDrawPolys == 1 ? [drawPolygons[j]] : drawPolygons[j];
                 let poly;
@@ -947,30 +945,24 @@ export class MapViewer{
                 }
 
                 if (rbush) {
-                    containElements = rbush.search(poly).features;
+                    containElements = rbush.search(poly);
+                    console.log(containElements);
+                    containElements = containElements.features;
                 }
-                
-                let areaPoly = turf.area(poly);
 
+                console.log(containElements);
+                
                 for (let index = 0, len = containElements.length; index < len && poly; index++) {
 
                     const polygon = containElements[index];
                     const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
 
-                    let areaPolygon = turf.area(polygon);
-
-                    let diffPolygonPoly = turf.difference(polygon, poly);
-                    let diffPolyPolygon = turf.difference(poly, polygon);
-
-                    let areaPolygonDiff = diffPolygonPoly ? turf.area(diffPolygonPoly) : 0;
-                    let areaPolyDiff = diffPolyPolygon ? turf.area(diffPolyPolygon) : 0;
-
-                    calcArea = (areaPolygon + areaPoly - (areaPolygonDiff + areaPolyDiff)) / 10000;
+                    var intersectArea = turf.intersect(polygon, poly);
 
                     //Convert area to hectares (ha = m^2 / 10000)
-                    //calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
+                    calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
 
-                    if (filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
+                    if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
                         dataArea[pos] = dataArea[pos] != null ? 
                             dataArea[pos] + calcArea : calcArea;
                     }
