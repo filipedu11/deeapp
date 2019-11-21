@@ -238,7 +238,7 @@ p {
 }
 
 .inline-block{
-    display: inline-block;
+    display: block;
 }
 
 #legend-content li {
@@ -304,33 +304,6 @@ p {
     border-bottom: none;/*disappears*/
 }
 
-#stats-main-board{
-    text-align: left;
-    bottom: .5em;
-    left: .5em;
-    max-width: calc(100% - 1.3em);
-    z-index: 30000;
-    position: absolute;
-    background: white;
-    opacity: 0.9;
-    border: 3px solid transparent;
-    border-radius: 4px;
-    background-color: rgba(200, 200, 200, 0.4);
-    max-width: 500px;
-}
-
-#stats-board{
-    background-color: rgb(255, 255, 255);
-    padding: 6px;
-    border-radius: 2px;
-}
-
-@media (max-width: 768px) {
-    #stats-main-board{
-      display: none;
-    }
-}
-
 #close-button {
     position:absolute;
     background-size: 20px 20px;
@@ -380,32 +353,31 @@ p {
     background-image: url("../img/combo_chart.png");
 }
 
-#controls{
+#controllers-main-board{
     text-align: left;
     top: .5em;
     right: .5em;
     max-width: calc(100% - 1.3em);
     z-index: 30000;
     position: absolute;
-    background: white;
-    opacity: 0.9;
-    border: 3px solid transparent;
-    border-radius: 4px;
-    background-color: rgba(200, 200, 200, 0.4);
+    background-color: rgba(200, 200, 200, 0);
 }
 
-#controls2{
+@media (max-width: 768px) {
+    #controllers-main-board{
+      display: none;
+    }
+}
+
+#controls{
     text-align: left;
-    right: .5em;
-    max-width: calc(100% - 1.3em);
     z-index: 30000;
-    position: absolute;
+    position: sticky;
     background: white;
     opacity: 0.9;
     border: 3px solid transparent;
     border-radius: 4px;
     background-color: rgba(200, 200, 200, 0.4);
-    margin-top: 7.5px;
 }
 
 #controls-content{
@@ -418,7 +390,6 @@ p {
     background-color: rgb(255, 255, 255);
     padding: 6px;
     border-radius: 2px;
-    display: none;
 }
 
 /* Center the loader */

@@ -4,6 +4,7 @@ import Highmaps from 'highcharts/modules/map';
 Highmaps(Highcharts);
 
 import * as turf from '@turf/turf';
+import { Metrics } from './Metrics';
 
 /*eslint no-undef: "error"*/
 /*eslint-env node*/
@@ -12,12 +13,10 @@ var geojsonRbush = require('geojson-rbush').default;
 export class ErrorMatrix {
 
     constructor(){
-        this.content = document.getElementById('content-error-matrix-oa');
-        this.info = document.getElementById('info-error-matrix-oa');
-        this.infoErrorMatrixGlobal = document.createElement('div');
-        this.infoErrorMatrixGlobal.id = 'info-error-matrix-global-oa';
-        this.infoErrorMatrixFiltered = document.createElement('div');
-        this.infoErrorMatrixFiltered.id = 'info-error-matrix-filtered-oa';
+        this.content = document.getElementById('content-error-matrix');
+        this.info = document.getElementById('info-error-matrix');
+
+        this.metrics = new Metrics();
     }
 
     clearStatsPanel(){
@@ -147,7 +146,6 @@ export class ErrorMatrix {
     computeDataToErrorMatrix(yCategories, xCategories, dataArea, colors){
         
         var dataErrorMatrix = [];
-        var dataToComputeMetrics = [];
 
         var lenJ = yCategories.length;
         var lenI = xCategories.length;
@@ -172,7 +170,6 @@ export class ErrorMatrix {
                         value: value,
                     }
                 );
-                dataToComputeMetrics.push(value);
                 count -= 1;
                 totalArea += value;
             }
@@ -184,4 +181,5 @@ export class ErrorMatrix {
 
         return dataErrorMatrix;
     }
+    
 }

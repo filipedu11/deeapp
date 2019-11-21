@@ -276,7 +276,7 @@
 
 .sidebar-left~.sidebar-map .ol-zoom,
 .sidebar-left~.sidebar-map .ol-scale-line, 
-.sidebar-left~.sidebar-map #stats-main-board {
+.sidebar-left~.sidebar-map #legend {
   margin-left: 46px;
 }
 
@@ -284,7 +284,7 @@
 
   .sidebar-left~.sidebar-map .ol-zoom,
   .sidebar-left~.sidebar-map .ol-scale-line, 
-  .sidebar-left~.sidebar-map #stats-main-board {
+  .sidebar-left~.sidebar-map #legend {
     transition: margin-left 500ms;
   }
 }
@@ -293,7 +293,7 @@
 
   .sidebar-left~.sidebar-map .ol-zoom,
   .sidebar-left~.sidebar-map .ol-scale-line, 
-  .sidebar-left~.sidebar-map #stats-main-board {
+  .sidebar-left~.sidebar-map #legend {
     margin-left: calc(45% + 10px);
   }
 }
@@ -302,7 +302,7 @@
 
   .sidebar-left~.sidebar-map .ol-zoom,
   .sidebar-left~.sidebar-map .ol-scale-line, 
-  .sidebar-left~.sidebar-map #stats-main-board {
+  .sidebar-left~.sidebar-map #legend {
     margin-left: calc(40% + 10px);
   }
 }
@@ -311,7 +311,7 @@
 
   .sidebar-left~.sidebar-map .ol-zoom,
   .sidebar-left~.sidebar-map .ol-scale-line,
-  .sidebar-left~.sidebar-map #stats-main-board {
+  .sidebar-left~.sidebar-map #legend {
     margin-left: calc(35% + 10px);
   }
 }
@@ -320,7 +320,7 @@
 
   .sidebar-left.collapsed~.sidebar-map .ol-zoom,
   .sidebar-left.collapsed~.sidebar-map .ol-scale-line, 
-  .sidebar-left.collapsed~.sidebar-map #stats-main-board {
+  .sidebar-left.collapsed~.sidebar-map #legend {
     margin-left: 52px;
   }
 }

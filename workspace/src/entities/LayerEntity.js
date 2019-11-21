@@ -217,4 +217,23 @@ export class LayerEntity{
     getMaximumOccupiedArea(){
         return Math.ceil(this.maxOccupiedArea * 10000) / 10000;
     }
+
+    getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision){
+        return this.occupiedAreaOfEachFeatures
+            .map(
+                function(num) {
+                    return parseFloat(num.toFixed(precision)) + 1/Math.pow(10, precision);
+                }
+            )
+            .filter(
+                function(value, index, self) { 
+                    return self.indexOf(value) === index;
+                }
+            )
+            .sort(
+                function(a, b){
+                    return a - b;
+                }
+            );
+    }
 }

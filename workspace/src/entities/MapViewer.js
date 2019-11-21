@@ -47,6 +47,7 @@ import * as turf from '@turf/turf';
 
 import noUiSlider from 'nouislider';
 import wNumb from 'wnumb';
+import { Metrics } from '../panels/Metrics.js';
 
 Highmore(Highcharts);
 Histogram(Highcharts);
@@ -88,6 +89,7 @@ export class MapViewer{
         this.errorMatrix = new ErrorMatrix();
         this.legend = new Legend();
         this.controllers = new Controllers();
+        this.metrics = new Metrics();
 
         //Add Sidebar control to map
         this.createSideBar();
@@ -604,12 +606,59 @@ export class MapViewer{
         this.addChangeListenerVectorDraw(dataLyr, layerSel);
 
         this.controllers.displayControllers();
-        this.createPolygonInteraction(dataLyr, layerSel);
+        this.createPolygonInteraction();
         this.createAreaFilterInteraction(dataLyr, layerSel);
         this.createBufferFilter(dataLyr, layerSel);
 
+        this.addEventListenerToClearButton(dataLyr, layerSel);
+        this.addEventToApplyButton(dataLyr, layerSel);
+
         layerSel.getSource().dispatchEvent('change');
         this.currentLayer = layerSel;
+    }
+
+    addEventListenerToClearButton(dataLyr, layerSel){
+        
+        var clearFilterPAnel = document.getElementById('reset-controller-settings');
+        
+        var mapViewer = this;
+
+        var min = document.getElementById('area-min-number');
+        var max = document.getElementById('area-max-number');
+
+        clearFilterPAnel.onclick = function(){
+            if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
+                mapViewer.vectorDraw.getSource().removeFeature(mapViewer.vectorDraw.getSource().getFeatures()[0]);
+            
+            layerSel.getFilters().forEach(f => {
+                layerSel.removeFilter(f);
+            });
+
+            min.value = dataLyr.getMinimumOccupiedArea();
+            min.dispatchEvent(new Event('change'));
+            max.value = dataLyr.getMaximumOccupiedArea();
+            max.dispatchEvent(new Event('change'));
+
+            var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
+                dataLyr,  
+                [min.value, max.value], 
+                null);
+
+            mapViewer.errorMatrix.createConfusionMatrix (
+                dataLyr,
+                calcAreaFilter,
+                true);
+        };
+    }
+
+    addEventToApplyButton(dataLyr, layerSel){
+        
+        var applyFilterPAnel = document.getElementById('apply-controller-settings');
+        var mapViewer = this;
+
+        applyFilterPAnel.onclick = function(){
+            mapViewer.createStatsPanel(layerSel);
+        };
     }
 
     /**
@@ -624,6 +673,7 @@ export class MapViewer{
 
         var min = document.getElementById('area-min-number');
         var max = document.getElementById('area-max-number');
+
         var featsFilter = this.vectorDraw.getSource().getFeatures();
 
         var calcArea = this.calcOccupiedAreaForEachClass(dataLyr);
@@ -633,13 +683,82 @@ export class MapViewer{
             featsFilter.length > 0 ? 
                 format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null);
 
-        this.errorMatrix.createConfusionMatrix(dataLyr, calcArea);
+        //CREATE NON FILTER ERROR MATRIX
+        this.errorMatrix.createConfusionMatrix(
+            dataLyr, 
+            calcArea);
 
+        //CREATE FILTER ERROR MATRIX
         this.errorMatrix.createConfusionMatrix(
             dataLyr, 
             calcAreaFilter,
             true
         );
+
+        this.metrics.createMetricsGraph(this.computeDataForOaGraph(
+            dataLyr, 
+            [min.value, max.value], 
+            featsFilter.length > 0 ? 
+                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null));
+
+    }
+
+    computeDataForOaGraph(dataLyr, filterAreaInterval, polygonFilter){                  
+
+        let metricsDataGraph = [{
+            name: 'Overall Accuracy',
+            color: 'rgba(223, 83, 83, .5)',
+            data: []
+        }, {
+            name: 'Recall',
+            color: 'rgba(10, 83, 83, .5)',
+            data: []
+        }, {
+            name: 'Precision',
+            color: 'rgba(200, 0, 83, .5)',
+            data: []
+        }];
+
+        let precision = 2;
+        let steps = dataLyr.getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision);
+        let len = steps.length;
+        let end = steps[0];
+        let start = steps[0] - 1/Math.pow(10, precision - 1);
+
+        for (let i = 1; i < len; i++) {
+
+            let dataArea =  this.calcOccupiedAreaForEachClass(
+                dataLyr,  
+                [start, end],
+                polygonFilter
+            );
+
+            const oaValue = this.metrics.computeOA(dataArea);
+            const paValue = this.metrics.computeRecall(dataArea);
+            const uaValue = this.metrics.computePrecision(dataArea);
+
+            metricsDataGraph[0].data.push([end, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
+            metricsDataGraph[1].data.push([end, isNaN(paValue) ? 0 : parseFloat(paValue)]);
+            metricsDataGraph[2].data.push([end, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);
+            
+            end = steps[i];
+        }
+        
+        let dataArea =  this.calcOccupiedAreaForEachClass(
+            dataLyr,  
+            [start, end],
+            polygonFilter
+        );
+
+        const oaValue = this.metrics.computeOA(dataArea);
+        const paValue = this.metrics.computeRecall(dataArea);
+        const uaValue = this.metrics.computePrecision(dataArea);
+
+        metricsDataGraph[0].data.push([end, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
+        metricsDataGraph[1].data.push([end, isNaN(paValue) ? 0 : parseFloat(paValue)]);
+        metricsDataGraph[2].data.push([end, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);
+
+        return metricsDataGraph;
     }
 
     /**
@@ -724,8 +843,6 @@ export class MapViewer{
 
         var slideArea = document.getElementById('area-number-slider');
 
-        var mapViewer = this;
-
         noUiSlider.create(slideArea, {
             start: [min, max],
             connect: true,
@@ -738,29 +855,12 @@ export class MapViewer{
             })
         });
 
-        var format = new GeoJSON();
-
         // eslint-disable-next-line no-unused-vars
         slideArea.noUiSlider.on('update', function (values, handle) {
             minAreaInput.value = values[0];
             maxAreaInput.value = values[1];
 
             layerSel.getSource().dispatchEvent('change');
-            var featAux = mapViewer.vectorDraw.getSource().getFeatures();
-            var filterPoly = null;
-
-            if (featAux.length == 1 )
-                filterPoly =  format.writeFeatureObject(featAux[0], {featureProjection: 'EPSG:3857'});
-                
-            var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
-                dataLyr,  
-                [minAreaInput.value, maxAreaInput.value], 
-                filterPoly);
-
-            mapViewer.errorMatrix.createConfusionMatrix (
-                dataLyr,
-                calcAreaFilter,
-                true);
         });
 
         minAreaInput.addEventListener('change', function () {
@@ -778,11 +878,10 @@ export class MapViewer{
      * @param {*} dataLyr 
      * @param {*} layerSel 
      */
-    createPolygonInteraction(dataLyr, layerSel){
+    createPolygonInteraction(){
 
         var draw; // global so we can remove it later
         var typeSelect = document.getElementById('type-geo');
-        var clearPolygon = document.getElementById('clear-polygon-draw');
         
         this.map.addLayer(this.vectorDraw);
 
@@ -791,28 +890,6 @@ export class MapViewer{
         typeSelect.onchange = function() {
             mapViewer.map.removeInteraction(draw);
             addInteraction();
-        };
-
-        var min = document.getElementById('area-min-number');
-        var max = document.getElementById('area-max-number');
-
-        clearPolygon.onclick = function(){
-            if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
-                mapViewer.vectorDraw.getSource().removeFeature(mapViewer.vectorDraw.getSource().getFeatures()[0]);
-            
-            layerSel.getFilters().forEach(f => {
-                layerSel.removeFilter(f);
-            });
-
-            var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
-                dataLyr,  
-                [min.value, max.value], 
-                null);
-
-            mapViewer.errorMatrix.createConfusionMatrix (
-                dataLyr,
-                calcAreaFilter,
-                true);
         };
 
         function addInteraction() {
@@ -844,9 +921,6 @@ export class MapViewer{
     addChangeListenerVectorDraw(dataLyr, layerSel) {
         var format = new GeoJSON();
         var mapViewer = this;
-
-        var min = document.getElementById('area-min-number');
-        var max = document.getElementById('area-max-number');
         
         // eslint-disable-next-line no-unused-vars
         mapViewer.vectorDraw.getSource().on('addfeature', function(e){
@@ -880,17 +954,6 @@ export class MapViewer{
                 });
 
                 layerSel.addFilter(mask);
-
-                var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
-                var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
-                    dataLyr,
-                    [min.value, max.value],
-                    featAux);
-            
-                mapViewer.errorMatrix.createConfusionMatrix (
-                    dataLyr,
-                    calcAreaFilter,
-                    true);
             }
         });
     }
@@ -933,7 +996,7 @@ export class MapViewer{
             var drawPolygons = polygonFilter.geometry.coordinates;
             let lenDrawPolys = drawPolygons.length;
 
-            for (let j = 0; j < 1/*lenDrawPolys*/; j++) {
+            for (let j = 0; j < lenDrawPolys; j++) {
 
                 const coords = lenDrawPolys == 1 ? [drawPolygons[j]] : drawPolygons[j];
                 let poly;
@@ -944,13 +1007,7 @@ export class MapViewer{
                     poly = turf.lineStringToPolygon(line);
                 }
 
-                if (rbush) {
-                    containElements = rbush.search(poly);
-                    console.log(containElements);
-                    containElements = containElements.features;
-                }
-
-                console.log(containElements);
+                containElements = rbush.search(poly).features;
                 
                 for (let index = 0, len = containElements.length; index < len && poly; index++) {
 
@@ -990,7 +1047,7 @@ export class MapViewer{
      * Remove the controller panel
      */
     clearFilterControllers(){
-        this.controllers.clearControls();
+        this.controllers.hideControls();
 
         this.vectorDraw.getSource().getFeatures().forEach(feat => {
             this.vectorDraw.getSource().removeFeature(feat);

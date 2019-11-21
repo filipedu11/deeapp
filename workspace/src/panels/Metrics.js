@@ -1,7 +1,9 @@
 import Highcharts from 'highcharts';
 import Highmaps from 'highcharts/modules/map';
+import exporting from 'highcharts/modules/exporting';
 
 Highmaps(Highcharts);
+exporting(Highcharts);
 
 import * as turf from '@turf/turf';
 
@@ -15,18 +17,79 @@ export class Metrics {
 
     }
 
+    createMetricsGraph(dataMetricsGraph) {
+
+        Highcharts.chart('controls-content-metrics-plot', {
+            chart: {
+                type: 'scatter',
+                zoomType: 'x',
+                zoomKey: 'ctrl',
+                height: 300,
+                width: 500
+            },
+            title: {
+                text: 'Valor das métrcias para diferentes máximos do filtro de area'
+            },
+            xAxis: {
+                title: {
+                    enabled: true,
+                    text: 'Área máxima (ha)'
+                },
+                startOnTick: true,
+                endOnTick: true,
+                showLastLabel: true,
+                type: 'logarithmic'
+            },
+            yAxis: {
+                title: {
+                    text: 'Valor métricas (%)'
+                }
+            },
+            plotOptions: {
+                scatter: {
+                    marker: {
+                        radius: 5,
+                        states: {
+                            hover: {
+                                enabled: true,
+                                lineColor: 'rgb(100,100,100)'
+                            }
+                        }
+                    },
+                    states: {
+                        hover: {
+                            marker: {
+                                enabled: false
+                            }
+                        }
+                    },
+                    tooltip: {
+                        pointFormat: '<b>{series.name}</b>: {point.y} % <br><b>Área máxima</b>: {point.x} area ha'
+                    }
+                }
+            },
+            series: dataMetricsGraph
+        });
+    }
+
     computeOA(dataToComputeMetrics){
 
         var numerator = 0;
         var divisor = 0;
         var lenData = dataToComputeMetrics.length;
-        var step = Math.sqrt(lenData) + 1;
+        var step = Math.sqrt(lenData);
         var oa = 0;
+
+        let diag = 0;
 
         for (let index = 0; index < lenData; index++) {
             const element = dataToComputeMetrics[index];
-            
-            numerator += (index % step == 0 ? element : 0);
+
+            if (index % step == 0) {
+                numerator += dataToComputeMetrics[index + diag];
+                diag+=1;
+            }
+
             divisor += element;
         }
 
@@ -55,19 +118,19 @@ export class Metrics {
         return f1;
     }
 
-    computePrecision(dataToComputeMetrics, col=0){
+    computePrecision(dataToComputeMetrics, col=1){
 
-        var numerator = 0;
-        var divisor = 0;
         var lenData = dataToComputeMetrics.length;
         var len = Math.sqrt(lenData);
-        var startIndex = col * len;
+        var startCol = col * len;
+        var endCol = (col + 1) * len;
         var precision = 0;
 
-        for (let index = startIndex; index < len*(col+1); index++) {
-            const element = dataToComputeMetrics[index];
-            numerator += (col == index - startIndex) ? element : 0;
-            divisor += element;
+        var numerator = dataToComputeMetrics[startCol + col];
+        var divisor = 0;
+
+        for (let index = startCol; index < endCol; index++) {
+            divisor += dataToComputeMetrics[index];
         }
 
         precision = ((numerator / divisor) * 100).toFixed(1);
@@ -75,21 +138,19 @@ export class Metrics {
         return precision;
     }
 
-    computeRecall(dataToComputeMetrics, line=0){
+    computeRecall(dataToComputeMetrics, line=1){
 
-        var numerator = 0;
-        var divisor = 0;
         var lenData = dataToComputeMetrics.length;
         var step = Math.sqrt(lenData);
         var recall = 0;
-        var startIndex = step - line - 1;
+        var startLine = line;
 
-        for (let index = startIndex; index < lenData; index+=step) {
-            const element = dataToComputeMetrics[index];
-            const isTP = ((startIndex*step) + startIndex%2 == index);
+        
+        var numerator = dataToComputeMetrics[startLine * step + startLine];
+        var divisor = 0;
 
-            numerator += isTP ? element : 0;
-            divisor += element;
+        for (let index = startLine; index < lenData; index+=step) {
+            divisor += dataToComputeMetrics[index];
         }
 
         recall = ((numerator / divisor) * 100).toFixed(1);
