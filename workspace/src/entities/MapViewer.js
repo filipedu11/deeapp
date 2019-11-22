@@ -626,6 +626,9 @@ export class MapViewer{
         var min = document.getElementById('area-min-number');
         var max = document.getElementById('area-max-number');
 
+        var typeSelect = document.getElementById('type-geo');
+        var classBufferSelect = document.getElementById('class-buffer');
+
         clearFilterPAnel.onclick = function(){
             if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
                 mapViewer.vectorDraw.getSource().removeFeature(mapViewer.vectorDraw.getSource().getFeatures()[0]);
@@ -633,6 +636,9 @@ export class MapViewer{
             layerSel.getFilters().forEach(f => {
                 layerSel.removeFilter(f);
             });
+
+            typeSelect.value = typeSelect.options[0].value;
+            classBufferSelect.value = classBufferSelect.options[0].value;
 
             min.value = dataLyr.getMinimumOccupiedArea();
             min.dispatchEvent(new Event('change'));
@@ -657,8 +663,45 @@ export class MapViewer{
         var mapViewer = this;
 
         applyFilterPAnel.onclick = function(){
-            mapViewer.createStatsPanel(layerSel);
+            mapViewer.computeFilterPanel(layerSel);
         };
+    }
+
+    
+    /**
+     * Create the Stats panel with error matrix
+     * 
+     * @param {*} layerSel 
+     */
+    computeFilterPanel(layerSel) {
+        var format = new GeoJSON();
+                    
+        var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
+
+        var min = document.getElementById('area-min-number');
+        var max = document.getElementById('area-max-number');
+
+        var featsFilter = this.vectorDraw.getSource().getFeatures();
+
+        var calcAreaFilter = this.calcOccupiedAreaForEachClass(
+            dataLyr,  
+            [min.value, max.value], 
+            featsFilter.length > 0 ? 
+                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null);
+
+        //CREATE FILTER ERROR MATRIX
+        this.errorMatrix.createConfusionMatrix(
+            dataLyr, 
+            calcAreaFilter,
+            true
+        );
+
+        // this.metrics.createMetricsGraph(this.computeDataForOaGraph(
+        //     dataLyr, 
+        //     [min.value, max.value], 
+        //     featsFilter.length > 0 ? 
+        //         format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null));
+
     }
 
     /**
@@ -676,22 +719,16 @@ export class MapViewer{
 
         var featsFilter = this.vectorDraw.getSource().getFeatures();
 
-        var calcArea = this.calcOccupiedAreaForEachClass(dataLyr);
-        var calcAreaFilter = this.calcOccupiedAreaForEachClass(
-            dataLyr,  
-            [min.value, max.value], 
-            featsFilter.length > 0 ? 
-                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null);
-
         //CREATE NON FILTER ERROR MATRIX
+        var calcArea = this.calcOccupiedAreaForEachClass(dataLyr);
+
         this.errorMatrix.createConfusionMatrix(
             dataLyr, 
             calcArea);
 
-        //CREATE FILTER ERROR MATRIX
         this.errorMatrix.createConfusionMatrix(
             dataLyr, 
-            calcAreaFilter,
+            calcArea,
             true
         );
 
@@ -789,7 +826,7 @@ export class MapViewer{
                 if (allFeatures.length > 1) {
 
                     let mainFeats = [];
-                    var options = {tolerance: 0.0001, highQuality: false, mutate: false};
+                    var options = {tolerance: 0.00075, highQuality: false, mutate: false};
 
                     for (let index = 0, len = allFeatures.length; index < len; index++) {
                         const feat = allFeatures[index];
@@ -797,15 +834,18 @@ export class MapViewer{
                         if (feat.properties.classId == 1) {
 
                             let featBuffer;
+                            let bufferLine = feat;
 
-                            if (0 == classBuffer.value) {
-                                featBuffer = turf.polygonToLine(turf.simplify(feat, options));
-                            } else {
-                                featBuffer = turf.simplify(feat, options);
+                            if (buffer.value != 0) {
+                                if (0 == classBuffer.value) {
+                                    featBuffer = turf.simplify(turf.polygonToLine(feat), options);
+                                } else {
+                                    featBuffer = turf.simplify(feat, options);
+                                }
+                                bufferLine = turf.buffer(featBuffer, buffer.value);
                             }
 
-                            let bufferLine = turf.buffer(featBuffer, buffer.value);
-                            mainFeats.push(turf.simplify(bufferLine, options));
+                            mainFeats.push(bufferLine);
                         }
                     }
 
