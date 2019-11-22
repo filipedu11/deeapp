@@ -21,19 +21,19 @@
 
 @media (min-width: 768px) and (max-width: 991px) {
   .sidebar {
-    width: 45%;
+    width: 40%;
   }
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {
   .sidebar {
-    width: 40%;
+    width: 35%;
   }
 }
 
 @media (min-width: 1200px) {
   .sidebar {
-    width: 35%;
+    width: 30%;
   }
 }
 
@@ -170,7 +170,7 @@
 
 @media (min-width: 768px) and (max-width: 991px) {
   .sidebar-pane {
-    min-width: 45%;
+    min-width: 40%;
   }
 
   .container-stats{
@@ -182,7 +182,7 @@
 
 @media (min-width: 992px) and (max-width: 1199px) {
   .sidebar-pane {
-    min-width: 40%;
+    min-width: 35%;
   }
 
   .container-stats{
@@ -194,7 +194,7 @@
 
 @media (min-width: 1200px) {
   .sidebar-pane {
-    min-width: 35%;
+    min-width: 30%;
   }
 
   .container-stats{
@@ -294,7 +294,7 @@
   .sidebar-left~.sidebar-map .ol-zoom,
   .sidebar-left~.sidebar-map .ol-scale-line, 
   .sidebar-left~.sidebar-map #legend {
-    margin-left: calc(45% + 10px);
+    margin-left: calc(40% + 10px);
   }
 }
 
@@ -303,7 +303,7 @@
   .sidebar-left~.sidebar-map .ol-zoom,
   .sidebar-left~.sidebar-map .ol-scale-line, 
   .sidebar-left~.sidebar-map #legend {
-    margin-left: calc(40% + 10px);
+    margin-left: calc(35% + 10px);
   }
 }
 
@@ -312,7 +312,7 @@
   .sidebar-left~.sidebar-map .ol-zoom,
   .sidebar-left~.sidebar-map .ol-scale-line,
   .sidebar-left~.sidebar-map #legend {
-    margin-left: calc(35% + 10px);
+    margin-left: calc(30% + 10px);
   }
 }
 
