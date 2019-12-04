@@ -48,6 +48,8 @@ import * as turf from '@turf/turf';
 import noUiSlider from 'nouislider';
 import wNumb from 'wnumb';
 import { Metrics } from '../panels/Metrics.js';
+import Swal from 'sweetalert2';
+
 
 Highmore(Highcharts);
 Histogram(Highcharts);
@@ -822,11 +824,32 @@ export class MapViewer{
         });
 
         function computeBuffer() {
+
+            if (0 == classBuffer.value && buffer.value == buffer.min ) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro no tamanho do buffer!',
+                    text: 'Não é possivel computar o buffer com tamanho 0 para as fronteiras.'
+                });
+                return;
+            }
+
+            if (buffer.value < buffer.min || buffer.value > buffer.max ) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro no tamanho do buffer!',
+                    text: 'Não é possivel computar buffers com valores inferiores a '
+                            + buffer.min + ' e superiores a ' + buffer.max + '.'
+                });
+                return;
+            }
+
             if (classBuffer.value != -1) {
                 if (allFeatures.length > 1) {
 
                     let mainFeats = [];
-                    var options = {tolerance: 0.00075, highQuality: false, mutate: false};
+                    var options = {tolerance: 0.00075
+                        , highQuality: false, mutate: false};
 
                     for (let index = 0, len = allFeatures.length; index < len; index++) {
                         const feat = allFeatures[index];
@@ -836,7 +859,7 @@ export class MapViewer{
                             let featBuffer;
                             let bufferLine = feat;
 
-                            if (buffer.value != 0) {
+                            if (buffer.value > 0) {
                                 if (0 == classBuffer.value) {
                                     featBuffer = turf.simplify(turf.polygonToLine(feat), options);
                                 } else {
