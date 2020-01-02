@@ -1056,38 +1056,59 @@ export class MapViewer{
             var rbush = tree.load(features);
             var containElements;
 
-            var drawPolygons = polygonFilter.geometry.coordinates;
+            var drawPolygons = turf.tesselate(polygonFilter).features;
             let lenDrawPolys = drawPolygons.length;
+            let poly = lenDrawPolys > 0 ? drawPolygons[0] : null;
+            const factorDivision = lenDrawPolys;
 
-            for (let j = 0; j < lenDrawPolys; j++) {
+            for (let j = 1; j < lenDrawPolys; ++j) {
 
-                const coords = lenDrawPolys == 1 ? [drawPolygons[j]] : drawPolygons[j];
-                let poly;
-                try {
-                    poly = turf.polygon(coords);
-                } catch (error) {
-                    let line = turf.lineString(coords);
-                    poly = turf.lineStringToPolygon(line);
-                }
-
-                containElements = rbush.search(poly).features;
+                //console.log('Element ' + j + ' of ' + lenDrawPolys);
                 
-                for (let index = 0, len = containElements.length; index < len && poly; index++) {
-
-                    const polygon = containElements[index];
-                    const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
-
-                    var intersectArea = turf.intersect(polygon, poly);
-
-                    //Convert area to hectares (ha = m^2 / 10000)
-                    calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-
-                    if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                        dataArea[pos] = dataArea[pos] != null ? 
-                            dataArea[pos] + calcArea : calcArea;
+                //Construct poly to eval
+                if (j%factorDivision != 0) {
+                    poly = turf.union(poly, drawPolygons[j]);
+                }
+                //Eval the polygon 
+                else {
+                    containElements = rbush.search(poly).features;
+                    
+                    for (let index = 0, len = containElements.length; index < len && poly; ++index) {
+    
+                        const polygon = containElements[index];
+                        const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
+    
+                        const intersectArea = turf.intersect(polygon, poly);
+    
+                        //Convert area to hectares (ha = m^2 / 10000)
+                        calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
+    
+                        if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
+                            dataArea[pos] = dataArea[pos] != null ? 
+                                dataArea[pos] + calcArea : calcArea;
+                        }
                     }
+
+                    poly = drawPolygons[j];
                 }
             }
+
+            for (let index = 0, len = containElements.length; index < len && poly; ++index) {
+    
+                const polygon = containElements[index];
+                const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
+
+                const intersectArea = turf.intersect(polygon, poly);
+
+                //Convert area to hectares (ha = m^2 / 10000)
+                calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
+
+                if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
+                    dataArea[pos] = dataArea[pos] != null ? 
+                        dataArea[pos] + calcArea : calcArea;
+                }
+            }
+
         } else {
 
             for (let index = 0, len = features.length; index < len; index++) {
