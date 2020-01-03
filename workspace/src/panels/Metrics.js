@@ -72,6 +72,60 @@ export class Metrics {
         });
     }
 
+    createMetricsGraphForBuffer(dataMetricsGraph) {
+
+        Highcharts.chart('controls-content-metrics-plot-for-buffer', {
+            chart: {
+                type: 'scatter',
+                zoomType: 'x',
+                zoomKey: 'ctrl',
+                height: 300,
+                width: 500
+            },
+            title: {
+                text: 'Valor das métrcias para diferentes tamanhos de buffer na fronteira'
+            },
+            xAxis: {
+                title: {
+                    enabled: true,
+                    text: 'Tamanho do buffer (km)'
+                },
+                startOnTick: true,
+                endOnTick: true,
+                showLastLabel: true
+            },
+            yAxis: {
+                title: {
+                    text: 'Valor métricas (%)'
+                }
+            },
+            plotOptions: {
+                scatter: {
+                    marker: {
+                        radius: 5,
+                        states: {
+                            hover: {
+                                enabled: true,
+                                lineColor: 'rgb(100,100,100)'
+                            }
+                        }
+                    },
+                    states: {
+                        hover: {
+                            marker: {
+                                enabled: false
+                            }
+                        }
+                    },
+                    tooltip: {
+                        pointFormat: '<b>{series.name}</b>: {point.y} % <br><b>Tamanho do buffer</b>: {point.x} km'
+                    }
+                }
+            },
+            series: dataMetricsGraph
+        });
+    }
+
     computeOA(dataToComputeMetrics){
 
         var numerator = 0;

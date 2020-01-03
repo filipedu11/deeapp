@@ -712,14 +712,8 @@ export class MapViewer{
      * @param {*} layerSel 
      */
     createStatsPanel(layerSel) {
-        var format = new GeoJSON();
                     
-        var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
-
-        var min = document.getElementById('area-min-number');
-        var max = document.getElementById('area-max-number');
-
-        var featsFilter = this.vectorDraw.getSource().getFeatures();
+        var dataLyr = this.getObjectLayer(layerSel.get('layerId')); 
 
         //CREATE NON FILTER ERROR MATRIX
         var calcArea = this.calcOccupiedAreaForEachClass(dataLyr);
@@ -734,15 +728,20 @@ export class MapViewer{
             true
         );
 
-        this.metrics.createMetricsGraph(this.computeDataForOaGraph(
-            dataLyr, 
-            [min.value, max.value], 
-            featsFilter.length > 0 ? 
-                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null));
+        this.metrics.createMetricsGraph(
+            this.computeDataForOaGraph(
+                dataLyr
+            )
+        );
 
+        this.metrics.createMetricsGraphForBuffer(
+            this.computeDataForBufferGraph(
+                dataLyr
+            )
+        );
     }
 
-    computeDataForOaGraph(dataLyr, filterAreaInterval, polygonFilter){                  
+    computeDataForOaGraph(dataLyr){                  
 
         let metricsDataGraph = [{
             name: 'Overall Accuracy',
@@ -769,7 +768,7 @@ export class MapViewer{
             let dataArea =  this.calcOccupiedAreaForEachClass(
                 dataLyr,  
                 [start, end],
-                polygonFilter
+                null
             );
 
             const oaValue = this.metrics.computeOA(dataArea);
@@ -786,7 +785,7 @@ export class MapViewer{
         let dataArea =  this.calcOccupiedAreaForEachClass(
             dataLyr,  
             [start, end],
-            polygonFilter
+            null
         );
 
         const oaValue = this.metrics.computeOA(dataArea);
@@ -796,6 +795,51 @@ export class MapViewer{
         metricsDataGraph[0].data.push([end, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
         metricsDataGraph[1].data.push([end, isNaN(paValue) ? 0 : parseFloat(paValue)]);
         metricsDataGraph[2].data.push([end, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);
+
+        return metricsDataGraph;
+    }
+
+    computeDataForBufferGraph(dataLyr){                  
+
+        let step = 0.01;
+        let min = 0.01;
+        let max = 0.25;
+
+        var valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
+        var allFeatures = valLayer.getFeatures();
+
+        let metricsDataGraph = [{
+            name: 'Overall Accuracy',
+            color: 'rgba(223, 83, 83, .5)',
+            data: []
+        }, {
+            name: 'Recall',
+            color: 'rgba(10, 83, 83, .5)',
+            data: []
+        }, {
+            name: 'Precision',
+            color: 'rgba(200, 0, 83, .5)',
+            data: []
+        }];
+
+        for (let i = min; i <= max; i+=step) {
+
+            console.log(i);
+
+            let dataArea = this.calcOccupiedAreaForEachClass(
+                dataLyr,  
+                null,
+                this.computeBufferAuxiliary(allFeatures, i, 0)
+            );
+
+            const oaValue = this.metrics.computeOA(dataArea);
+            const paValue = this.metrics.computeRecall(dataArea);
+            const uaValue = this.metrics.computePrecision(dataArea);
+
+            metricsDataGraph[0].data.push([i, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
+            metricsDataGraph[1].data.push([i, isNaN(paValue) ? 0 : parseFloat(paValue)]);
+            metricsDataGraph[2].data.push([i, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);    
+        }
 
         return metricsDataGraph;
     }
@@ -847,32 +891,7 @@ export class MapViewer{
             if (classBuffer.value != -1) {
                 if (allFeatures.length > 1) {
 
-                    let mainFeats = [];
-                    var options = {tolerance: 0.00075
-                        , highQuality: false, mutate: false};
-
-                    for (let index = 0, len = allFeatures.length; index < len; index++) {
-                        const feat = allFeatures[index];
-                        
-                        if (feat.properties.classId == 1) {
-
-                            let featBuffer;
-                            let bufferLine = feat;
-
-                            if (buffer.value > 0) {
-                                if (0 == classBuffer.value) {
-                                    featBuffer = turf.simplify(turf.polygonToLine(feat), options);
-                                } else {
-                                    featBuffer = turf.simplify(feat, options);
-                                }
-                                bufferLine = turf.buffer(featBuffer, buffer.value);
-                            }
-
-                            mainFeats.push(bufferLine);
-                        }
-                    }
-
-                    let mainFeat = turf.union.apply(this, mainFeats);
+                    let mainFeat = mapViewer.computeBufferAuxiliary(allFeatures, buffer.value, classBuffer.value);
 
                     if (mainFeat) {
                         if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
@@ -888,6 +907,36 @@ export class MapViewer{
             }
         }
 
+    }
+
+    computeBufferAuxiliary(allFeatures, value, classBuffer) {
+
+        let mainFeats = [];
+        var options = {tolerance: 0.0005
+            , highQuality: false, mutate: false};
+
+        for (let index = 0, len = allFeatures.length; index < len; index++) {
+            const feat = allFeatures[index];
+            
+            if (feat.properties.classId == 1) {
+
+                let featBuffer;
+                let bufferLine = feat;
+
+                if (value > 0) {
+                    if (0 == classBuffer) {
+                        featBuffer = turf.simplify(turf.polygonToLine(feat), options);
+                    } else {
+                        featBuffer = turf.simplify(feat, options);
+                    }
+                    bufferLine = turf.buffer(featBuffer, value);
+                }
+
+                mainFeats.push(bufferLine);
+            }
+        }
+
+        return turf.union.apply(this, mainFeats);
     }
 
     /**
@@ -1059,18 +1108,14 @@ export class MapViewer{
             var drawPolygons = turf.tesselate(polygonFilter).features;
             let lenDrawPolys = drawPolygons.length;
             let poly = lenDrawPolys > 0 ? drawPolygons[0] : null;
-            const factorDivision = lenDrawPolys;
+            const factorDivision = 20;
 
             for (let j = 1; j < lenDrawPolys; ++j) {
-
-                //console.log('Element ' + j + ' of ' + lenDrawPolys);
                 
-                //Construct poly to eval
-                if (j%factorDivision != 0) {
+                if (j%factorDivision != 0) { //Construct poly to eval
                     poly = turf.union(poly, drawPolygons[j]);
                 }
-                //Eval the polygon 
-                else {
+                else { //Eval the polygon 
                     containElements = rbush.search(poly).features;
                     
                     for (let index = 0, len = containElements.length; index < len && poly; ++index) {
