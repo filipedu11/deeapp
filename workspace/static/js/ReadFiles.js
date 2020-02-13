@@ -4,36 +4,20 @@ import readFileAsync from 'fs';
 export class ReadFiles{
 
     constructor(){}
-    
-    readValidationBurnedArea(){
-        return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/validation_burned_area_out.geojson', 'utf8').trim());
-    }
-
-    // readClassificationCart(){
-    //     return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_cart_out.geojson', 'utf8').trim());
-    // }
-
-    readClassificationContinuousNaiveBayes(){
-        return JSON.parse(readFileSync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_continuousNaiveBayes_out.geojson', 'utf8').trim());
-    }
-
-    readEvaluationContinuousNaiveBayes(){
-        return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_continuousNaiveBayes_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
-    }
-
-    // readEvaluationRandomForest(){
-    //     return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_randomForest_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
-    // }
 
     readClassifiedImage(){
         return 'http://127.0.0.1:8080/classifiedImage.png';
     }
-    
-    // readEvaluationGmoMaxEnt(){
-    //     return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_gmoMaxEnt_VS_validation_burned_area_difference_map_out.geojson', 'utf8').trim());
-    // }
 
-    // readTestClassification(){
-    //     return JSON.parse(readFileAsync('./workspace/static/data/classification/GEE_Burned_Area_Experiments/classification_out.geojson', 'utf8').trim());
-    // }
+    readValidationBurnedArea(){
+        return JSON.parse(readFileSync('./workspace/static/data/GEE_Burned_Area_Experiments/validation/validation_burned_area_out.geojson', 'utf8').trim());
+    }
+
+    readClassificationContinuousNaiveBayes(){
+        return JSON.parse(readFileSync('./workspace/static/data/GEE_Burned_Area_Experiments/classification/classification_continuousNaiveBayes_out.geojson', 'utf8').trim());
+    }
+
+    readEvaluationContinuousNaiveBayes(){
+        return JSON.parse(readFileAsync('./workspace/static/data/GEE_Burned_Area_Experiments/evaluation/validation_burned_area_VS_classification_continuousNaiveBayes_difference_map_out.geojson', 'utf8').trim());
+    }
 }

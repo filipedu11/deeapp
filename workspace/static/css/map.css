@@ -216,7 +216,7 @@ p {
 #legend{
     text-align: left;
     bottom: .5em;
-    left: .5em;
+    right: .5em;
     max-width: calc(100% - 1.3em);
     z-index: 30000;
     position: absolute;

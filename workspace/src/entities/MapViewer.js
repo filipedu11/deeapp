@@ -29,6 +29,7 @@ import VectorLayer from 'ol/layer/VectorTile';
 import VectorL from 'ol/layer/Vector';
 import ImageLayer from 'ol/layer/Image.js';
 import Control from 'ol/control';
+import ScaleLine from 'ol/control/ScaleLine.js';
 import Mask from 'ol-ext/filter/Mask';
 
 import Projection from 'ol/proj/Projection';
@@ -136,6 +137,8 @@ export class MapViewer{
             }),
         });
 
+        map.addControl(new ScaleLine());
+        
         map.set('initExtent', map.getView().getProjection().getExtent());
 
         return map;
@@ -760,8 +763,8 @@ export class MapViewer{
         let precision = 2;
         let steps = dataLyr.getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision);
         let len = steps.length;
-        let end = steps[0];
-        let start = steps[0] - 1/Math.pow(10, precision - 1);
+        let end = steps[1];
+        let start = steps[0];
 
         for (let i = 1; i < len; i++) {
 
@@ -912,7 +915,7 @@ export class MapViewer{
     computeBufferAuxiliary(allFeatures, value, classBuffer) {
 
         let mainFeats = [];
-        var options = {tolerance: 0.0005
+        var options = {tolerance: 0.001
             , highQuality: false, mutate: false};
 
         for (let index = 0, len = allFeatures.length; index < len; index++) {
@@ -1087,6 +1090,7 @@ export class MapViewer{
 
         var classKeys = dataLyr.getKeysOfClasses();
         var features = dataLyr.getFeatures();
+        var newFeatures = [];
 
         var dataArea = [];
         var classIndex = {};
@@ -1101,9 +1105,18 @@ export class MapViewer{
 
         if(polygonFilter) {
 
+            for (let index = 0, len = features.length; index < len; index++) {
+                const polygon = features[index];
+                //Convert area to hectares (ha = m^2 / 10000)
+                calcArea = turf.area(polygon) / 10000;
+                if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
+                    newFeatures.push(polygon);
+                }
+            }
+
             var tree = geojsonRbush();
-            var rbush = tree.load(features);
-            var containElements;
+            var rbush = tree.load(newFeatures);
+            let containElements;
 
             var drawPolygons = turf.tesselate(polygonFilter).features;
             let lenDrawPolys = drawPolygons.length;
@@ -1128,15 +1141,15 @@ export class MapViewer{
                         //Convert area to hectares (ha = m^2 / 10000)
                         calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
     
-                        if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                            dataArea[pos] = dataArea[pos] != null ? 
-                                dataArea[pos] + calcArea : calcArea;
-                        }
+                        dataArea[pos] = dataArea[pos] != null ? 
+                            dataArea[pos] + calcArea : calcArea;
                     }
 
                     poly = drawPolygons[j];
                 }
             }
+            
+            containElements = rbush.search(poly).features;
 
             for (let index = 0, len = containElements.length; index < len && poly; ++index) {
     
@@ -1147,11 +1160,9 @@ export class MapViewer{
 
                 //Convert area to hectares (ha = m^2 / 10000)
                 calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-
-                if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                    dataArea[pos] = dataArea[pos] != null ? 
-                        dataArea[pos] + calcArea : calcArea;
-                }
+                
+                dataArea[pos] = dataArea[pos] != null ? 
+                    dataArea[pos] + calcArea : calcArea;
             }
 
         } else {
