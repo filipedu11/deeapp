@@ -701,7 +701,7 @@ export class MapViewer{
             true
         );
 
-        // this.metrics.createMetricsGraph(this.computeDataForOaGraph(
+        // this.metrics.createMetricsGraph(this.computeDataForMetricsGraph(
         //     dataLyr, 
         //     [min.value, max.value], 
         //     featsFilter.length > 0 ? 
@@ -732,19 +732,19 @@ export class MapViewer{
         );
 
         this.metrics.createMetricsGraph(
-            this.computeDataForOaGraph(
+            this.computeDataForMetricsGraph(
                 dataLyr
             )
         );
 
-        this.metrics.createMetricsGraphForBuffer(
-            this.computeDataForBufferGraph(
-                dataLyr
-            )
-        );
+        // this.metrics.createMetricsGraphForBuffer(
+        //     this.computeDataForBufferGraph(
+        //         dataLyr
+        //     )
+        // );
     }
 
-    computeDataForOaGraph(dataLyr){                  
+    computeDataForMetricsGraph(dataLyr){                  
 
         let metricsDataGraph = [{
             name: 'Overall Accuracy',
@@ -760,7 +760,7 @@ export class MapViewer{
             data: []
         }];
 
-        let precision = 2;
+        let precision = 0;
         let steps = dataLyr.getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision);
         let len = steps.length;
         let end = steps[1];
@@ -915,7 +915,7 @@ export class MapViewer{
     computeBufferAuxiliary(allFeatures, value, classBuffer) {
 
         let mainFeats = [];
-        var options = {tolerance: 0.001
+        var options = {tolerance: 0.0005
             , highQuality: false, mutate: false};
 
         for (let index = 0, len = allFeatures.length; index < len; index++) {

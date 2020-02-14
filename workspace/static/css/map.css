@@ -75,6 +75,7 @@ html, body {
 
 .controller-padding {
     padding-left: 10px;
+    width: 100%;
 }
 
 .noUi-horizontal {
