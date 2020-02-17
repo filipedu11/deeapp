@@ -51,20 +51,18 @@ import wNumb from 'wnumb';
 import { Metrics } from '../panels/Metrics.js';
 import Swal from 'sweetalert2';
 
-
 Highmore(Highcharts);
 Histogram(Highcharts);
-
-/*eslint no-undef: "error"*/
-/*eslint-env node*/
-// eslint-disable-next-line no-unused-vars
-var geojsonRbush = require('geojson-rbush').default;
 
 var BASE_TYPE_STRING = 'basemap';
 var DRAW_LAYER_STRING = 'draw';
 var CLASSIFICATION_TYPE_STRING = 'classification';
 var VALIDATION_STRING = 'validation';
 var EVALUATION_STRING = 'evaluation';
+
+var w = new Worker('./worker.js');
+var workerAreaFilter = new Worker('./workerAreaFilter.js');
+var workerBufferFilter = new Worker('./workerBufferFilter.js');
 
 export class MapViewer{
 
@@ -170,25 +168,25 @@ export class MapViewer{
      */
     initLayersGroup(){
         var base = new LayerGroup({
-            title: 'Base Maps',
+            title: 'Mapas Base',
             fold: 'open',
             typeBase: BASE_TYPE_STRING,
         });
 
         var classifications = new LayerGroup({
-            title: 'Classifications',
+            title: 'Classificação',
             fold: 'open',
             typeBase: CLASSIFICATION_TYPE_STRING
         });
         
         var validations = new LayerGroup({
-            title: 'Validations',
+            title: 'Validação',
             fold: 'open',
             typeBase: VALIDATION_STRING
         });
 
         var evaluations = new LayerGroup({
-            title: 'Evaluations',
+            title: 'Distribuição Espacial do Erro',
             fold: 'open',
             typeBase: EVALUATION_STRING
         });
@@ -537,8 +535,7 @@ export class MapViewer{
             layerId: classObject.getId(),
             sourceAux: vectorSource,
             inactiveClasses: {},
-            typeBase: classObject.getType(),
-
+            typeBase: classObject.getType()
         });
 
         this.createStyle(layer, []);
@@ -649,16 +646,12 @@ export class MapViewer{
             min.dispatchEvent(new Event('change'));
             max.value = dataLyr.getMaximumOccupiedArea();
             max.dispatchEvent(new Event('change'));
-
-            var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
-                dataLyr,  
-                [min.value, max.value], 
-                null);
-
-            mapViewer.errorMatrix.createConfusionMatrix (
-                dataLyr,
-                calcAreaFilter,
-                true);
+    
+            let classKeys = dataLyr.getKeysOfClasses();
+            let features = dataLyr.getFeatures();
+    
+            //CREATE CONFUSION MATRIX
+            w.postMessage([classKeys, features, [min.value, max.value], null]);
         };
     }
 
@@ -679,34 +672,27 @@ export class MapViewer{
      * @param {*} layerSel 
      */
     computeFilterPanel(layerSel) {
-        var format = new GeoJSON();
+        let format = new GeoJSON();
                     
-        var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
+        let dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
 
-        var min = document.getElementById('area-min-number');
-        var max = document.getElementById('area-max-number');
+        let min = document.getElementById('area-min-number');
+        let max = document.getElementById('area-max-number');
 
-        var featsFilter = this.vectorDraw.getSource().getFeatures();
+        let featsFilter = this.vectorDraw.getSource().getFeatures();
 
-        var calcAreaFilter = this.calcOccupiedAreaForEachClass(
-            dataLyr,  
-            [min.value, max.value], 
-            featsFilter.length > 0 ? 
-                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null);
+        let errorMatrixAux = this.errorMatrix;
+        errorMatrixAux.loadingFilterMatrix();
+        
+        let classKeys = dataLyr.getKeysOfClasses();
+        let features = dataLyr.getFeatures();
 
-        //CREATE FILTER ERROR MATRIX
-        this.errorMatrix.createConfusionMatrix(
-            dataLyr, 
-            calcAreaFilter,
-            true
-        );
-
-        // this.metrics.createMetricsGraph(this.computeDataForMetricsGraph(
-        //     dataLyr, 
-        //     [min.value, max.value], 
-        //     featsFilter.length > 0 ? 
-        //         format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null));
-
+        let polygonFilter = featsFilter.length > 0 ? 
+            format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null;
+        
+        //CREATE CONFUSION MATRIX
+        w.postMessage([classKeys, features, [min.value, max.value], polygonFilter]);
+        
     }
 
     /**
@@ -717,134 +703,37 @@ export class MapViewer{
     createStatsPanel(layerSel) {
                     
         var dataLyr = this.getObjectLayer(layerSel.get('layerId')); 
+        var errorMatrixAux = this.errorMatrix;
+        var metrics = this.metrics;
 
-        //CREATE NON FILTER ERROR MATRIX
-        var calcArea = this.calcOccupiedAreaForEachClass(dataLyr);
+        var classKeys = dataLyr.getKeysOfClasses();
+        var features = dataLyr.getFeatures();
 
-        this.errorMatrix.createConfusionMatrix(
-            dataLyr, 
-            calcArea);
+        //CREATE CONFUSION MATRIX
+        w.addEventListener('message', function(e) {
 
-        this.errorMatrix.createConfusionMatrix(
-            dataLyr, 
-            calcArea,
-            true
-        );
+            if (!errorMatrixAux.errorMatrixWithoutFilterExist())
+                errorMatrixAux.createConfusionMatrix(dataLyr, e.data);
 
-        this.metrics.createMetricsGraph(
-            this.computeDataForMetricsGraph(
-                dataLyr
-            )
-        );
-
-        // this.metrics.createMetricsGraphForBuffer(
-        //     this.computeDataForBufferGraph(
-        //         dataLyr
-        //     )
-        // );
-    }
-
-    computeDataForMetricsGraph(dataLyr){                  
-
-        let metricsDataGraph = [{
-            name: 'Overall Accuracy',
-            color: 'rgba(223, 83, 83, .5)',
-            data: []
-        }, {
-            name: 'Recall',
-            color: 'rgba(10, 83, 83, .5)',
-            data: []
-        }, {
-            name: 'Precision',
-            color: 'rgba(200, 0, 83, .5)',
-            data: []
-        }];
-
-        let precision = 0;
+            errorMatrixAux.createConfusionMatrix(dataLyr, e.data, true);
+        }, false);
+        w.postMessage([classKeys, features, null, null]);
+ 
+        //CREATE AREA FILTER GRAPH
+        let precision = 3;
         let steps = dataLyr.getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision);
-        let len = steps.length;
-        let end = steps[1];
-        let start = steps[0];
+        workerAreaFilter.addEventListener('message', function(e) {
+            metrics.createMetricsGraph(e.data);
+        }, false);
+        workerAreaFilter.postMessage([classKeys, features, steps]);
 
-        for (let i = 1; i < len; i++) {
+        //CREATE BUFFER FILTER GRAPH
+        let valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
+        workerBufferFilter.addEventListener('message', function(e) {
+            metrics.createMetricsGraphForBuffer(e.data);
+        }, false);
+        workerBufferFilter.postMessage([classKeys, features, valLayer.getFeatures()]);
 
-            let dataArea =  this.calcOccupiedAreaForEachClass(
-                dataLyr,  
-                [start, end],
-                null
-            );
-
-            const oaValue = this.metrics.computeOA(dataArea);
-            const paValue = this.metrics.computeRecall(dataArea);
-            const uaValue = this.metrics.computePrecision(dataArea);
-
-            metricsDataGraph[0].data.push([end, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
-            metricsDataGraph[1].data.push([end, isNaN(paValue) ? 0 : parseFloat(paValue)]);
-            metricsDataGraph[2].data.push([end, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);
-            
-            end = steps[i];
-        }
-        
-        let dataArea =  this.calcOccupiedAreaForEachClass(
-            dataLyr,  
-            [start, end],
-            null
-        );
-
-        const oaValue = this.metrics.computeOA(dataArea);
-        const paValue = this.metrics.computeRecall(dataArea);
-        const uaValue = this.metrics.computePrecision(dataArea);
-
-        metricsDataGraph[0].data.push([end, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
-        metricsDataGraph[1].data.push([end, isNaN(paValue) ? 0 : parseFloat(paValue)]);
-        metricsDataGraph[2].data.push([end, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);
-
-        return metricsDataGraph;
-    }
-
-    computeDataForBufferGraph(dataLyr){                  
-
-        let step = 0.01;
-        let min = 0.01;
-        let max = 0.25;
-
-        var valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
-        var allFeatures = valLayer.getFeatures();
-
-        let metricsDataGraph = [{
-            name: 'Overall Accuracy',
-            color: 'rgba(223, 83, 83, .5)',
-            data: []
-        }, {
-            name: 'Recall',
-            color: 'rgba(10, 83, 83, .5)',
-            data: []
-        }, {
-            name: 'Precision',
-            color: 'rgba(200, 0, 83, .5)',
-            data: []
-        }];
-
-        for (let i = min; i <= max; i+=step) {
-
-            console.log(i);
-
-            let dataArea = this.calcOccupiedAreaForEachClass(
-                dataLyr,  
-                null,
-                this.computeBufferAuxiliary(allFeatures, i, 0)
-            );
-
-            const oaValue = this.metrics.computeOA(dataArea);
-            const paValue = this.metrics.computeRecall(dataArea);
-            const uaValue = this.metrics.computePrecision(dataArea);
-
-            metricsDataGraph[0].data.push([i, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
-            metricsDataGraph[1].data.push([i, isNaN(paValue) ? 0 : parseFloat(paValue)]);
-            metricsDataGraph[2].data.push([i, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);    
-        }
-
-        return metricsDataGraph;
     }
 
     /**
@@ -1071,116 +960,6 @@ export class MapViewer{
                 layerSel.addFilter(mask);
             }
         });
-    }
-
-    /**
-     * Compute the data for the error matrix according with:
-     * 
-     *  1. Selected interval area
-     *  2. Polygon draw
-     * 
-     * calcOccupiedAreaForEachClass(dataLayer) -> data for error matrix without filter
-     * calcOccupiedAreaForEachClass(dataLayer, filterAreaInterval, polygonFilter) -> data for error matrix with filter
-     * 
-     * @param {*} dataLyr 
-     * @param {*} filterAreaInterval 
-     * @param {*} polygonFilter 
-     */    
-    calcOccupiedAreaForEachClass(dataLyr, filterAreaInterval, polygonFilter){
-
-        var classKeys = dataLyr.getKeysOfClasses();
-        var features = dataLyr.getFeatures();
-        var newFeatures = [];
-
-        var dataArea = [];
-        var classIndex = {};
-
-        for (let index = 0, len = classKeys.length ; index < len; index++) {
-            const key = classKeys[index];
-            classIndex[key] = index;
-            dataArea[index] = 0;
-        }
-
-        var calcArea;
-
-        if(polygonFilter) {
-
-            for (let index = 0, len = features.length; index < len; index++) {
-                const polygon = features[index];
-                //Convert area to hectares (ha = m^2 / 10000)
-                calcArea = turf.area(polygon) / 10000;
-                if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                    newFeatures.push(polygon);
-                }
-            }
-
-            var tree = geojsonRbush();
-            var rbush = tree.load(newFeatures);
-            let containElements;
-
-            var drawPolygons = turf.tesselate(polygonFilter).features;
-            let lenDrawPolys = drawPolygons.length;
-            let poly = lenDrawPolys > 0 ? drawPolygons[0] : null;
-            const factorDivision = 20;
-
-            for (let j = 1; j < lenDrawPolys; ++j) {
-                
-                if (j%factorDivision != 0) { //Construct poly to eval
-                    poly = turf.union(poly, drawPolygons[j]);
-                }
-                else { //Eval the polygon 
-                    containElements = rbush.search(poly).features;
-                    
-                    for (let index = 0, len = containElements.length; index < len && poly; ++index) {
-    
-                        const polygon = containElements[index];
-                        const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
-    
-                        const intersectArea = turf.intersect(polygon, poly);
-    
-                        //Convert area to hectares (ha = m^2 / 10000)
-                        calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-    
-                        dataArea[pos] = dataArea[pos] != null ? 
-                            dataArea[pos] + calcArea : calcArea;
-                    }
-
-                    poly = drawPolygons[j];
-                }
-            }
-            
-            containElements = rbush.search(poly).features;
-
-            for (let index = 0, len = containElements.length; index < len && poly; ++index) {
-    
-                const polygon = containElements[index];
-                const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
-
-                const intersectArea = turf.intersect(polygon, poly);
-
-                //Convert area to hectares (ha = m^2 / 10000)
-                calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-                
-                dataArea[pos] = dataArea[pos] != null ? 
-                    dataArea[pos] + calcArea : calcArea;
-            }
-
-        } else {
-
-            for (let index = 0, len = features.length; index < len; index++) {
-                const polygon = features[index];
-                const pos = classIndex[parseInt(features[index]['properties']['classId'])];
-
-                //Convert area to hectares (ha = m^2 / 10000)
-                calcArea = turf.area(polygon) / 10000;
-                if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                    dataArea[pos] = dataArea[pos] != null ? 
-                        dataArea[pos] + calcArea : calcArea;
-                }
-            }
-        }
-
-        return dataArea;
     }
 
     /**
