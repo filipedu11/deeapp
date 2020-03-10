@@ -283,6 +283,7 @@
 @media (min-width: 768px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
+  .sidebar-left~.sidebar-map #compass,
   .sidebar-left~.sidebar-map .ol-scale-line, 
   .sidebar-left~.sidebar-map #legend {
     transition: margin-left 500ms;
@@ -292,6 +293,7 @@
 @media (min-width: 768px) and (max-width: 991px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
+  .sidebar-left~.sidebar-map #compass,
   .sidebar-left~.sidebar-map .ol-scale-line, 
   .sidebar-left~.sidebar-map #legend {
     margin-left: calc(40% + 10px);
@@ -301,6 +303,7 @@
 @media (min-width: 992px) and (max-width: 1199px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
+  .sidebar-left~.sidebar-map #compass,
   .sidebar-left~.sidebar-map .ol-scale-line, 
   .sidebar-left~.sidebar-map #legend {
     margin-left: calc(35% + 10px);
@@ -310,6 +313,7 @@
 @media (min-width: 1200px) {
 
   .sidebar-left~.sidebar-map .ol-zoom,
+  .sidebar-left~.sidebar-map #compass,
   .sidebar-left~.sidebar-map .ol-scale-line,
   .sidebar-left~.sidebar-map #legend {
     margin-left: calc(30% + 10px);
@@ -319,6 +323,7 @@
 @media (min-width: 768px) {
 
   .sidebar-left.collapsed~.sidebar-map .ol-zoom,
+  .sidebar-left.collapsed~.sidebar-map #compass,
   .sidebar-left.collapsed~.sidebar-map .ol-scale-line, 
   .sidebar-left.collapsed~.sidebar-map #legend {
     margin-left: 52px;

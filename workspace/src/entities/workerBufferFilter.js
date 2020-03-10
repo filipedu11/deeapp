@@ -1,6 +1,7 @@
 var turf = require('@turf/turf');
 var geojsonRbush = require('geojson-rbush').default;
 
+var metricsDataGraph;
 self.addEventListener('message', function(e) {
     var data = e.data;
     var area = computeDataForBufferGraph(data[0], data[1], data[2]);
@@ -9,21 +10,25 @@ self.addEventListener('message', function(e) {
 
 function computeDataForBufferGraph(classKeys, features, valFeatures){                  
 
+    if (metricsDataGraph) {
+        return metricsDataGraph;
+    }
+
     let step = 0.01;
     let min = 0.01;
-    let max = 0.25;
+    let max = 0.30;
     let dataArea;
 
-    let metricsDataGraph = [{
-        name: 'Overall Accuracy',
+    metricsDataGraph = [{
+        name: 'Precisão Global (OA)',
         color: 'rgba(223, 83, 83, .5)',
         data: []
     }, {
-        name: 'Recall',
+        name: 'Precisão (UA)',
         color: 'rgba(10, 83, 83, .5)',
         data: []
     }, {
-        name: 'Precision',
+        name: 'Exatidão (PA)',
         color: 'rgba(200, 0, 83, .5)',
         data: []
     }, {
@@ -32,54 +37,63 @@ function computeDataForBufferGraph(classKeys, features, valFeatures){
         data: []
     }];
 
-    for (let i = min; i <= max; i+=step) {
+    console.log('Compute buffer!');
+    let polygonBufferFilter = [];
+    for (let bufferSize = min; bufferSize <= max; bufferSize+=step) {
+        polygonBufferFilter.push(computeBufferAuxiliary(valFeatures, bufferSize));
+    }
 
-        console.log(i);
+    let bufferTesselate = [];
+
+    console.log('Buffer tesselated!');
+    for (const feat of polygonBufferFilter) {
+        const bufTesselate = turf.tesselate(feat).features;
+        bufferTesselate.push(bufTesselate);
+    }
+
+    let pos = min;
+    for (const polyBuffer of bufferTesselate) {
+
+        console.log('Compute buffer: ' + pos);
 
         dataArea = calcOccupiedAreaForEachClass(
             classKeys, 
             features,
-            null,
-            computeBufferAuxiliary(valFeatures, i, 0)
+            polyBuffer
         );
-        
+
         const oaValue = computeOA(dataArea);
         const paValue = computeRecall(dataArea);
         const uaValue = computePrecision(dataArea);
         const f1score = computeF1(dataArea);
 
-        metricsDataGraph[0].data.push([i, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
-        metricsDataGraph[1].data.push([i, isNaN(paValue) ? 0 : parseFloat(paValue)]);
-        metricsDataGraph[2].data.push([i, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);  
-        metricsDataGraph[3].data.push([i, isNaN(f1score) ? 0 : parseFloat(f1score)]);  
+        metricsDataGraph[0].data.push([pos, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
+        metricsDataGraph[1].data.push([pos, isNaN(paValue) ? 0 : parseFloat(paValue)]);
+        metricsDataGraph[2].data.push([pos, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);  
+        metricsDataGraph[3].data.push([pos, isNaN(f1score) ? 0 : parseFloat(f1score)]); 
+
+        pos+=step;
     }
 
     return metricsDataGraph;
 }
 
-function computeBufferAuxiliary(valFeatures, value, classBuffer) {
+function computeBufferAuxiliary(valFeatures, value) {
 
     let mainFeats = [];
-    var options = {tolerance: 0.0075
+    var options = {tolerance: 0.0005
         , highQuality: false, mutate: false};
 
-    for (let index = 0, len = valFeatures.length; index < len; index++) {
+    for (let index = 0, len = valFeatures.length; index < len; ++index) {
         const feat = valFeatures[index];
         
         if (feat.properties.classId == 1) {
 
             let featBuffer;
             let bufferLine = feat;
-
-            if (value > 0) {
-                if (0 == classBuffer) {
-                    featBuffer = turf.simplify(turf.polygonToLine(feat), options);
-                } else {
-                    featBuffer = turf.simplify(feat, options);
-                }
-                bufferLine = turf.buffer(featBuffer, value);
-            }
-
+            featBuffer = turf.simplify(turf.polygonToLine(feat), options);
+            bufferLine = turf.buffer(featBuffer, value);
+            
             mainFeats.push(bufferLine);
         }
     }
@@ -186,10 +200,9 @@ function computeRecall(dataToComputeMetrics, line=1){
  * @param {*} filterAreaInterval 
  * @param {*} polygonFilter 
  */    
-function calcOccupiedAreaForEachClass(classKeys, features, filterAreaInterval, polygonFilter){
-    var newFeatures = [];
+function calcOccupiedAreaForEachClass(classKeys, features, polygonBufferTesselated){
 
-    var dataArea = [];
+    let dataArea = [];
     var classIndex = {};
 
     for (let index = 0, len = classKeys.length ; index < len; index++) {
@@ -198,84 +211,47 @@ function calcOccupiedAreaForEachClass(classKeys, features, filterAreaInterval, p
         dataArea[index] = 0;
     }
 
-    var calcArea;
+    let calcArea;
+    let tree = geojsonRbush();
+    const treeFeat= tree.load(features);
 
-    if(polygonFilter) {
+    let poly = polygonBufferTesselated[0];
+    const factorDivision = 10;
+    let foundFeats;
 
-        for (let index = 0, len = features.length; index < len; index++) {
-            const polygon = features[index];
-            //Convert area to hectares (ha = m^2 / 10000)
-            calcArea = turf.area(polygon) / 10000;
-            if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                newFeatures.push(polygon);
-            }
+    for (let j = 1, len = polygonBufferTesselated.length; j < len; ++j) {
+
+        if (j%factorDivision != 0) { //Construct poly to eval
+            poly = turf.union(poly, polygonBufferTesselated[j]);
         }
-
-        var tree = geojsonRbush();
-        var rbush = tree.load(newFeatures);
-        let containElements;
-
-        var drawPolygons = turf.tesselate(polygonFilter).features;
-        let lenDrawPolys = drawPolygons.length;
-        let poly = lenDrawPolys > 0 ? drawPolygons[0] : null;
-        const factorDivision = 20;
-
-        for (let j = 1; j < lenDrawPolys; ++j) {
-        
-            if (j%factorDivision != 0) { //Construct poly to eval
-                poly = turf.union(poly, drawPolygons[j]);
-            }
-            else { //Eval the polygon 
-                containElements = rbush.search(poly).features;
-            
-                for (let index = 0, len = containElements.length; index < len && poly; ++index) {
-
-                    const polygon = containElements[index];
-                    const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
-
-                    const intersectArea = turf.intersect(polygon, poly);
-
+        else {
+            try {
+                foundFeats = treeFeat.search(poly).features;
+                for (const fFeat of foundFeats) {
+                    const pos = classIndex[parseInt(fFeat['properties']['classId'])];
+                    const intersectArea = turf.intersect(fFeat, poly);
                     //Convert area to hectares (ha = m^2 / 10000)
                     calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-
-                    dataArea[pos] = dataArea[pos] != null ? 
-                        dataArea[pos] + calcArea : calcArea;
+                    dataArea[pos] = dataArea[pos] + calcArea;
                 }
 
-                poly = drawPolygons[j];
-            }
-        }
-    
-        containElements = rbush.search(poly).features;
-
-        for (let index = 0, len = containElements.length; index < len && poly; ++index) {
-
-            const polygon = containElements[index];
-            const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
-
-            const intersectArea = turf.intersect(polygon, poly);
-
-            //Convert area to hectares (ha = m^2 / 10000)
-            calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-        
-            dataArea[pos] = dataArea[pos] != null ? 
-                dataArea[pos] + calcArea : calcArea;
-        }
-
-    } else {
-
-        for (let index = 0, len = features.length; index < len; index++) {
-            const polygon = features[index];
-            const pos = classIndex[parseInt(features[index]['properties']['classId'])];
-
-            //Convert area to hectares (ha = m^2 / 10000)
-            calcArea = turf.area(polygon) / 10000;
-            if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                dataArea[pos] = dataArea[pos] != null ? 
-                    dataArea[pos] + calcArea : calcArea;
+                poly = polygonBufferTesselated[j]; 
+            } catch (error) {
+                poly = turf.union(poly, polygonBufferTesselated[j]);
             }
         }
     }
 
+    foundFeats = treeFeat.search(poly).features;
+
+    for (const fFeat of foundFeats) {
+        const pos = classIndex[parseInt(fFeat['properties']['classId'])];
+        const intersectArea = turf.intersect(fFeat, poly);
+        //Convert area to hectares (ha = m^2 / 10000)
+        calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
+
+        dataArea[pos] = dataArea[pos] + calcArea;
+    }
+    
     return dataArea;
 }

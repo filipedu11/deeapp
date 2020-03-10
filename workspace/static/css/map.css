@@ -213,10 +213,28 @@ p {
     background: rgb(230, 230, 230);
 }
 
+.ol-scale-line{
+    top: 5em;
+    left: .5em;
+    bottom: auto;
+}
+
+#compass{
+    top: .5em;
+    left: 3.25em;
+    z-index: 30000;
+    position: absolute;
+    opacity: 0.9;
+    background: white;
+    border: 3px solid transparent;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
 #legend{
     text-align: left;
     bottom: .5em;
-    right: .5em;
+    left: .5em;
     max-width: calc(100% - 1.3em);
     z-index: 30000;
     position: absolute;
@@ -231,6 +249,7 @@ p {
     background-color: rgb(255, 255, 255);
     padding: 6px;
     border-radius: 2px;
+    font-size: large;
 }
 
 .none-block{

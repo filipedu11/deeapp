@@ -41,7 +41,7 @@ function computeDataForMetricsGraph(classKeys, features, steps){
         const oaValue = computeOA(dataArea);
         const paValue = computeRecall(dataArea);
         const uaValue = computePrecision(dataArea);
-        const f1score = computeF1(dataArea);
+        const f1score = computeF1(parseFloat(uaValue), parseFloat(paValue));
 
         metricsDataGraph[0].data.push([end, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
         metricsDataGraph[1].data.push([end, isNaN(paValue) ? 0 : parseFloat(paValue)]);
@@ -56,11 +56,11 @@ function computeDataForMetricsGraph(classKeys, features, steps){
 
 function computeOA(dataToComputeMetrics){
 
-    var numerator = 0;
-    var divisor = 0;
-    var lenData = dataToComputeMetrics.length;
-    var step = Math.sqrt(lenData);
-    var oa = 0;
+    let numerator = 0;
+    let divisor = 0;
+    let lenData = dataToComputeMetrics.length;
+    let step = Math.sqrt(lenData);
+    let oa = 0;
 
     let diag = 0;
 
@@ -80,64 +80,50 @@ function computeOA(dataToComputeMetrics){
     return oa;
 }
 
-function computeF1(dataToComputeMetrics, col=0){
+function computeF1(precision, recall){
 
-    var numerator = 0;
-    var divisor = 0;
-    var lenData = dataToComputeMetrics.length;
-    var step = Math.sqrt(lenData) + 1;
-    var f1 = 0;
-
-    for (let index = 0; index < lenData; index++) {
-        const element = dataToComputeMetrics[index];
-        
-        numerator += (col * step == index) ? element*2 : 0;
-        divisor += (index % step != 0 ? element : 0);
-    }
-
-    f1 = ((numerator / (divisor + numerator)) * 100).toFixed(1);
-
-    return f1;
+    const f1 = 2 * ((precision*recall)/(precision+recall));
+    return f1.toFixed(1);
 }
 
-function computePrecision(dataToComputeMetrics, col=1){
+function computeRecall(dataToComputeMetrics, col=1){
 
-    var lenData = dataToComputeMetrics.length;
-    var len = Math.sqrt(lenData);
-    var startCol = col * len;
-    var endCol = (col + 1) * len;
-    var precision = 0;
+    let lenData = dataToComputeMetrics.length;
+    let len = Math.sqrt(lenData);
+    let startCol = col * len;
+    let endCol = (col + 1) * len;
+    let precision = 0;
 
-    var numerator = dataToComputeMetrics[startCol + col];
-    var divisor = 0;
+    let numerator = dataToComputeMetrics[startCol + col];
+    let divisor = 0;
 
     for (let index = startCol; index < endCol; index++) {
         divisor += dataToComputeMetrics[index];
     }
 
-    precision = ((numerator / divisor) * 100).toFixed(1);
+    precision = (numerator / divisor) * 100;
 
-    return precision;
+    return precision.toFixed(1);
 }
 
-function computeRecall(dataToComputeMetrics, line=1){
+function computePrecision(dataToComputeMetrics, line=1){
 
-    var lenData = dataToComputeMetrics.length;
-    var step = Math.sqrt(lenData);
-    var recall = 0;
-    var startLine = line;
+    let lenData = dataToComputeMetrics.length;
+    let step = Math.sqrt(lenData);
+    let recall = 0;
+    let startLine = line;
 
     
-    var numerator = dataToComputeMetrics[startLine * step + startLine];
-    var divisor = 0;
+    let numerator = dataToComputeMetrics[startLine * step + startLine];
+    let divisor = 0;
 
     for (let index = startLine; index < lenData; index+=step) {
         divisor += dataToComputeMetrics[index];
     }
 
-    recall = ((numerator / divisor) * 100).toFixed(1);
+    recall = (numerator / divisor) * 100;
 
-    return recall;
+    return recall.toFixed(1);
 }
 
 /**

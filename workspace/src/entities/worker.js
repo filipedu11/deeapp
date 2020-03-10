@@ -78,6 +78,7 @@ function calcOccupiedAreaForEachClass(classKeys, features, filterAreaInterval, p
 
                 poly = drawPolygons[j];
             }
+            console.log(j + ' : ' + lenDrawPolys);
         }
     
         containElements = rbush.search(poly).features;
@@ -94,6 +95,9 @@ function calcOccupiedAreaForEachClass(classKeys, features, filterAreaInterval, p
         
             dataArea[pos] = dataArea[pos] != null ? 
                 dataArea[pos] + calcArea : calcArea;
+
+            console.log(dataArea);
+
         }
 
     } else {
@@ -111,5 +115,7 @@ function calcOccupiedAreaForEachClass(classKeys, features, filterAreaInterval, p
         }
     }
 
+    console.log(dataArea);
+    
     return dataArea;
 }

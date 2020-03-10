@@ -5,15 +5,10 @@ Highmaps(Highcharts);
 
 import { Metrics } from './Metrics';
 
-/*eslint no-undef: "error"*/
-/*eslint-env node*/
-var geojsonRbush = require('geojson-rbush').default;
-
 export class ErrorMatrix {
 
     constructor(){
         this.content = document.getElementById('content-error-matrix');
-        this.info = document.getElementById('info-error-matrix');
 
         this.metrics = new Metrics();
         this.errorMatrixExist = false;
@@ -21,8 +16,7 @@ export class ErrorMatrix {
 
     clearStatsPanel(){
         this.content.innerHTML = '';
-        this.info.innerHTML = '';
-
+        this.metrics.clearMetricsInfo();
         this.lastX = -1;
         this.lastY = -1;
     }
@@ -73,8 +67,8 @@ export class ErrorMatrix {
         
         var dataForErrorMatrix = this.getDataForErrorMatrix(dataLyr, dataArea);
         var title = dataLyr.getName().split(' | ');
-        var xAxisTitle = '<b>' + title[0] + '</b>';
-        var yAxisTitle = '<b>' + title[1] + '</b>';
+        var xAxisTitle = '<b>' + title[0].split(' (c)')[0] + '</b>';
+        var yAxisTitle = '<b>' + title[1].split(' (v)')[0] + '</b>';
 
         xCategories = dataForErrorMatrix[0];
         yCategories = dataForErrorMatrix[1];
@@ -84,6 +78,8 @@ export class ErrorMatrix {
 
         confusionMatrix.style.height = xCategories.length * 125 + 'px';
 
+        this.metrics.addMetricsInfo(dataArea, xCategories);
+
         this.confusionMatrix = Highcharts.chart(idMatrix, {
             chart: {
                 type: 'heatmap',
@@ -92,7 +88,7 @@ export class ErrorMatrix {
                 backgroundColor:'rgba(255, 255, 255, 0.0)'
             },
             title: {
-                text: isFilter ? '<b>Matrix de Erro (Com Filtros)</b>' : '<b>Matrix de Erro (Sem Filtros)</b>' 
+                text: '' 
             },
             xAxis: {
                 categories: xCategories,
@@ -196,8 +192,8 @@ export class ErrorMatrix {
         }
 
         dataErrorMatrix.forEach(element => {
-            element.percentage = parseFloat((element.value / totalArea * 100).toFixed(2));
-            element.value = parseFloat((element.value).toFixed(2));
+            element.percentage = parseFloat((element.value / totalArea * 100).toFixed(3));
+            element.value = parseFloat((element.value).toFixed(3));
         });
 
         return dataErrorMatrix;

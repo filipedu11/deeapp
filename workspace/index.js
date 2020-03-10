@@ -30,13 +30,12 @@ var app = new Main();
 var readFiles = new ReadFiles();
 
 app.addEvaluation(
-    readFiles.readEvaluationContinuousNaiveBayes(), 
-    readFiles.readValidationBurnedArea(),
-    readFiles.readClassificationContinuousNaiveBayes()
+    readFiles.readEvaluation(), 
+    readFiles.readValidation(),
+    readFiles.readClassification()
 );
 
 app.addClassifiedImage(readFiles.readClassifiedImage());
-
 //app.addEvaluation(readFiles.readEvaluationRandomForest());
 // app.addEvaluation(readFiles.readEvaluationGmoMaxEnt());
 // app.addClassification(readFiles.readClassificationWinnow());
