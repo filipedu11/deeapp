@@ -135,7 +135,7 @@ export class Metrics {
         const mcc = this.computeMCC(dataToComputeMetrics);
 
         const oaClassCircle = this.getCircleClassName(oa);
-        const mccClassCircle = this.getCircleClassName(mcc);
+        const mccClassCircle = this.getCircleClassMCC(mcc);
 
         const precision = this.computePrecision(dataToComputeMetrics);
         const precisionClassCircle = this.getCircleClassName(precision);
@@ -282,11 +282,11 @@ export class Metrics {
     }
 
     getCircleClassName(value){
-        return 'c100 center p' + Math.round(value) + ' small ' + (value > 90 ? 'green' : value > 80 ? 'green dark' : value > 70 ? 'orange dark' : 'orange') ;
+        return 'c100 center p' + Math.round(value) + ' small ' + (value > 90 ? 'green' : value > 80 ? 'yellow' : value > 70 ? 'orange' : 'red') ;
     }
 
     getCircleClassMCC(value){
-        return 'c100 center p' + Math.round(value*100) + ' small ' + (value > 0.75 ? 'green' : value > 0.25 ? 'green dark' : value > 0 ? 'orange dark' : 'orange') ;
+        return 'c100 center p' + Math.round(value) + ' small ' + (value > 0.75 ? 'green' : value > 0.25 ? 'yellow' : value > 0 ? 'orange' : 'red') ;
     }
 
     computeOA(dataToComputeMetrics){

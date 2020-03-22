@@ -21,10 +21,10 @@ self.addEventListener('message', function(e) {
  * @param {*} polygonFilter 
  */    
 function calcOccupiedAreaForEachClass(classKeys, features, filterAreaInterval, polygonFilter){
-    var newFeatures = [];
+    let newFeatures = [];
 
-    var dataArea = [];
-    var classIndex = {};
+    let dataArea = [];
+    let classIndex = {};
 
     for (let index = 0, len = classKeys.length ; index < len; index++) {
         const key = classKeys[index];
@@ -32,7 +32,7 @@ function calcOccupiedAreaForEachClass(classKeys, features, filterAreaInterval, p
         dataArea[index] = 0;
     }
 
-    var calcArea;
+    let calcArea;
 
     if(polygonFilter) {
 
@@ -41,81 +41,59 @@ function calcOccupiedAreaForEachClass(classKeys, features, filterAreaInterval, p
             //Convert area to hectares (ha = m^2 / 10000)
             calcArea = turf.area(polygon) / 10000;
             if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                newFeatures.push(polygon);
+                let newPoly = turf.tesselate(polygon).features;
+
+                for (const newP of newPoly) 
+                    newP['properties'] = polygon['properties'];
+                
+                newFeatures.push(...newPoly);
             }
         }
-
-        var tree = geojsonRbush();
-        var rbush = tree.load(newFeatures);
-        let containElements;
-
-        var drawPolygons = turf.tesselate(polygonFilter).features;
-        let lenDrawPolys = drawPolygons.length;
-        let poly = lenDrawPolys > 0 ? drawPolygons[0] : null;
-        const factorDivision = 10;
-
-        for (let j = 1; j < lenDrawPolys; ++j) {
         
-            if (j%factorDivision != 0) { //Construct poly to eval
-                poly = turf.union(poly, drawPolygons[j]);
-            }
-            else { //Eval the polygon 
-                containElements = rbush.search(poly).features;
-            
-                for (let index = 0, len = containElements.length; index < len && poly; ++index) {
+        let tree = geojsonRbush();
+        let rbush = tree.load(newFeatures);
+        let containElements;
+        const drawPolygons = turf.tesselate(polygonFilter).features;
 
-                    const polygon = containElements[index];
-                    const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
+        let count = 0;
+        let lendra = drawPolygons.length;
 
-                    const intersectArea = turf.intersect(polygon, poly);
+        for (const drawP of drawPolygons) {
+            const drawPArea = turf.area(drawP);
+            containElements = rbush.search(drawP).features;
 
-                    //Convert area to hectares (ha = m^2 / 10000)
-                    calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-
-                    dataArea[pos] = dataArea[pos] != null ? 
-                        dataArea[pos] + calcArea : calcArea;
+            for (let index = 0, len = containElements.length; index < len && drawP; ++index) {
+                calcArea = 0;
+                const polygon = containElements[index];
+                const pos = classIndex[parseInt(polygon['properties']['classId'])];
+                try {
+                    calcArea = drawPArea - turf.area(turf.difference(drawP, polygon));
+                // eslint-disable-next-line no-empty
+                } catch (error) {
                 }
 
-                poly = drawPolygons[j];
+                dataArea[pos] += calcArea;
             }
-            console.log(j + ' : ' + lenDrawPolys);
+            console.log(count++ + ' : ' + lendra);
         }
-    
-        containElements = rbush.search(poly).features;
-
-        for (let index = 0, len = containElements.length; index < len && poly; ++index) {
-
-            const polygon = containElements[index];
-            const pos = classIndex[parseInt(containElements[index]['properties']['classId'])];
-
-            const intersectArea = turf.intersect(polygon, poly);
-
-            //Convert area to hectares (ha = m^2 / 10000)
-            calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
+        //Convert area to hectares (ha = m^2 / 10000)
+        for(var i = 0, length = dataArea.length; i < length; i++){
+            dataArea[i] = dataArea[i]/10000;
+        }
         
-            dataArea[pos] = dataArea[pos] != null ? 
-                dataArea[pos] + calcArea : calcArea;
-
-            console.log(dataArea);
-
-        }
-
     } else {
 
         for (let index = 0, len = features.length; index < len; index++) {
             const polygon = features[index];
-            const pos = classIndex[parseInt(features[index]['properties']['classId'])];
+            const pos = classIndex[parseInt(polygon['properties']['classId'])];
 
             //Convert area to hectares (ha = m^2 / 10000)
             calcArea = turf.area(polygon) / 10000;
             if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                dataArea[pos] = dataArea[pos] != null ? 
-                    dataArea[pos] + calcArea : calcArea;
+                dataArea[pos] += calcArea;
             }
         }
     }
 
-    console.log(dataArea);
-    
     return dataArea;
 }

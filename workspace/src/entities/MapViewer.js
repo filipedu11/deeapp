@@ -711,9 +711,8 @@ export class MapViewer{
 
         //CREATE CONFUSION MATRIX
         w.addEventListener('message', function(e) {
-            errorMatrixAux.createConfusionMatrix(dataLyr, e.data, true);
-            
-        }, false);
+            errorMatrixAux.createConfusionMatrix(dataLyr, e.data, true);   
+        });
         w.postMessage([classKeys, features, null, null]);
  
         //CREATE AREA FILTER GRAPH
@@ -801,7 +800,7 @@ export class MapViewer{
     computeBufferAuxiliary(allFeatures, value, classBuffer) {
 
         let mainFeats = [];
-        var options = {tolerance: 0.0001
+        var options = {tolerance: 0.0005
             , highQuality: false, mutate: false};
 
         for (let index = 0, len = allFeatures.length; index < len; index++) {

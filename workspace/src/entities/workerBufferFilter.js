@@ -45,7 +45,7 @@ function computeDataForBufferGraph(classKeys, features, valFeatures){
 
     let bufferTesselate = [];
 
-    console.log('Buffer tesselated!');
+    console.log('Buffers tesselated!');
     for (const feat of polygonBufferFilter) {
         const bufTesselate = turf.tesselate(feat).features;
         bufferTesselate.push(bufTesselate);
@@ -194,16 +194,15 @@ function computeRecall(dataToComputeMetrics, line=1){
  *  2. Polygon draw
  * 
  * calcOccupiedAreaForEachClass(dataLayer) -> data for error matrix without filter
- * calcOccupiedAreaForEachClass(dataLayer, filterAreaInterval, polygonFilter) -> data for error matrix with filter
+ * calcOccupiedAreaForEachClass(dataLayer, filterAreaInterval, polygonBufferTesselated) -> data for error matrix with filter
  * 
  * @param {*} dataLyr 
  * @param {*} filterAreaInterval 
- * @param {*} polygonFilter 
+ * @param {*} polygonBufferTesselated 
  */    
 function calcOccupiedAreaForEachClass(classKeys, features, polygonBufferTesselated){
-
     let dataArea = [];
-    var classIndex = {};
+    let classIndex = {};
 
     for (let index = 0, len = classKeys.length ; index < len; index++) {
         const key = classKeys[index];
@@ -212,46 +211,49 @@ function calcOccupiedAreaForEachClass(classKeys, features, polygonBufferTesselat
     }
 
     let calcArea;
-    let tree = geojsonRbush();
-    const treeFeat= tree.load(features);
 
-    let poly = polygonBufferTesselated[0];
-    const factorDivision = 10;
-    let foundFeats;
+    let newFeatures = [];
 
-    for (let j = 1, len = polygonBufferTesselated.length; j < len; ++j) {
-
-        if (j%factorDivision != 0) { //Construct poly to eval
-            poly = turf.union(poly, polygonBufferTesselated[j]);
-        }
-        else {
-            try {
-                foundFeats = treeFeat.search(poly).features;
-                for (const fFeat of foundFeats) {
-                    const pos = classIndex[parseInt(fFeat['properties']['classId'])];
-                    const intersectArea = turf.intersect(fFeat, poly);
-                    //Convert area to hectares (ha = m^2 / 10000)
-                    calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-                    dataArea[pos] = dataArea[pos] + calcArea;
-                }
-
-                poly = polygonBufferTesselated[j]; 
-            } catch (error) {
-                poly = turf.union(poly, polygonBufferTesselated[j]);
-            }
-        }
-    }
-
-    foundFeats = treeFeat.search(poly).features;
-
-    for (const fFeat of foundFeats) {
-        const pos = classIndex[parseInt(fFeat['properties']['classId'])];
-        const intersectArea = turf.intersect(fFeat, poly);
+    for (let index = 0, len = features.length; index < len; index++) {
+        const polygon = features[index];
         //Convert area to hectares (ha = m^2 / 10000)
-        calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
+        calcArea = turf.area(polygon) / 10000;
+        let newPoly = turf.tesselate(polygon).features;
 
-        dataArea[pos] = dataArea[pos] + calcArea;
+        for (const newP of newPoly) 
+            newP['properties'] = polygon['properties'];
+            
+        newFeatures.push(...newPoly);
     }
     
+    let tree = geojsonRbush();
+    let rbush = tree.load(newFeatures);
+    let containElements;
+
+    let count = 0;
+    let lendra = polygonBufferTesselated.length;
+
+    for (const drawP of polygonBufferTesselated) {
+        const drawPArea = turf.area(drawP);
+        containElements = rbush.search(drawP).features;
+
+        for (let index = 0, len = containElements.length; index < len && drawP; ++index) {
+            calcArea = 0;
+            const polygon = containElements[index];
+            const pos = classIndex[parseInt(polygon['properties']['classId'])];
+            try {
+                calcArea = drawPArea - turf.area(turf.difference(drawP, polygon));
+            // eslint-disable-next-line no-empty
+            } catch (error) {
+            }
+
+            dataArea[pos] += calcArea;
+        }
+        console.log(count++ + ' : ' + lendra);
+    }
+    //Convert area to hectares (ha = m^2 / 10000)
+    for(var i = 0, length = dataArea.length; i < length; i++){
+        dataArea[i] = dataArea[i]/10000;
+    }
     return dataArea;
 }
