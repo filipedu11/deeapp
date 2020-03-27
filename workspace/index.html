@@ -3,8 +3,10 @@
 
 <head>
   <meta charset="utf-8">
-  <title>DEE Application</title>
+  <title>DEE - Aplicação para análise da distribuição espacial e erro de
+  classificações de mapas temáticos</title>
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
   <script src="//rawgithub.com/phpepe/highcharts-regression/master/highcharts-regression.js?8"></script>
 </head>
@@ -24,7 +26,10 @@
       </ul>
 
       <ul role="tablist">
-        <li><a href="https://github.com/filipedu11/deeapp" role="tab" target="_blank"><i class="fab fa-github"></i></a></li>
+        <li style="cursor: pointer;"><a id="export-png"><i class="fa fa-download"></i></a></li>
+        <li><a href="https://github.com/filipedu11/deeapp" role="tab"
+        target="_blank"><i class="fab fa-github"></i></a></li>
+        <a id="image-download" download="map.png"></a>
       </ul>
     </div>
 
@@ -47,20 +52,21 @@
       </div>
 
       <div class="sidebar-pane" id="stats-error-matrix-oa">
-        <h1 class="sidebar-header">Matrizes de Erro<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <h1 class="sidebar-header">Matrizes de Confusão<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
         <div class="content">
             <div id="content-error-matrix"></div>
             <div id="info-error-matrix"></div>
         </div>
       </div>
 
-
-      <div class="sidebar-pane" id="settings">
+<!--       <div class="sidebar-pane" id="settings">
         <h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
         <div class="content">
-          <div id="content-settings"></div>
+          <div id="content-settings">
+          </div>
         </div>
-      </div>
+      </div> -->
+
     </div>
   </div>
   <!-- END OF SIDEBAR DIV -->
@@ -92,7 +98,7 @@
                       Polígono
                     </option>
                   </select>
-                  <input value="0.01" id="area-buffer" style="margin-top: 4px" type="number" step="0.01" min="0" max="0.5"/>
+                  <input value="0.01" id="area-buffer" style="margin-top: 4px" type="number" step="0.01" min="0" max="0.51"/>
                 </label>
             </div>
             <div class="controller-content">
@@ -139,11 +145,8 @@
       </div>
 
       <img src=".\\static\\img\\compass.png" alt="compass" id="compass" width="42px" class="image">
-
     </div>
-
-      
-      <div id="loader" class="none-block"></div>
+    <div id="loader" class="none-block"></div>
   </div>
   <div id="progress"></div>
 

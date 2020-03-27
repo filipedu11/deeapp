@@ -14,9 +14,9 @@ function computeDataForBufferGraph(classKeys, features, valFeatures){
         return metricsDataGraph;
     }
 
-    let step = 0.01;
-    let min = 0.01;
-    let max = 0.30;
+    let step = 0.02;
+    let min = 0.02;
+    let max = 0.50;
     let dataArea;
 
     metricsDataGraph = [{
@@ -37,7 +37,6 @@ function computeDataForBufferGraph(classKeys, features, valFeatures){
         data: []
     }];
 
-    console.log('Compute buffer!');
     let polygonBufferFilter = [];
     for (let bufferSize = min; bufferSize <= max; bufferSize+=step) {
         polygonBufferFilter.push(computeBufferAuxiliary(valFeatures, bufferSize));
@@ -45,7 +44,6 @@ function computeDataForBufferGraph(classKeys, features, valFeatures){
 
     let bufferTesselate = [];
 
-    console.log('Buffers tesselated!');
     for (const feat of polygonBufferFilter) {
         const bufTesselate = turf.tesselate(feat).features;
         bufferTesselate.push(bufTesselate);
@@ -53,8 +51,6 @@ function computeDataForBufferGraph(classKeys, features, valFeatures){
 
     let pos = min;
     for (const polyBuffer of bufferTesselate) {
-
-        console.log('Compute buffer: ' + pos);
 
         dataArea = calcOccupiedAreaForEachClass(
             classKeys, 
@@ -229,10 +225,7 @@ function calcOccupiedAreaForEachClass(classKeys, features, polygonBufferTesselat
     let tree = geojsonRbush();
     let rbush = tree.load(newFeatures);
     let containElements;
-
-    let count = 0;
-    let lendra = polygonBufferTesselated.length;
-
+    
     for (const drawP of polygonBufferTesselated) {
         const drawPArea = turf.area(drawP);
         containElements = rbush.search(drawP).features;
@@ -249,7 +242,6 @@ function calcOccupiedAreaForEachClass(classKeys, features, polygonBufferTesselat
 
             dataArea[pos] += calcArea;
         }
-        console.log(count++ + ' : ' + lendra);
     }
     //Convert area to hectares (ha = m^2 / 10000)
     for(var i = 0, length = dataArea.length; i < length; i++){

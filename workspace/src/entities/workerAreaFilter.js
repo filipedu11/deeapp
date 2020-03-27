@@ -1,6 +1,7 @@
 var turf = require('@turf/turf');
 var geojsonRbush = require('geojson-rbush').default;
 
+var metricsDataGraph;
 self.addEventListener('message', function(e) {
     var data = e.data;
     var area = computeDataForMetricsGraph(data[0], data[1], data[2]);
@@ -9,16 +10,20 @@ self.addEventListener('message', function(e) {
 
 function computeDataForMetricsGraph(classKeys, features, steps){                  
 
-    let metricsDataGraph = [{
-        name: 'Overall Accuracy',
+    if (metricsDataGraph) {
+        return metricsDataGraph;
+    }
+
+    metricsDataGraph = [{
+        name: 'Precisão Global (OA)',
         color: 'rgba(223, 83, 83, .5)',
         data: []
     }, {
-        name: 'Recall',
+        name: 'Precisão (UA)',
         color: 'rgba(10, 83, 83, .5)',
         data: []
     }, {
-        name: 'Precision',
+        name: 'Exatidão (PA)',
         color: 'rgba(200, 0, 83, .5)',
         data: []
     }, {

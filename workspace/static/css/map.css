@@ -217,6 +217,7 @@ p {
     top: 5em;
     left: .5em;
     bottom: auto;
+    size: 20px;
 }
 
 #compass{

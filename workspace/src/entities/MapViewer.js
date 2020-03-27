@@ -51,6 +51,8 @@ import wNumb from 'wnumb';
 import { Metrics } from '../panels/Metrics.js';
 import Swal from 'sweetalert2';
 
+import {toPng} from 'html-to-image';
+
 Highmore(Highcharts);
 Histogram(Highcharts);
 
@@ -63,6 +65,25 @@ var EVALUATION_STRING = 'evaluation';
 var w = new Worker('./worker.js');
 var workerAreaFilter = new Worker('./workerAreaFilter.js');
 var workerBufferFilter = new Worker('./workerBufferFilter.js');
+
+// export options for html-to-image.
+// See: https://github.com/bubkoo/html-to-image#options
+var exportOptions = {
+    filter: function(element) {
+
+        if (element.id) {
+            switch (element.id) {
+            case 'controllers-main-board':
+                return false;
+            default:
+                return true;
+            } 
+        } else {
+            return true;
+        }
+
+    }
+};
 
 export class MapViewer{
 
@@ -115,7 +136,8 @@ export class MapViewer{
         this.vectorDraw = new VectorL({
             typeBase: DRAW_LAYER_STRING,
             source: new Vector({
-                wrapX: false
+                wrapX: false,
+                crossOrigin: 'anonymous'
             }),
             style: new Style({
                 stroke: new Stroke({
@@ -135,10 +157,39 @@ export class MapViewer{
             }),
         });
 
-        map.addControl(new ScaleLine());
-        
         map.set('initExtent', map.getView().getProjection().getExtent());
 
+        map.addControl(new ScaleLine({
+            units: 'metric',
+            bar: true,
+            steps: 4,
+            minWidth: 70
+        }));
+
+        function setDPI(canvas, dpi) {
+            var scaleFactor = dpi / 96;
+            canvas.width = Math.ceil(canvas.width * scaleFactor);
+            canvas.height = Math.ceil(canvas.height * scaleFactor);
+            var ctx=canvas.getContext('2d');
+            ctx.scale(scaleFactor, scaleFactor);
+        }
+
+        document.getElementById('export-png').addEventListener('click', function() {
+            map.once('precompose', function(event) {
+                setDPI(document.querySelector('canvas'),300);
+            });
+
+            map.once('rendercomplete', function() {
+                toPng(map.getTargetElement(), exportOptions)
+                    .then(function(dataURL) {
+                        var link = document.getElementById('image-download');
+                        link.href = dataURL;
+                        link.click();
+                    });
+            });
+            map.renderSync();
+        });        
+        
         return map;
     }
 
@@ -223,6 +274,7 @@ export class MapViewer{
             typeBase: BASE_TYPE_STRING,
             source: new XYZ({
                 url:'http://{1-4}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+                crossOrigin: 'anonymous'
             })
         });
 
@@ -232,6 +284,7 @@ export class MapViewer{
             typeBase: BASE_TYPE_STRING,
             source: new XYZ({
                 url:'http://{1-4}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
+                crossOrigin: 'anonymous'
             })
         });
 
@@ -364,7 +417,8 @@ export class MapViewer{
             source: new Static({
                 url: classifiedImage,
                 projection: projection,
-                imageExtent: extent
+                imageExtent: extent,
+                crossOrigin: null
             }),
             visible: false,
             title: 'Imagem Satélite',
@@ -503,7 +557,8 @@ export class MapViewer{
                     );
                 });
             },
-            url: 'data:' // arbitrary url, we don't use it in the tileLoadFunction
+            url: 'data:', // arbitrary url, we don't use it in the tileLoadFunction
+            crossOrigin: 'anonymous'
         });
 
     }
@@ -535,7 +590,7 @@ export class MapViewer{
             layerId: classObject.getId(),
             sourceAux: vectorSource,
             inactiveClasses: {},
-            typeBase: classObject.getType()
+            typeBase: classObject.getType(),
         });
 
         this.createStyle(layer, []);
