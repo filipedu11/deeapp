@@ -13,7 +13,10 @@ import LayerSwitcher from '../panels/LayerSwitcher.js';
 import Sidebar from '../../static/js/sidebar.js';
 import { Progress } from '../../static/js/Progress.js';
 
-import { LayerEntity } from './LayerEntity';
+import { ValidationEntity } from './ValidationEntity';
+import { ClassificationEntity } from './ClassificationEntity';
+import { EvaluationEntity } from './EvalutationEntity';
+
 import { LayerDecode } from '../decode/LayerDecode';
 
 import {Style, Fill, Stroke} from 'ol/style';
@@ -26,6 +29,7 @@ import VectorLayer from 'ol/layer/VectorTile';
 import VectorL from 'ol/layer/Vector';
 import ImageLayer from 'ol/layer/Image.js';
 import Control from 'ol/control';
+import ScaleLine from 'ol/control/ScaleLine.js';
 import Mask from 'ol-ext/filter/Mask';
 
 import Projection from 'ol/proj/Projection';
@@ -44,20 +48,42 @@ import * as turf from '@turf/turf';
 
 import noUiSlider from 'nouislider';
 import wNumb from 'wnumb';
+import { Metrics } from '../panels/Metrics.js';
+import Swal from 'sweetalert2';
+
+import {toPng} from 'html-to-image';
 
 Highmore(Highcharts);
 Histogram(Highcharts);
-
-/*eslint no-undef: "error"*/
-/*eslint-env node*/
-// eslint-disable-next-line no-unused-vars
-var geojsonRbush = require('geojson-rbush').default;
 
 var BASE_TYPE_STRING = 'basemap';
 var DRAW_LAYER_STRING = 'draw';
 var CLASSIFICATION_TYPE_STRING = 'classification';
 var VALIDATION_STRING = 'validation';
 var EVALUATION_STRING = 'evaluation';
+
+var w = new Worker('./worker.js');
+var workerAreaFilter = new Worker('./workerAreaFilter.js');
+var workerBufferFilter = new Worker('./workerBufferFilter.js');
+
+// export options for html-to-image.
+// See: https://github.com/bubkoo/html-to-image#options
+var exportOptions = {
+    filter: function(element) {
+
+        if (element.id) {
+            switch (element.id) {
+            case 'controllers-main-board':
+                return false;
+            default:
+                return true;
+            } 
+        } else {
+            return true;
+        }
+
+    }
+};
 
 export class MapViewer{
 
@@ -70,9 +96,6 @@ export class MapViewer{
 
         this.baseDict = {};
         this.baseArray = [];
-
-        this.classiArray = [];
-        this.valiArray = [];
 
         this.allLayersDict = {};
         this.lyrsSelected = [];
@@ -88,6 +111,7 @@ export class MapViewer{
         this.errorMatrix = new ErrorMatrix();
         this.legend = new Legend();
         this.controllers = new Controllers();
+        this.metrics = new Metrics();
 
         //Add Sidebar control to map
         this.createSideBar();
@@ -112,7 +136,8 @@ export class MapViewer{
         this.vectorDraw = new VectorL({
             typeBase: DRAW_LAYER_STRING,
             source: new Vector({
-                wrapX: false
+                wrapX: false,
+                crossOrigin: 'anonymous'
             }),
             style: new Style({
                 stroke: new Stroke({
@@ -134,6 +159,37 @@ export class MapViewer{
 
         map.set('initExtent', map.getView().getProjection().getExtent());
 
+        map.addControl(new ScaleLine({
+            units: 'metric',
+            bar: true,
+            steps: 4,
+            minWidth: 70
+        }));
+
+        function setDPI(canvas, dpi) {
+            var scaleFactor = dpi / 96;
+            canvas.width = Math.ceil(canvas.width * scaleFactor);
+            canvas.height = Math.ceil(canvas.height * scaleFactor);
+            var ctx=canvas.getContext('2d');
+            ctx.scale(scaleFactor, scaleFactor);
+        }
+
+        document.getElementById('export-png').addEventListener('click', function() {
+            map.once('precompose', function(event) {
+                setDPI(document.querySelector('canvas'),300);
+            });
+
+            map.once('rendercomplete', function() {
+                toPng(map.getTargetElement(), exportOptions)
+                    .then(function(dataURL) {
+                        var link = document.getElementById('image-download');
+                        link.href = dataURL;
+                        link.click();
+                    });
+            });
+            map.renderSync();
+        });        
+        
         return map;
     }
 
@@ -163,25 +219,25 @@ export class MapViewer{
      */
     initLayersGroup(){
         var base = new LayerGroup({
-            title: 'Base Maps',
+            title: 'Mapas Base',
             fold: 'open',
             typeBase: BASE_TYPE_STRING,
         });
 
         var classifications = new LayerGroup({
-            title: 'Classifications',
+            title: 'Classificação',
             fold: 'open',
             typeBase: CLASSIFICATION_TYPE_STRING
         });
         
         var validations = new LayerGroup({
-            title: 'Validations',
+            title: 'Validação',
             fold: 'open',
             typeBase: VALIDATION_STRING
         });
 
         var evaluations = new LayerGroup({
-            title: 'Evaluations',
+            title: 'Distribuição Espacial do Erro',
             fold: 'open',
             typeBase: EVALUATION_STRING
         });
@@ -218,6 +274,7 @@ export class MapViewer{
             typeBase: BASE_TYPE_STRING,
             source: new XYZ({
                 url:'http://{1-4}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+                crossOrigin: 'anonymous'
             })
         });
 
@@ -227,6 +284,7 @@ export class MapViewer{
             typeBase: BASE_TYPE_STRING,
             source: new XYZ({
                 url:'http://{1-4}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
+                crossOrigin: 'anonymous'
             })
         });
 
@@ -258,18 +316,75 @@ export class MapViewer{
     }
 
     /**
-     * Create the LayerEntity object with the given geojson file and type group
+     * Create the ValidationEntity object with the given geojson file
      * 
      * @param {*} layerGeojson 
-     * @param {string} typeGroup 
      */
-    createLayerObj(layerGeojson, typeGroup) {
+    createValidationLayerObj(layerGeojson) {
         var cD = new LayerDecode();
         var k = cD.key;
 
         var id = layerGeojson[cD.layerID[k]];
 
-        var lyr = new LayerEntity(
+        var lyr = new ValidationEntity(
+            id,
+            layerGeojson[cD.layerName[k]],
+            layerGeojson[cD.layerDescription[k]],
+            layerGeojson[cD.layerRasterFile[k]],
+            layerGeojson[cD.layerSource[k]],
+            layerGeojson[cD.layerStats[k]],
+            layerGeojson[cD.layerStyle[k]],
+            layerGeojson[cD.features[k]],
+            layerGeojson[cD.classNames[k]],
+            layerGeojson
+        );
+
+        this.allLayersDict[id] = lyr;
+
+        return lyr;
+    }
+
+    /**
+     * Create the Classification object with the given geojson file
+     * 
+     * @param {*} layerGeojson 
+     */
+    createClassificationLayerObj(layerGeojson) {
+        var cD = new LayerDecode();
+        var k = cD.key;
+
+        var id = layerGeojson[cD.layerID[k]];
+
+        var lyr = new ClassificationEntity(
+            id,
+            layerGeojson[cD.layerName[k]],
+            layerGeojson[cD.layerDescription[k]],
+            layerGeojson[cD.layerRasterFile[k]],
+            layerGeojson[cD.layerSource[k]],
+            layerGeojson[cD.layerStats[k]],
+            layerGeojson[cD.layerStyle[k]],
+            layerGeojson[cD.features[k]],
+            layerGeojson[cD.classNames[k]],
+            layerGeojson
+        );
+
+        this.allLayersDict[id] = lyr;
+
+        return lyr;
+    }
+
+    /**
+     * Create the EvaluationEntity object with the given geojson file
+     * 
+     * @param {*} layerGeojson 
+     */
+    createEvaluationnLayerObj(layerGeojson, validation, classification) {
+        var cD = new LayerDecode();
+        var k = cD.key;
+
+        var id = layerGeojson[cD.layerID[k]];
+
+        var lyr = new EvaluationEntity(
             id,
             layerGeojson[cD.layerName[k]],
             layerGeojson[cD.layerDescription[k]],
@@ -280,11 +395,11 @@ export class MapViewer{
             layerGeojson[cD.features[k]],
             layerGeojson[cD.classNames[k]],
             layerGeojson,
-            typeGroup
+            validation, 
+            classification
         );
 
         this.allLayersDict[id] = lyr;
-        this.valiArray.push(lyr);
 
         return lyr;
     }
@@ -302,7 +417,8 @@ export class MapViewer{
             source: new Static({
                 url: classifiedImage,
                 projection: projection,
-                imageExtent: extent
+                imageExtent: extent,
+                crossOrigin: null
             }),
             visible: false,
             title: 'Imagem Satélite',
@@ -321,11 +437,13 @@ export class MapViewer{
      */
     addClassification(classiGeojson){
 
-        var newLayer = this.createLayer(classiGeojson, this.createLayerObj(classiGeojson, CLASSIFICATION_TYPE_STRING));
+        var newLayer = this.createLayer(classiGeojson, this.createClassificationLayerObj(classiGeojson));
 
         this.addLayerToMapGroup(CLASSIFICATION_TYPE_STRING, newLayer);
 
         this.loadLayerSwitcher();
+
+        return newLayer;
     }
 
     /**
@@ -334,20 +452,22 @@ export class MapViewer{
      */
     addValidation(validationGeojson){
 
-        var newLayer = this.createLayer(validationGeojson, this.createLayerObj(validationGeojson, VALIDATION_STRING));
+        var newLayer = this.createLayer(validationGeojson, this.createValidationLayerObj(validationGeojson));
 
         this.addLayerToMapGroup(VALIDATION_STRING, newLayer);
 
         this.loadLayerSwitcher();
+
+        return newLayer;
     }
 
     /**
      * Add evaluation layer to map
      * @param {*} evaluationGeojson 
      */
-    addEvaluation(evaluationGeojson){
+    addEvaluation(evaluationGeojson, validation, classification){
 
-        var newLayer = this.createLayer(evaluationGeojson, this.createLayerObj(evaluationGeojson, EVALUATION_STRING));
+        var newLayer = this.createLayer(evaluationGeojson, this.createEvaluationnLayerObj(evaluationGeojson, validation, classification));
 
         this.addLayerToMapGroup(EVALUATION_STRING, newLayer);
 
@@ -437,7 +557,8 @@ export class MapViewer{
                     );
                 });
             },
-            url: 'data:' // arbitrary url, we don't use it in the tileLoadFunction
+            url: 'data:', // arbitrary url, we don't use it in the tileLoadFunction
+            crossOrigin: 'anonymous'
         });
 
     }
@@ -470,7 +591,6 @@ export class MapViewer{
             sourceAux: vectorSource,
             inactiveClasses: {},
             typeBase: classObject.getType(),
-
         });
 
         this.createStyle(layer, []);
@@ -540,12 +660,94 @@ export class MapViewer{
 
         var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
 
+        this.addChangeListenerVectorDraw(dataLyr, layerSel);
+
         this.controllers.displayControllers();
-        this.createPolygonInteraction(dataLyr, layerSel);
+        this.createPolygonInteraction();
         this.createAreaFilterInteraction(dataLyr, layerSel);
+        this.createBufferFilter(dataLyr, layerSel);
+
+        this.addEventListenerToClearButton(dataLyr, layerSel);
+        this.addEventToApplyButton(dataLyr, layerSel);
 
         layerSel.getSource().dispatchEvent('change');
         this.currentLayer = layerSel;
+    }
+
+    addEventListenerToClearButton(dataLyr, layerSel){
+        
+        var clearFilterPAnel = document.getElementById('reset-controller-settings');
+        
+        var mapViewer = this;
+
+        var min = document.getElementById('area-min-number');
+        var max = document.getElementById('area-max-number');
+
+        var typeSelect = document.getElementById('type-geo');
+        var classBufferSelect = document.getElementById('class-buffer');
+
+        clearFilterPAnel.onclick = function(){
+            if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
+                mapViewer.vectorDraw.getSource().removeFeature(mapViewer.vectorDraw.getSource().getFeatures()[0]);
+            
+            layerSel.getFilters().forEach(f => {
+                layerSel.removeFilter(f);
+            });
+
+            typeSelect.value = typeSelect.options[0].value;
+            classBufferSelect.value = classBufferSelect.options[0].value;
+
+            min.value = dataLyr.getMinimumOccupiedArea();
+            min.dispatchEvent(new Event('change'));
+            max.value = dataLyr.getMaximumOccupiedArea();
+            max.dispatchEvent(new Event('change'));
+    
+            let classKeys = dataLyr.getKeysOfClasses();
+            let features = dataLyr.getFeatures();
+    
+            //CREATE CONFUSION MATRIX
+            w.postMessage([classKeys, features, [min.value, max.value], null]);
+        };
+    }
+
+    addEventToApplyButton(dataLyr, layerSel){
+        
+        var applyFilterPAnel = document.getElementById('apply-controller-settings');
+        var mapViewer = this;
+
+        applyFilterPAnel.onclick = function(){
+            mapViewer.computeFilterPanel(layerSel);
+        };
+    }
+
+    
+    /**
+     * Create the Stats panel with error matrix
+     * 
+     * @param {*} layerSel 
+     */
+    computeFilterPanel(layerSel) {
+        let format = new GeoJSON();
+                    
+        let dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
+
+        let min = document.getElementById('area-min-number');
+        let max = document.getElementById('area-max-number');
+
+        let featsFilter = this.vectorDraw.getSource().getFeatures();
+
+        let errorMatrixAux = this.errorMatrix;
+        errorMatrixAux.loadingFilterMatrix();
+        
+        let classKeys = dataLyr.getKeysOfClasses();
+        let features = dataLyr.getFeatures();
+
+        let polygonFilter = featsFilter.length > 0 ? 
+            format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null;
+        
+        //CREATE CONFUSION MATRIX
+        w.postMessage([classKeys, features, [min.value, max.value], polygonFilter]);
+        
     }
 
     /**
@@ -554,28 +756,130 @@ export class MapViewer{
      * @param {*} layerSel 
      */
     createStatsPanel(layerSel) {
-        var format = new GeoJSON();
                     
-        var dataLyr = this.getObjectLayer(layerSel.get('layerId'));  
+        var dataLyr = this.getObjectLayer(layerSel.get('layerId')); 
+        var errorMatrixAux = this.errorMatrix;
+        var metrics = this.metrics;
 
-        var min = document.getElementById('area-min-number');
-        var max = document.getElementById('area-max-number');
-        var featsFilter = this.vectorDraw.getSource().getFeatures();
+        var classKeys = dataLyr.getKeysOfClasses();
+        var features = dataLyr.getFeatures();
 
-        var calcArea = this.calcOccupiedAreaForEachClass(dataLyr);
-        var calcAreaFilter = this.calcOccupiedAreaForEachClass(
-            dataLyr,  
-            [min.value, max.value], 
-            featsFilter.length > 0 ? 
-                format.writeFeatureObject(featsFilter[0], {featureProjection: 'EPSG:3857'}) : null);
+        //CREATE CONFUSION MATRIX
+        w.addEventListener('message', function(e) {
+            errorMatrixAux.createConfusionMatrix(dataLyr, e.data, true);   
+        });
+        w.postMessage([classKeys, features, null, null]);
+ 
+        //CREATE AREA FILTER GRAPH
+        let precision = 3;
+        let steps = dataLyr.getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision);
+        workerAreaFilter.addEventListener('message', function(e) {
+            metrics.createMetricsGraph(e.data);
+        }, false);
+        workerAreaFilter.postMessage([classKeys, features, steps]);
 
-        this.errorMatrix.createConfusionMatrix(dataLyr, calcArea);
+        //CREATE BUFFER FILTER GRAPH
+        let valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
+        workerBufferFilter.addEventListener('message', function(e) {
+            metrics.createMetricsGraphForBuffer(e.data);
+        }, false);
+        workerBufferFilter.postMessage([classKeys, features, valLayer.getFeatures()]);
 
-        this.errorMatrix.createConfusionMatrix(
-            dataLyr, 
-            calcAreaFilter,
-            true
-        );
+    }
+
+    /**
+     * 
+     * @param {*} dataLyr 
+     * @param {*} layerSel 
+     */
+    createBufferFilter(dataLyr, layerSel){
+        var mapViewer = this;
+        var format = new GeoJSON();
+        
+        var buffer = document.getElementById('area-buffer');
+        var classBuffer = document.getElementById('class-buffer');
+
+        var valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
+        var allFeatures = valLayer.getFeatures();
+
+        classBuffer.addEventListener('change', function () {
+            computeBuffer();
+        });
+
+        buffer.addEventListener('change', function () {
+            computeBuffer();
+        });
+
+        function computeBuffer() {
+
+            if (0 == classBuffer.value && buffer.value == buffer.min ) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro no tamanho do buffer!',
+                    text: 'Não é possivel computar o buffer com tamanho 0 para as fronteiras.'
+                });
+                return;
+            }
+
+            if (buffer.value < buffer.min || buffer.value > buffer.max ) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro no tamanho do buffer!',
+                    text: 'Não é possivel computar buffers com valores inferiores a '
+                            + buffer.min + ' e superiores a ' + buffer.max + '.'
+                });
+                return;
+            }
+
+            if (classBuffer.value != -1) {
+                if (allFeatures.length > 1) {
+
+                    let mainFeat = mapViewer.computeBufferAuxiliary(allFeatures, buffer.value, classBuffer.value);
+
+                    if (mainFeat) {
+                        if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
+                            mapViewer.vectorDraw.getSource().removeFeature(mapViewer.vectorDraw.getSource().getFeatures()[0]);
+                        
+                        layerSel.getFilters().forEach(f => {
+                            layerSel.removeFilter(f);
+                        });
+
+                        mapViewer.vectorDraw.getSource().addFeature(format.readFeature(mainFeat, {featureProjection: 'EPSG:3857'}));
+                    }
+                }
+            }
+        }
+
+    }
+
+    computeBufferAuxiliary(allFeatures, value, classBuffer) {
+
+        let mainFeats = [];
+        var options = {tolerance: 0.0005
+            , highQuality: false, mutate: false};
+
+        for (let index = 0, len = allFeatures.length; index < len; index++) {
+            const feat = allFeatures[index];
+            
+            if (feat.properties.classId == 1) {
+
+                let featBuffer;
+                let bufferLine = feat;
+
+                if (value > 0) {
+                    if (0 == classBuffer) {
+                        featBuffer = turf.simplify(turf.polygonToLine(feat), options);
+                    } else {
+                        featBuffer = turf.simplify(feat, options);
+                    }
+                    bufferLine = turf.buffer(featBuffer, value);
+                }
+
+                mainFeats.push(bufferLine);
+            }
+        }
+
+        return turf.union.apply(this, mainFeats);
     }
 
     /**
@@ -594,8 +898,6 @@ export class MapViewer{
 
         var slideArea = document.getElementById('area-number-slider');
 
-        var mapViewer = this;
-
         noUiSlider.create(slideArea, {
             start: [min, max],
             connect: true,
@@ -608,29 +910,12 @@ export class MapViewer{
             })
         });
 
-        var format = new GeoJSON();
-
         // eslint-disable-next-line no-unused-vars
         slideArea.noUiSlider.on('update', function (values, handle) {
             minAreaInput.value = values[0];
             maxAreaInput.value = values[1];
 
             layerSel.getSource().dispatchEvent('change');
-            var featAux = mapViewer.vectorDraw.getSource().getFeatures();
-            var filterPoly = null;
-
-            if (featAux.length == 1 )
-                filterPoly =  format.writeFeatureObject(featAux[0], {featureProjection: 'EPSG:3857'});
-                
-            var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
-                dataLyr,  
-                [minAreaInput.value, maxAreaInput.value], 
-                filterPoly);
-
-            mapViewer.errorMatrix.createConfusionMatrix (
-                dataLyr,
-                calcAreaFilter,
-                true);
         });
 
         minAreaInput.addEventListener('change', function () {
@@ -648,11 +933,10 @@ export class MapViewer{
      * @param {*} dataLyr 
      * @param {*} layerSel 
      */
-    createPolygonInteraction(dataLyr, layerSel){
+    createPolygonInteraction(){
 
         var draw; // global so we can remove it later
         var typeSelect = document.getElementById('type-geo');
-        var clearPolygon = document.getElementById('clear-polygon-draw');
         
         this.map.addLayer(this.vectorDraw);
 
@@ -661,28 +945,6 @@ export class MapViewer{
         typeSelect.onchange = function() {
             mapViewer.map.removeInteraction(draw);
             addInteraction();
-        };
-
-        var min = document.getElementById('area-min-number');
-        var max = document.getElementById('area-max-number');
-
-        clearPolygon.onclick = function(){
-            if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
-                mapViewer.vectorDraw.getSource().removeFeature(mapViewer.vectorDraw.getSource().getFeatures()[0]);
-            
-            layerSel.getFilters().forEach(f => {
-                layerSel.removeFilter(f);
-            });
-
-            var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
-                dataLyr,  
-                [min.value, max.value], 
-                null);
-
-            mapViewer.errorMatrix.createConfusionMatrix (
-                dataLyr,
-                calcAreaFilter,
-                true);
         };
 
         function addInteraction() {
@@ -707,144 +969,55 @@ export class MapViewer{
                 });
 
                 mapViewer.map.addInteraction(draw);
-
-                var format = new GeoJSON();
-
-                // eslint-disable-next-line no-unused-vars
-                mapViewer.vectorDraw.getSource().on('addfeature', function(e){
-
-                    var featGeo, unionFeat;
-                    var allFeatures = mapViewer.vectorDraw.getSource().getFeatures();
-                    var mainFeat = allFeatures[0];
-
-                    if (allFeatures.length > 1) {
-
-                        var mainFeatGeo = format.writeFeatureObject(mainFeat);
-                        mapViewer.vectorDraw.getSource().removeFeature(mainFeat);
-
-                        for (let index = 1; index < allFeatures.length; index++) {
-
-                            const feat = allFeatures[index];
-                            featGeo = format.writeFeatureObject(feat);
-                            mainFeatGeo = turf.union(mainFeatGeo,featGeo);
-                            mapViewer.vectorDraw.getSource().removeFeature(feat);
-                        }
-                        
-                        unionFeat = format.readFeature(mainFeatGeo);
-                        mapViewer.vectorDraw.getSource().addFeature(unionFeat);
-                        
-                    } else if (allFeatures.length == 1) {
-
-                        const mask = new Mask({ feature: mainFeat, inner:false, fill: new Fill({ color:[255,255,255,0.8] }) });
-                        
-                        layerSel.getFilters().forEach(f => {
-                            layerSel.removeFilter(f);
-                        });
-
-                        layerSel.addFilter(mask);
-
-                        var featAux = format.writeFeatureObject(mainFeat, {featureProjection: 'EPSG:3857'});
-                        var calcAreaFilter = mapViewer.calcOccupiedAreaForEachClass(
-                            dataLyr,  
-                            [min.value, max.value], 
-                            featAux);
-            
-                        mapViewer.errorMatrix.createConfusionMatrix (
-                            dataLyr,
-                            calcAreaFilter,
-                            true);
-                    }
-                });
             }
         }
     }
 
-    /**
-     * Compute the data for the error matrix according with:
-     * 
-     *  1. Selected interval area
-     *  2. Polygon draw
-     * 
-     * calcOccupiedAreaForEachClass(dataLayer) -> data for error matrix without filter
-     * calcOccupiedAreaForEachClass(dataLayer, filterAreaInterval, polygonFilter) -> data for error matrix with filter
-     * 
-     * @param {*} dataLyr 
-     * @param {*} filterAreaInterval 
-     * @param {*} polygonFilter 
-     */    
-    calcOccupiedAreaForEachClass(dataLyr, filterAreaInterval, polygonFilter){
+    addChangeListenerVectorDraw(dataLyr, layerSel) {
+        var format = new GeoJSON();
+        var mapViewer = this;
+        
+        // eslint-disable-next-line no-unused-vars
+        mapViewer.vectorDraw.getSource().on('addfeature', function(e){
 
-        var classKeys = dataLyr.getKeysOfClasses();
-        var features = dataLyr.getFeatures();
+            var featGeo, unionFeat;
+            var allFeatures = mapViewer.vectorDraw.getSource().getFeatures();
+            var mainFeat = allFeatures[0];
 
-        var dataArea = [];
-        var classIndex = {};
+            if (allFeatures.length > 1) {
 
-        for (let index = 0, len = classKeys.length ; index < len; index++) {
-            const key = classKeys[index];
-            classIndex[key] = index;
-            dataArea[index] = 0;
-        }
+                var mainFeatGeo = format.writeFeatureObject(mainFeat);
+                mapViewer.vectorDraw.getSource().removeFeature(mainFeat);
 
-        var calcArea;
+                for (let index = 1; index < allFeatures.length; index++) {
 
-        if(polygonFilter) {
-
-            var tree = geojsonRbush();
-            var rbush = tree.load(features);
-            var containElements = [];
-            if (rbush && polygonFilter) {
-                containElements.push(rbush.search(polygonFilter));
-                features = containElements[0].features;
-            }
-
-            var drawPolygons = polygonFilter.geometry.coordinates;
-            let lenDrawPolys = drawPolygons.length;
-
-            for (let j = 0; j < lenDrawPolys; j++) {
-
-                const coords = lenDrawPolys == 1 ? [drawPolygons[j]] : drawPolygons[j];
-                const poly = turf.polygon(coords);
-
-                for (let index = 0, len = features.length; index < len; index++) {
-
-                    const polygon = features[index];
-                    const pos = classIndex[parseInt(features[index]['properties']['classId'])];
-
-                    var intersectArea = turf.intersect(polygon, poly);
-
-                    //Convert area to hectares (ha = m^2 / 10000)
-                    calcArea = intersectArea ? turf.area(intersectArea) / 10000 : 0;
-
-                    if (filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                        dataArea[pos] = dataArea[pos] != null ? 
-                            dataArea[pos] + calcArea : calcArea;
-                    }
+                    const feat = allFeatures[index];
+                    featGeo = format.writeFeatureObject(feat);
+                    mainFeatGeo = turf.union(mainFeatGeo,featGeo);
+                    mapViewer.vectorDraw.getSource().removeFeature(feat);
                 }
+                        
+                unionFeat = format.readFeature(mainFeatGeo);
+                mapViewer.vectorDraw.getSource().addFeature(unionFeat);
+                        
+            } else if (allFeatures.length == 1) {
+
+                const mask = new Mask({ feature: mainFeat, inner:false, fill: new Fill({ color:[0,0,0,0.8] }) });
+                        
+                layerSel.getFilters().forEach(f => {
+                    layerSel.removeFilter(f);
+                });
+
+                layerSel.addFilter(mask);
             }
-        } else {
-
-            for (let index = 0, len = features.length; index < len; index++) {
-                const polygon = features[index];
-                const pos = classIndex[parseInt(features[index]['properties']['classId'])];
-
-                //Convert area to hectares (ha = m^2 / 10000)
-                calcArea = turf.area(polygon) / 10000;
-                if (!filterAreaInterval || filterAreaInterval[0] <= calcArea && calcArea <= filterAreaInterval[1]) {
-                    dataArea[pos] = dataArea[pos] != null ? 
-                        dataArea[pos] + calcArea : calcArea;
-                }
-            }
-        }
-
-        return dataArea;
+        });
     }
 
     /**
      * Remove the controller panel
      */
     clearFilterControllers(){
-        this.controllers.clearControls();
+        this.controllers.hideControls();
 
         this.vectorDraw.getSource().getFeatures().forEach(feat => {
             this.vectorDraw.getSource().removeFeature(feat);
@@ -858,12 +1031,19 @@ export class MapViewer{
     /**
      * Clear the map and define the new layer
      * 
-     * @param {*} l 
      */
-    resetMap(l) {
-        this.currentLayer = l;
+    resetMap() {
         this.errorMatrix.clearStatsPanel();
         this.clearFilterControllers();
+    }
+
+    /**
+     * define the new layer
+     * 
+     * @param {*} l 
+     */
+    setCurrentLayer(l){
+        this.currentLayer = l;
     }
 
     /**

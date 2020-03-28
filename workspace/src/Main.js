@@ -5,25 +5,18 @@ export class Main {
     constructor(){
 
         this.mapViewer = new MapViewer();
-
-        this.classificationVector = [];
-        this.classificationMap = {};
     }
 
     addClassifiedImage(classifiedImageTiff){
         this.mapViewer.addClassifiedImage(classifiedImageTiff);
     }
 
-    addClassification(classificationGeojson){
-        this.mapViewer.addClassification(classificationGeojson);
-    }
+    addEvaluation(evaluationGeojson, validationGeojson, classificationGeojson){
 
-    addValidation(validationGeojson){
-        this.mapViewer.addValidation(validationGeojson);
-    }
+        var validation = this.mapViewer.addValidation(validationGeojson);
+        var classification = this.mapViewer.addClassification(classificationGeojson);
 
-    addEvaluation(evaluationGeojson){
-        this.mapViewer.addEvaluation(evaluationGeojson);
+        this.mapViewer.addEvaluation(evaluationGeojson, validation, classification);
     }
     
 }

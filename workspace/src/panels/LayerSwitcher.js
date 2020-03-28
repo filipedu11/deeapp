@@ -334,15 +334,17 @@ import Feature from 'ol/Feature';
                         mapView.createStatsPanel(lyrSelected);
                         mapView.createControllersFilter(lyrSelected);
                     }
+
+                    lyrSelected.getSource().dispatchEvent('change');
                 }
-                else {
+                else if(mapView.controllers.isDisplayed) {
                     //map.getView().fit(map.get('initExtent'), {constrainResolution: false});
-                    mapView.resetMap(lyrSelected);
+                    mapView.resetMap();
                 }
+
+                mapView.setCurrentLayer(lyrSelected);
                 
                 mapView.updateLegend();
-
-                lyrSelected.getSource().dispatchEvent('change');
             }
         },       
         {

@@ -57,7 +57,6 @@ html, body {
     font: 10pt "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
-
 /* As we've given the element we're displaying the layer tree within a class of
    * layer-switcher (so we can benefit from the default layer-switcher styles) we
    * need to override the position to avoid it being absolutely positioned */
@@ -75,6 +74,7 @@ html, body {
 
 .controller-padding {
     padding-left: 10px;
+    width: 100%;
 }
 
 .noUi-horizontal {
@@ -213,10 +213,29 @@ p {
     background: rgb(230, 230, 230);
 }
 
+.ol-scale-line{
+    top: 5em;
+    left: .5em;
+    bottom: auto;
+    size: 20px;
+}
+
+#compass{
+    top: .5em;
+    left: 3.25em;
+    z-index: 30000;
+    position: absolute;
+    opacity: 0.9;
+    background: white;
+    border: 3px solid transparent;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
 #legend{
     text-align: left;
     bottom: .5em;
-    right: .5em;
+    left: .5em;
     max-width: calc(100% - 1.3em);
     z-index: 30000;
     position: absolute;
@@ -231,6 +250,7 @@ p {
     background-color: rgb(255, 255, 255);
     padding: 6px;
     border-radius: 2px;
+    font-size: large;
 }
 
 .none-block{
@@ -238,7 +258,7 @@ p {
 }
 
 .inline-block{
-    display: inline-block;
+    display: block;
 }
 
 #legend-content li {
@@ -304,33 +324,6 @@ p {
     border-bottom: none;/*disappears*/
 }
 
-#stats-main-board{
-    text-align: left;
-    bottom: .5em;
-    left: .5em;
-    max-width: calc(100% - 1.3em);
-    z-index: 30000;
-    position: absolute;
-    background: white;
-    opacity: 0.9;
-    border: 3px solid transparent;
-    border-radius: 4px;
-    background-color: rgba(200, 200, 200, 0.4);
-    max-width: 500px;
-}
-
-#stats-board{
-    background-color: rgb(255, 255, 255);
-    padding: 6px;
-    border-radius: 2px;
-}
-
-@media (max-width: 768px) {
-    #stats-main-board{
-      display: none;
-    }
-}
-
 #close-button {
     position:absolute;
     background-size: 20px 20px;
@@ -380,32 +373,31 @@ p {
     background-image: url("../img/combo_chart.png");
 }
 
-#controls{
+#controllers-main-board{
     text-align: left;
     top: .5em;
     right: .5em;
     max-width: calc(100% - 1.3em);
     z-index: 30000;
     position: absolute;
-    background: white;
-    opacity: 0.9;
-    border: 3px solid transparent;
-    border-radius: 4px;
-    background-color: rgba(200, 200, 200, 0.4);
+    background-color: rgba(200, 200, 200, 0);
 }
 
-#controls2{
+@media (max-width: 768px) {
+    #controllers-main-board{
+      display: none;
+    }
+}
+
+#controls{
     text-align: left;
-    right: .5em;
-    max-width: calc(100% - 1.3em);
     z-index: 30000;
-    position: absolute;
+    position: sticky;
     background: white;
     opacity: 0.9;
     border: 3px solid transparent;
     border-radius: 4px;
     background-color: rgba(200, 200, 200, 0.4);
-    margin-top: 7.5px;
 }
 
 #controls-content{
@@ -418,7 +410,12 @@ p {
     background-color: rgb(255, 255, 255);
     padding: 6px;
     border-radius: 2px;
-    display: none;
+}
+
+#controls-content-metrics-plot-for-buffer{
+    background-color: rgb(255, 255, 255);
+    padding: 6px;
+    border-radius: 2px;
 }
 
 /* Center the loader */
@@ -471,4 +468,19 @@ p {
   #myDiv {
     display: none;
     text-align: center;
+  }
+
+  .loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+    margin: auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }

@@ -7,7 +7,7 @@ import * as turf from '@turf/turf';
 export class LayerEntity{
 
     constructor(layerID, layerName, layerDescription, 
-        layerRasterFile, layerSource, layerStats, layerStyle, features, classNames, geojsonFile, type) {
+        layerRasterFile, layerSource, layerStats, layerStyle, features, classNames, geojsonFile) {
 
         //Set the decode
         this.decodeLayer = new LayerDecode();
@@ -22,7 +22,6 @@ export class LayerEntity{
         this.features = features;
         this.classNames = classNames;
         this.geojsonFile = geojsonFile;
-        this.type = type;
         this.occupiedAreaOfEachFeatures = this.computeOccupiedArea(features);
         this.minOccupiedArea = Math.min(...this.occupiedAreaOfEachFeatures);
         this.maxOccupiedArea = Math.max(...this.occupiedAreaOfEachFeatures);
@@ -217,5 +216,24 @@ export class LayerEntity{
 
     getMaximumOccupiedArea(){
         return Math.ceil(this.maxOccupiedArea * 10000) / 10000;
+    }
+
+    getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision){
+        return this.occupiedAreaOfEachFeatures
+            .map(
+                function(num) {
+                    return parseFloat(num.toFixed(precision)) + 1/Math.pow(10, precision);
+                }
+            )
+            .filter(
+                function(value, index, self) { 
+                    return self.indexOf(value) === index;
+                }
+            )
+            .sort(
+                function(a, b){
+                    return a - b;
+                }
+            );
     }
 }

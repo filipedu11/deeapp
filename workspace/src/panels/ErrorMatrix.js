@@ -3,49 +3,61 @@ import Highmaps from 'highcharts/modules/map';
 
 Highmaps(Highcharts);
 
-import * as turf from '@turf/turf';
-
-/*eslint no-undef: "error"*/
-/*eslint-env node*/
-var geojsonRbush = require('geojson-rbush').default;
+import { Metrics } from './Metrics';
 
 export class ErrorMatrix {
 
     constructor(){
-        this.content = document.getElementById('content-error-matrix-oa');
-        this.info = document.getElementById('info-error-matrix-oa');
-        this.infoErrorMatrixGlobal = document.createElement('div');
-        this.infoErrorMatrixGlobal.id = 'info-error-matrix-global-oa';
-        this.infoErrorMatrixFiltered = document.createElement('div');
-        this.infoErrorMatrixFiltered.id = 'info-error-matrix-filtered-oa';
+        this.content = document.getElementById('content-error-matrix');
+
+        this.metrics = new Metrics();
+        this.errorMatrixExist = false;
     }
 
     clearStatsPanel(){
         this.content.innerHTML = '';
-        this.info.innerHTML = '';
-
+        this.metrics.clearMetricsInfo();
         this.lastX = -1;
         this.lastY = -1;
     }
 
+    errorMatrixWithoutFilterExist() {
+        return this.errorMatrixExist;
+    }
+
+    loadingFilterMatrix(){
+        var confusionMatrix = document.getElementById('confusion-matrix-oa');
+        if ( confusionMatrix ){
+            confusionMatrix.innerHTML = '';
+            confusionMatrix.style.width = '60px';
+            confusionMatrix.style.height = '60px';
+            confusionMatrix.className = 'loader';
+        }
+    }
+
     createConfusionMatrix(dataLyr, dataArea, isFilter = false){
+
+        if (!this.errorMatrixExist) {
+            this.errorMatrixExist = true;
+        }
 
         var idMatrix = 
             isFilter ? 
-                'confusion-matrix--oa' : 
+                'confusion-matrix-oa' : 
                 'confusion-matrix-global-oa';
 
         var confusionMatrix = document.getElementById(idMatrix);
 
         if ( !confusionMatrix ) {
             confusionMatrix = document.createElement('div');
-            confusionMatrix.id = idMatrix;
-            confusionMatrix.style.width = '100%';
-            confusionMatrix.style.marginBottom = '5px';
-            confusionMatrix.style.marginTop = '5px';
-
             this.content.appendChild(confusionMatrix);
         }
+        
+        confusionMatrix.id = idMatrix;
+        confusionMatrix.style.marginBottom = '5px';
+        confusionMatrix.style.marginTop = '5px';
+        confusionMatrix.style.width = '100%';
+        confusionMatrix.className = '';
 
         confusionMatrix.onchange = function(){
             document.getElementById('loader').className = 'inline-block';
@@ -55,8 +67,8 @@ export class ErrorMatrix {
         
         var dataForErrorMatrix = this.getDataForErrorMatrix(dataLyr, dataArea);
         var title = dataLyr.getName().split(' | ');
-        var xAxisTitle = '<b>' + title[0] + '</b>';
-        var yAxisTitle = '<b>' + title[1] + '</b>';
+        var xAxisTitle = '<b>' + title[0].split(' (c)')[0] + '</b>';
+        var yAxisTitle = '<b>' + title[1].split(' (v)')[0] + '</b>';
 
         xCategories = dataForErrorMatrix[0];
         yCategories = dataForErrorMatrix[1];
@@ -66,6 +78,8 @@ export class ErrorMatrix {
 
         confusionMatrix.style.height = xCategories.length * 125 + 'px';
 
+        this.metrics.addMetricsInfo(dataArea, xCategories);
+
         this.confusionMatrix = Highcharts.chart(idMatrix, {
             chart: {
                 type: 'heatmap',
@@ -74,7 +88,7 @@ export class ErrorMatrix {
                 backgroundColor:'rgba(255, 255, 255, 0.0)'
             },
             title: {
-                text: '<b>Com Filtros</b>'
+                text: '' 
             },
             xAxis: {
                 categories: xCategories,
@@ -103,8 +117,8 @@ export class ErrorMatrix {
                 formatter: function () {
                     var binaryCode = this.point.x + '' + this.point.y;
 
-                    return '<b>Resultado:</b> ' + resultLabel[binaryCode] + '<br/><b>Classe de classificação:</b> ' + this.series.xAxis.categories[this.point.x] + '<br/><b>Classe de validação:</b> ' +
-                    this.series.yAxis.categories[this.point.y] + '<br><b>Área ocupada:</b> ' + this.point.value + ' %';
+                    return '<b>Resultado:</b> ' + resultLabel[binaryCode] + '<br/><b>Classe classificada:</b> ' + this.series.xAxis.categories[this.point.x] + '<br/><b>Classe de validação:</b> ' +
+                    this.series.yAxis.categories[this.point.y] + '<br><b>Área ocupada (%) :</b> ' + this.point.percentage + '<br><b>Área ocupada (ha) :</b> ' + this.point.value;
                 }
             },
             series: [{
@@ -114,7 +128,7 @@ export class ErrorMatrix {
                 dataLabels: {
                     enabled: true,
                     formatter: function () { 
-                        return this.point.value + ' %';
+                        return this.point.percentage + ' %';
                     },
                     style: {
                         fontSize: '14px'
@@ -147,7 +161,6 @@ export class ErrorMatrix {
     computeDataToErrorMatrix(yCategories, xCategories, dataArea, colors){
         
         var dataErrorMatrix = [];
-        var dataToComputeMetrics = [];
 
         var lenJ = yCategories.length;
         var lenI = xCategories.length;
@@ -170,18 +183,20 @@ export class ErrorMatrix {
                         y: lenJ - (j + 1),
                         color: colors[count + 1], 
                         value: value,
+                        prct: 0
                     }
                 );
-                dataToComputeMetrics.push(value);
                 count -= 1;
                 totalArea += value;
             }
         }
 
         dataErrorMatrix.forEach(element => {
-            element.value = parseFloat((element.value / totalArea * 100).toFixed(2));
+            element.percentage = parseFloat((element.value / totalArea * 100).toFixed(3));
+            element.value = parseFloat((element.value).toFixed(3));
         });
 
         return dataErrorMatrix;
     }
+    
 }

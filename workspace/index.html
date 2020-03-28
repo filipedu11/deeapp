@@ -3,9 +3,12 @@
 
 <head>
   <meta charset="utf-8">
-  <title>DEE Application</title>
+  <title>DEE - Aplicação para análise da distribuição espacial e erro de
+  classificações de mapas temáticos</title>
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
+  <script src="//rawgithub.com/phpepe/highcharts-regression/master/highcharts-regression.js?8"></script>
 </head>
 
 <body>
@@ -23,7 +26,10 @@
       </ul>
 
       <ul role="tablist">
-        <li><a href="https://github.com/filipedu11/deeapp" role="tab" target="_blank"><i class="fab fa-github"></i></a></li>
+        <li style="cursor: pointer;"><a id="export-png"><i class="fa fa-download"></i></a></li>
+        <li><a href="https://github.com/filipedu11/deeapp" role="tab"
+        target="_blank"><i class="fab fa-github"></i></a></li>
+        <a id="image-download" download="map.png"></a>
       </ul>
     </div>
 
@@ -46,82 +52,104 @@
       </div>
 
       <div class="sidebar-pane" id="stats-error-matrix-oa">
-        <h1 class="sidebar-header">Matriz de Confusão - Global<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <h1 class="sidebar-header">Matrizes de Confusão<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
         <div class="content">
-            <div id="main-stats-oa">
-              <div id="content-error-matrix-oa"></div>
-              <div id="info-error-matrix-oa"></div>
-            </div>
+            <div id="content-error-matrix"></div>
+            <div id="info-error-matrix"></div>
         </div>
       </div>
 
-
-      <div class="sidebar-pane" id="settings">
+<!--       <div class="sidebar-pane" id="settings">
         <h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
         <div class="content">
-          <div id="content-settings"></div>
+          <div id="content-settings">
+          </div>
         </div>
-      </div>
+      </div> -->
+
     </div>
   </div>
   <!-- END OF SIDEBAR DIV -->
 
   <div id="map" class="sidebar-map">
-
       <!-- MAP LEGEND -->
-      <div id="controls" class="none-block">
-        <div id="controls-content">
-          <h4>Filtros</h4>
-          <hr style="margin-top:0em;">
-          <div class="controller-content">
-            <label class="slidelabel controller-padding">
-                <b>Área em Ha</b><br/><br/>
-                <input id="area-min-number"/><label id="area-number-slider"></label><input id="area-max-number"/>
-            </label>
+      <div id="controllers-main-board" class="none-block">
+        <div id="controls">
+          <div id="controls-content">
+            <h4>Filtros</h4>
+            <hr style="margin-top:0em;">
+            <div class="controller-content">
+              <label class="slidelabel controller-padding">
+                  <b>Área em Ha</b><br/>
+                  <input id="area-min-number"/><label id="area-number-slider"></label><input id="area-max-number"/>
+              </label>
+            </div>
+            <div class="controller-content">
+              <label class="polygonlabel controller-padding">
+                  <b>Buffer em km </b><br/>
+                  <select id="class-buffer" style="margin-top: 4px">
+                    <option value="-1">
+                        ----
+                    </option>
+                    <option value="0">
+                      Fronteiras
+                    </option>
+                    <option value="1">
+                      Polígono
+                    </option>
+                  </select>
+                  <input value="0.01" id="area-buffer" style="margin-top: 4px" type="number" step="0.01" min="0" max="0.51"/>
+                </label>
+            </div>
+            <div class="controller-content">
+              <label class="polygonlabel controller-padding">
+                  <b>Filtrar por geometria</b><br/>
+                  <select id="type-geo" style="margin-top: 4px">
+                    <option value="None">
+                        ----
+                    </option>
+                    <option value="Box">
+                      Box
+                    </option>
+                    <option value="Polygon">
+                      Poligono
+                    </option>
+                    <option value="Free">
+                      Livre
+                    </option>
+                  </select>
+              </label>
+            </div>
+            <div class="controller-content controller-padding">
+              <button id='apply-controller-settings' style="margin-top: 4px;">Calcular</button>
+              <button id='reset-controller-settings' style="margin-top: 4px">Limpar</button>
+            </div>
           </div>
-          <div class="controller-content">
-            <label class="polygonlabel controller-padding">
-                <b>Filtrar por geometria:</b><br/>
-                <select id="type-geo" style="margin-top: 4px">
-                  <option value="None">
-                      ----
-                  </option>
-                  <option value="Box">
-                    Box
-                  </option>
-                  <option value="Polygon">
-                    Poligono
-                  </option>
-                  <option value="Free">
-                    Livre
-                </option>
-                </select>
-            </label>
-            <button id='clear-polygon-draw'>Clear</button>
-          </div>
+        </div>
+        <div id="controls">
+          <div id="controls-content">
+            <h4>Análise de evolução das métricas</h4>
+            <hr style="margin-top:0em;">
+            <div id="controls-content-metrics-plot">
+              <div class="loader"></div>
+            </div>
+            <hr style="margin-top:0em;">
+            <div id="controls-content-metrics-plot-for-buffer">
+              <div class="loader"></div>
+            </div>
           </div>
         </div>
       </div>
-
-      
+  
       <!-- MAP LEGEND -->
-        
-      <div id="controls2" class="none-block">
-        <div id="controls-content-metrics-plot">
+      <div id="legend" class="none-block">
+        <div id="legend-content">
         </div>
       </div>
 
-      <!-- MAP LEGEND -->
-      <div id="legend" class="none-block"><div id="legend-content">TESTE</div></div>
-      
-      <div id="loader" class="none-block"></div>
-
-    <!-- STATS CONTENT BOARD -->
-    <div id="stats-main-board" class="none-block">
-      <button title="Close" id="close-button" class="btn"></button>
-      <div id="stats-board">
-      </div>
+      <img src=".\\static\\img\\compass.png" alt="compass" id="compass" width="42px" class="image">
     </div>
+    <div id="loader" class="none-block"></div>
   </div>
   <div id="progress"></div>
 

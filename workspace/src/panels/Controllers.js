@@ -1,24 +1,22 @@
 export class Controllers {
 
     constructor(){
+        this.mainControllers = document.getElementById('controllers-main-board');
         this.controls = document.getElementById('controls');
         this.controls2 = document.getElementById('controls2');
         this.isDisplayed = false;
     }
 
     displayControllers(){
-        this.controls.className = 'inline-block';
-        this.controls2.className = 'inline-block';
-        this.controls2.style.top = (this.controls.offsetHeight) + 'px';
+        this.mainControllers.className = 'inline-block';
         this.isDisplayed = true;      
     }
 
-    clearControls(){
+    hideControls(){
         
         if (this.controls !== null) {
             //CLEAR PREVIOUS CONTENT
-            this.controls.className = 'none-block';
-            this.controls2.className = 'none-block';
+            this.mainControllers.className = 'none-block';
             this.isDisplayed = false;
         }
     }
