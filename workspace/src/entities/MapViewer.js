@@ -352,6 +352,21 @@ export class MapViewer{
             layerGeojson
         );
 
+        const classNames = Object.values(layerGeojson[cD.classNames[k]]);
+        const classKeys = Object.keys(layerGeojson[cD.classNames[k]]);
+
+        const selectClass = document.getElementById('class-classification');
+
+        if (!selectClass.length) {
+            for (let i = 0; i < classNames.length; i++) {
+                const cName = classNames[i];
+                var opt = document.createElement('option');
+                opt.value = classKeys[i];
+                opt.innerHTML = cName;
+                selectClass.appendChild(opt); 
+            }
+        }
+
         this.allLayersDict[id] = lyr;
 
         return lyr;
@@ -698,6 +713,7 @@ export class MapViewer{
 
         var typeSelect = document.getElementById('type-geo');
         var classBufferSelect = document.getElementById('class-buffer');
+        var classClassificationSelect = document.getElementById('class-classification');
 
         clearFilterPAnel.onclick = function(){
             if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
@@ -709,6 +725,7 @@ export class MapViewer{
 
             typeSelect.value = typeSelect.options[0].value;
             classBufferSelect.value = classBufferSelect.options[0].value;
+            classClassificationSelect.value = classClassificationSelect.options[0].value;
 
             min.value = dataLyr.getMinimumOccupiedArea();
             min.dispatchEvent(new Event('change'));
@@ -820,11 +837,16 @@ export class MapViewer{
         
         var buffer = document.getElementById('area-buffer');
         var classBuffer = document.getElementById('class-buffer');
+        var classClassification = document.getElementById('class-classification');
 
         var valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
         var allFeatures = valLayer.getFeatures();
 
         classBuffer.addEventListener('change', function () {
+            computeBuffer();
+        });
+
+        classClassification.addEventListener('change', function () {
             computeBuffer();
         });
 
@@ -856,7 +878,7 @@ export class MapViewer{
             if (classBuffer.value != -1) {
                 if (allFeatures.length > 1) {
 
-                    let mainFeat = mapViewer.computeBufferAuxiliary(allFeatures, buffer.value, classBuffer.value);
+                    let mainFeat = mapViewer.computeBufferAuxiliary(allFeatures, buffer.value, classBuffer.value, classClassification.value);
 
                     if (mainFeat) {
                         if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
@@ -874,7 +896,7 @@ export class MapViewer{
 
     }
 
-    computeBufferAuxiliary(allFeatures, value, classBuffer) {
+    computeBufferAuxiliary(allFeatures, value, classBuffer, classClassification) {
 
         let mainFeats = [];
         var options = {tolerance: 0.0005
@@ -883,7 +905,7 @@ export class MapViewer{
         for (let index = 0, len = allFeatures.length; index < len; index++) {
             const feat = allFeatures[index];
             
-            if (feat.properties.classId == 1) {
+            if (feat.properties.classId == classClassification) {
 
                 let featBuffer;
                 let bufferLine = feat;
