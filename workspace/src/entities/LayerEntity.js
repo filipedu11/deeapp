@@ -169,18 +169,18 @@ export class LayerEntity{
     getBinaryClassNamesForLegend(){
         return {
             1: 'Verdadeiros Negativos',
-            2: 'Falsos Negativos', 
-            3: 'Falsos Positivos', 
+            2: 'Falsos Positivos', 
+            3: 'Falsos Negativos', 
             4: 'Verdadeiros Positivos'
         };
     }
     
     getBinaryClassNamesForErrorMatrix(){
         return {
-            '00' : 'Falsos Positivos', 
+            '00' : 'Falsos Negativos', 
             '01' : 'Verdadeiros Positivos',
             '10' : 'Verdadeiros Negativos',
-            '11' : 'Falsos Negativos'
+            '11' : 'Falsos Positivos'
         };
     }
 

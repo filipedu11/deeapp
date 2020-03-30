@@ -30,7 +30,12 @@ def create_map_raster(
     r1 = np.array(ds1.ReadAsArray())
     r2 = np.array(ds2.ReadAsArray())
 
-    classes = np.unique(r2)
+    unique_classes = np.unique(r2)
+    classes = []
+
+    for cl in unique_classes:
+        if cl >= 0:
+            classes.append(cl)
     
     mapDiff = np.zeros(r2.shape)
     [cols, rows] = r2.shape
@@ -41,10 +46,11 @@ def create_map_raster(
 
     for c1 in classes:
         for c2 in classes:
-            calcAux = ((r1==c1) * (r2==c2)) * classId
-            mapDiff = mapDiff + calcAux
-            classMap[(c1,c2)] = classId
-            classId += 1
+            if c1 >= 0 and c2 >= 0:
+                calcAux = ((r1==c1) * (r2==c2)) * classId
+                mapDiff = mapDiff + calcAux
+                classMap[(c1,c2)] = classId
+                classId += 1
 
     driver = gdal.GetDriverByName("GTiff")
     outdata = driver.Create(map_output_filepath, rows, cols, 1, gdal.GDT_UInt16)
@@ -93,7 +99,11 @@ def create_json(classes, classMap, classification_json_file, validation_json_fil
     
     
     for c in classes:
-        color = classification_json_object["layerStyle"]["color"][str(c)]
+        try:
+            color = classification_json_object["layerStyle"]["color"][str(c)]
+        except:
+            color = classification_json_object["layerStyle"]["color"][str(int(c))]
+
         rgb = color.split('(')[1].split(')')[0].split(',')
         rgbTuple = tuple(np.array(rgb).astype(np.int) / 255)
         
@@ -101,10 +111,14 @@ def create_json(classes, classMap, classification_json_file, validation_json_fil
 
     for i, c1 in enumerate(classes, 0):
         for c2 in classes:
-            className = classification_json_object["classNames"][str(c1)] + ' (c)' + " | " + validation_json_object["classNames"][str(c2)] + ' (v)'
-            content_json["classNames"][str(classMap[(c1,c2)])] = className
-
-            color = classification_json_object["layerStyle"]["color"][str(c1)]
+            try:
+                className = classification_json_object["classNames"][str(c1)] + ' (c)' + " | " + validation_json_object["classNames"][str(c2)] + ' (v)'
+                content_json["classNames"][str(classMap[(c1,c2)])] = className
+                color = classification_json_object["layerStyle"]["color"][str(c1)]
+            except:
+                className = classification_json_object["classNames"][str(int(c1))] + ' (c)' + " | " + validation_json_object["classNames"][str(int(c2))] + ' (v)'
+                content_json["classNames"][str(classMap[(c1,c2)])] = className
+                color = classification_json_object["layerStyle"]["color"][str(int(c1))]
             
             if c1 != c2:
                 color = 'rgb({},{},{})'.format(int(color_palette[i][0]*255), int(color_palette[i][1]*255), int(color_palette[i][2]*255))
@@ -131,10 +145,10 @@ if __name__ == '__main__':
 
     print("\n ======================================== \n")
 
-    for j, filepath_t in enumerate(validation_files):
-        print("Validation map selected: {}  ({}/{})".format(os.path.basename(filepath_t), j+1, len(validation_files)))
-        for i, filepath in enumerate(classification_files):
-            print("Generating difference map for file: {}  ({}/{})".format(os.path.basename(filepath), i+1, len(classification_files)))
+    for j, filepath_t in enumerate(classification_files):
+        print("Validation map selected: {}  ({}/{})".format(os.path.basename(filepath_t), j+1, len(classification_files)))
+        for i, filepath in enumerate(validation_files):
+            print("Generating difference map for file: {}  ({}/{})".format(os.path.basename(filepath), i+1, len(validation_files)))
 
             file1 = re.match("(.*).tif", os.path.basename(filepath))
             file1 = file1.groups(1)[0]
@@ -161,4 +175,4 @@ if __name__ == '__main__':
             print(map_output_filepath)
             print(json_output_filepath)
 
-            create_map_raster(filepath, classification_json_files[i], filepath_t, validation_json_files[j], map_output_filepath, json_output_filepath)
+            create_map_raster(filepath, validation_json_files[i], filepath_t, classification_json_files[j], map_output_filepath, json_output_filepath)

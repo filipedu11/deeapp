@@ -117,7 +117,7 @@ export class ErrorMatrix {
                 formatter: function () {
                     var binaryCode = this.point.x + '' + this.point.y;
 
-                    return '<b>Resultado:</b> ' + resultLabel[binaryCode] + '<br/><b>Classe classificada:</b> ' + this.series.xAxis.categories[this.point.x] + '<br/><b>Classe de validação:</b> ' +
+                    return '<b>Resultado:</b> ' + resultLabel[binaryCode] + '<br/><b>Classe de validação:</b> ' + this.series.xAxis.categories[this.point.x] + '<br/><b>Classe classificada:</b> ' +
                     this.series.yAxis.categories[this.point.y] + '<br><b>Área ocupada (%) :</b> ' + this.point.percentage + '<br><b>Área ocupada (ha) :</b> ' + this.point.value;
                 }
             },

@@ -334,7 +334,7 @@ import Feature from 'ol/Feature';
                         mapView.createStatsPanel(lyrSelected);
                         mapView.createControllersFilter(lyrSelected);
                     }
-
+                    mapView.createInfoPanel(lyrSelected);
                     lyrSelected.getSource().dispatchEvent('change');
                 }
                 else if(mapView.controllers.isDisplayed) {

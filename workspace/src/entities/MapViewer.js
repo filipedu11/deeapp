@@ -1,5 +1,3 @@
-import 'jquery';
-
 /**
  * Import ol classes
  */
@@ -269,7 +267,7 @@ export class MapViewer{
     addBaseLayers(){
 
         var base = new TileLayer({
-            visible: true,
+            visible: false,
             title: 'World Map - Dark',
             typeBase: BASE_TYPE_STRING,
             source: new XYZ({
@@ -288,15 +286,30 @@ export class MapViewer{
             })
         });
 
+        var base3 = new TileLayer({
+            visible: true,
+            title: 'Google Terrain',
+            typeBase: BASE_TYPE_STRING,
+            source: new XYZ({
+                url:'http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}',
+                crossOrigin: 'anonymous'
+            })
+        });
+
+        
+
         this.addProgressStatus(base.getSource());
         this.addProgressStatus(base2.getSource());
+        this.addProgressStatus(base3.getSource());
 
         this.baseDict.b1 = base;
         this.baseDict.b2 = base2;
-        this.baseArray.push(base, base2);
+        this.baseDict.b3 = base3;
+        this.baseArray.push(base, base2, base3);
 
         this.addLayerToMapGroup(BASE_TYPE_STRING, base);
         this.addLayerToMapGroup(BASE_TYPE_STRING, base2);
+        this.addLayerToMapGroup(BASE_TYPE_STRING, base3);
     }
 
     /**
@@ -785,6 +798,15 @@ export class MapViewer{
         }, false);
         workerBufferFilter.postMessage([classKeys, features, valLayer.getFeatures()]);
 
+    }
+
+    /**
+     * Create the Stats panel with error matrix
+     * 
+     * @param {*} layerSel 
+     */
+    createInfoPanel(layerSel) {
+        console.log('TO IMPLEMENT: column chart with the number of polygons for a interval area');
     }
 
     /**
