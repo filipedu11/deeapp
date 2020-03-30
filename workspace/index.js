@@ -29,6 +29,12 @@ var app = new Main();
 
 var readFiles = new ReadFiles();
 
+// app.addEvaluation(
+//     readFiles.readEvaluation(), 
+//     readFiles.readValidation(),
+//     readFiles.readClassification()
+// );
+
 app.addEvaluation(
     readFiles.readEvaluation(), 
     readFiles.readValidation(),
