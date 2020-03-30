@@ -29,16 +29,16 @@ var app = new Main();
 
 var readFiles = new ReadFiles();
 
+// app.addEvaluation(
+//     readFiles.readEvaluation(), 
+//     readFiles.readValidation(),
+//     readFiles.readClassification()
+// );
+
 app.addEvaluation(
     readFiles.readEvaluation(), 
     readFiles.readValidation(),
     readFiles.readClassification()
-);
-
-app.addEvaluation(
-    readFiles.readEvaluation2(), 
-    readFiles.readValidation2(),
-    readFiles.readClassification2()
 );
 
 //app.addClassifiedImage(readFiles.readClassifiedImage());
