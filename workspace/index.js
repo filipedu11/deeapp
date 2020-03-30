@@ -35,12 +35,6 @@ app.addEvaluation(
     readFiles.readClassification()
 );
 
-app.addEvaluation(
-    readFiles.readEvaluation2(), 
-    readFiles.readValidation2(),
-    readFiles.readClassification2()
-);
-
 //app.addClassifiedImage(readFiles.readClassifiedImage());
 //app.addEvaluation(readFiles.readEvaluationRandomForest());
 // app.addEvaluation(readFiles.readEvaluationGmoMaxEnt());
