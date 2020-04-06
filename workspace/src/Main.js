@@ -7,8 +7,8 @@ export class Main {
         this.mapViewer = new MapViewer();
     }
 
-    addClassifiedImage(classifiedImageTiff){
-        this.mapViewer.addClassifiedImage(classifiedImageTiff);
+    addRemoteSensingImage(remoteSensingImage){
+        this.mapViewer.addRemoteSensingImage(remoteSensingImage);
     }
 
     addEvaluation(evaluationGeojson, validationGeojson, classificationGeojson){
