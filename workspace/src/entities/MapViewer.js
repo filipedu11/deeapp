@@ -59,6 +59,7 @@ var DRAW_LAYER_STRING = 'draw';
 var CLASSIFICATION_TYPE_STRING = 'classification';
 var VALIDATION_STRING = 'validation';
 var EVALUATION_STRING = 'evaluation';
+var REMOTESENSINGIMAGE_STRING = 'remoteSensingImage';
 
 var w = new Worker('./worker.js');
 var workerAreaFilter = new Worker('./workerAreaFilter.js');
@@ -222,6 +223,12 @@ export class MapViewer{
             typeBase: BASE_TYPE_STRING,
         });
 
+        var remoteSensingImages = new LayerGroup({
+            title: 'Imagem de Deteção Remota',
+            fold: 'open',
+            typeBase: REMOTESENSINGIMAGE_STRING,
+        });
+
         var classifications = new LayerGroup({
             title: 'Classificação',
             fold: 'open',
@@ -241,6 +248,7 @@ export class MapViewer{
         });
 
         this.map.addLayer(base);
+        this.map.addLayer(remoteSensingImages);
         this.map.addLayer(classifications);
         this.map.addLayer(validations);
         this.map.addLayer(evaluations);
@@ -434,26 +442,26 @@ export class MapViewer{
 
     /**
      * Add classified image (png/tiff) to map 
-     * @param {*} classifiedImage 
+     * @param {*} remoteSensingImage 
      */
-    addClassifiedImage(classifiedImage){
+    addRemoteSensingImage(remoteSensingImage){
     
         var projection = this.projStudyArea;
         var extent = this.extendStudyArea;
         
         var newLayer = new ImageLayer({
             source: new Static({
-                url: classifiedImage,
+                url: remoteSensingImage,
                 projection: projection,
                 imageExtent: extent,
                 crossOrigin: null
             }),
             visible: false,
             title: 'Imagem Satélite',
-            typeBase: BASE_TYPE_STRING
+            typeBase: REMOTESENSINGIMAGE_STRING
         });
 
-        this.addLayerToMapGroup(BASE_TYPE_STRING, newLayer);
+        this.addLayerToMapGroup(REMOTESENSINGIMAGE_STRING, newLayer);
 
         this.loadLayerSwitcher();
     }
