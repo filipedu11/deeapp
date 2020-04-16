@@ -171,7 +171,7 @@ export class ErrorMatrix {
         }
         
         //Construct classes data for error matrix  with total area
-        var count = 3;
+        var count = dataArea.length - 1;
         var totalArea = 0;
         for (let i = 0; i < lenI; i++) {
             for (let j = 0; j < lenJ ; j++) {
