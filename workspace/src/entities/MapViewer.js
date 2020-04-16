@@ -907,7 +907,7 @@ export class MapViewer{
     computeBufferAuxiliary(allFeatures, value, classBuffer, classClassification) {
 
         let mainFeats = [];
-        var options = {tolerance: 0.0005
+        var options = {tolerance: 0.0001
             , highQuality: false, mutate: false};
 
         for (let index = 0, len = allFeatures.length; index < len; index++) {
