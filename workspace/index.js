@@ -13,8 +13,6 @@ import './static/css/map.css';
 import './static/css/circle.css';
 import 'nouislider/distribute/nouislider.css';
 
-
-
 /**
  * Import Main class
  */
@@ -35,15 +33,4 @@ app.addEvaluation(
     readFiles.readClassification()
 );
 
-app.addEvaluation(
-    readFiles.readEvaluation2(), 
-    readFiles.readValidation2(),
-    readFiles.readClassification2()
-);
-
-//app.addClassifiedImage(readFiles.readClassifiedImage());
-//app.addEvaluation(readFiles.readEvaluationRandomForest());
-// app.addEvaluation(readFiles.readEvaluationGmoMaxEnt());
-// app.addClassification(readFiles.readClassificationWinnow());
-// app.addClassification(readFiles.readClassificationCart());
-//app.addClassification(readFiles.readTestClassification());
+app.addRemoteSensingImage(readFiles.readRemoteSensingImage());

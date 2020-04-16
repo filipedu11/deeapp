@@ -134,151 +134,22 @@ export class Metrics {
         const oa = this.computeOA(dataToComputeMetrics);
         const mcc = this.computeMCC(dataToComputeMetrics);
 
-        const oaClassCircle = this.getCircleClassName(oa);
-        const mccClassCircle = this.getCircleClassMCC(mcc);
-
-        const precision = this.computePrecision(dataToComputeMetrics);
-        const precisionClassCircle = this.getCircleClassName(precision);
-        const recall = this.computeRecall(dataToComputeMetrics);
-        const recallClassCircle = this.getCircleClassName(recall);
-        const f1 = this.computeF1(parseFloat(precision), parseFloat(recall));
-        const f1ClassCircle = this.getCircleClassName(f1);
-
-        const precisionFP = this.computePrecision(dataToComputeMetrics, 0);
-        const precisionClassCircleFP = this.getCircleClassName(precisionFP);
-        const recallFP = this.computeRecall(dataToComputeMetrics, 0);
-        const recallClassCircleFP = this.getCircleClassName(recallFP);
-        const f1FP = this.computeF1(parseFloat(precisionFP), parseFloat(recallFP));
-        const f1ClassCircleFP = this.getCircleClassName(f1FP);
-
         this.info.innerHTML = '<br/><hr/>';  
+        this.info.innerHTML += this.getHTMLTextForGlobalMetrics(oa, mcc);
 
-        this.info.innerHTML +=
-        '<div class="row justify-content-md-center">' +
-            '<div class="col col-md-12 text-center" style="padding:0;">' +
-                '<h5>Métricas Globais</h5>' +
-            '</div>' +
-        '</div>' +
-        '<div class="row justify-content-md-center">' +
-            '<div class="col col-md-6 text-center" style="padding:0;">' +
-                '<h6>Overall Accuracy</h6>' +
-            '</div>' +
-            '<div class="col col-md-6 text-center" style="padding:0;">' +
-                '<h6>Matthews correlation coefficient</h6>' +
-            '</div>' +
-        '</div>' +
-        '<div class="row justify-content-md-center">' +
-            '<div class="col col-md-6" style="padding:0;">' +
-                '<div class="' + oaClassCircle + '">' +
-                    '<span>' + oa + '%</span>' +
-                    '<div class="slice">' +
-                        '<div class="bar"></div>' +
-                        '<div class="fill"></div>' +
-                    '</div>' +
-                '</div>'+
-            '</div>' +
-            '<div class="col col-md-6" style="padding:0;">' +
-            '<div class="' + mccClassCircle + '">' +
-                '<span>' + mcc + '%</span>' +
-                '<div class="slice">' +
-                    '<div class="bar"></div>' +
-                    '<div class="fill"></div>' +
-                '</div>' +
-            '</div>'+
-        '</div>' +
-        '</div>' +
-        '<br/><br/>' +
-        '<div class="row justify-content-md-center">' +
-            '<div class="col col-md-12 text-center" style="padding:0;">' +
-                '<h5>Métricas por classe: '+xCategories[0]+'</h5>' +
-            '</div>' +
-        '</div>' +
-        '<div class="row justify-content-md-center">' +
-            '<div class="col col-md-4 text-center" style="padding:0;">' +
-                '<h6>Precision</h6>' +
-            '</div>' +
-            '<div class="col col-md-4 text-center" style="padding:0;">' +
-                '<h6>Recall</h6>' +
-            '</div>' +
-            '<div class="col col-md-4 text-center" style="padding:0;">' +
-                '<h6>F1 score</h6>' +
-            '</div>' +
-        '</div>' +
-        '<div class="row justify-content-md-center">' +
-            '<div class="col col-md-4" style="padding:0;">' +
-                '<div class="' + precisionClassCircle + '">' +
-                    '<span>' + precision + '%</span>' +
-                    '<div class="slice">' +
-                        '<div class="bar"></div>' +
-                        '<div class="fill"></div>' +
-                    '</div>' +
-                '</div>'+
-            '</div>' +
-            '<div class="col col-md-4" style="padding:0;">' +
-                '<div class="' + recallClassCircle + '">' +
-                '<span>' + recall + '%</span>' +
-                    '<div class="slice">' +
-                        '<div class="bar"></div>' +
-                        '<div class="fill"></div>' +
-                    '</div>' +
-                '</div>'+
-            '</div>'+
-            '<div class="col col-md-4" style="padding:0;">' +
-                '<div class="' + f1ClassCircle + '">' +
-                    '<span>' + f1 + '%</span>' +
-                    '<div class="slice">' +
-                        '<div class="bar"></div>' +
-                        '<div class="fill"></div>' +
-                    '</div>' +
-                '</div>'+
-            '</div>'+
-        '</div>' +
-        '<br/><br/>' +
-        '<div class="row justify-content-md-center">' +
-            '<div class="col col-md-12 text-center" style="padding:0;">' +
-                '<h5>Métricas por classe: '+xCategories[1]+'</h5>' +
-            '</div>' +
-        '</div>' +
-        '<div class="row justify-content-md-center">' +
-            '<div class="col col-md-4 text-center" style="padding:0;">' +
-                '<h6>Precision</h6>' +
-            '</div>' +
-            '<div class="col col-md-4 text-center" style="padding:0;">' +
-                '<h6>Recall</h6>' +
-            '</div>' +
-            '<div class="col col-md-4 text-center" style="padding:0;">' +
-                '<h6>F1 score</h6>' +
-            '</div>' +
-        '</div>' +
-        '<div class="row justify-content-md-center">' +
-            '<div class="col col-md-4" style="padding:0;">' +
-                '<div class="' + precisionClassCircleFP + '">' +
-                    '<span>' + precisionFP + '%</span>' +
-                    '<div class="slice">' +
-                        '<div class="bar"></div>' +
-                        '<div class="fill"></div>' +
-                    '</div>' +
-                '</div>'+
-            '</div>' +
-            '<div class="col col-md-4" style="padding:0;">' +
-                '<div class="' + recallClassCircleFP + '">' +
-                '<span>' + recallFP + '%</span>' +
-                    '<div class="slice">' +
-                        '<div class="bar"></div>' +
-                        '<div class="fill"></div>' +
-                    '</div>' +
-                '</div>'+
-            '</div>'+
-            '<div class="col col-md-4" style="padding:0;">' +
-                '<div class="' + f1ClassCircleFP + '">' +
-                    '<span>' + f1FP + '%</span>' +
-                    '<div class="slice">' +
-                        '<div class="bar"></div>' +
-                        '<div class="fill"></div>' +
-                    '</div>' +
-                '</div>'+
-            '</div>'+
-        '</div>';
+        for (let index = 0, len = xCategories.length; index < len; index++) {
+            
+            // For the classe of xcategories[index] we have to compute the
+            // metrics starting in len - inxdex - 1
+            const indexForCalculation = len - index - 1;
+
+            const precision = this.computePrecision(dataToComputeMetrics, indexForCalculation);
+            const recall = this.computeRecall(dataToComputeMetrics, indexForCalculation);
+            const f1 = this.computeF1(parseFloat(precision), parseFloat(recall));
+
+            this.info.innerHTML += this.getHTMLTextForMetricsPerClass(precision, recall, f1, xCategories[index]);
+
+        }
     }
 
     getCircleClassName(value){
@@ -374,4 +245,103 @@ export class Metrics {
         return (mcc*100).toFixed(1);
     }
 
+    getHTMLTextForGlobalMetrics(oaValue, mccValue){
+
+        const oaClassCircle = this.getCircleClassName(oaValue);
+        const mccClassCircle = this.getCircleClassMCC(mccValue);
+
+        const htmlText = 
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-12 text-center" style="padding:0;">' +
+                '<h5>Métricas Globais</h5>' +
+            '</div>' +
+        '</div>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-6 text-center" style="padding:0;">' +
+                '<h6>Overall Accuracy</h6>' +
+            '</div>' +
+            '<div class="col col-md-6 text-center" style="padding:0;">' +
+                '<h6>Matthews correlation coefficient</h6>' +
+            '</div>' +
+        '</div>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-6" style="padding:0;">' +
+                '<div class="' + oaClassCircle + '">' +
+                    '<span>' + oaValue + '%</span>' +
+                    '<div class="slice">' +
+                        '<div class="bar"></div>' +
+                        '<div class="fill"></div>' +
+                    '</div>' +
+                '</div>'+
+            '</div>' +
+            '<div class="col col-md-6" style="padding:0;">' +
+                '<div class="' + mccClassCircle + '">' +
+                    '<span>' + mccValue + '%</span>' +
+                    '<div class="slice">' +
+                        '<div class="bar"></div>' +
+                        '<div class="fill"></div>' +
+                    '</div>' +
+                '</div>'+
+            '</div>' +
+        '</div>';
+
+        return htmlText;
+    }
+
+    getHTMLTextForMetricsPerClass(precision, recall, f1, className){
+
+        const precisionClassCircle = this.getCircleClassName(precision);
+        const recallClassCircle = this.getCircleClassName(recall);
+        const f1ClassCircle = this.getCircleClassName(f1);
+
+        const htmlText = 
+        '<br/><br/>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-12 text-center" style="padding:0;">' +
+                '<h5>Métricas por classe: ' + className +'</h5>' +
+            '</div>' +
+        '</div>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-4 text-center" style="padding:0;">' +
+                '<h6>Precision</h6>' +
+            '</div>' +
+            '<div class="col col-md-4 text-center" style="padding:0;">' +
+                '<h6>Recall</h6>' +
+            '</div>' +
+            '<div class="col col-md-4 text-center" style="padding:0;">' +
+                '<h6>F1 score</h6>' +
+            '</div>' +
+        '</div>' +
+        '<div class="row justify-content-md-center">' +
+            '<div class="col col-md-4" style="padding:0;">' +
+                '<div class="' + precisionClassCircle + '">' +
+                    '<span>' + precision + '%</span>' +
+                    '<div class="slice">' +
+                        '<div class="bar"></div>' +
+                        '<div class="fill"></div>' +
+                    '</div>' +
+                '</div>'+
+            '</div>' +
+            '<div class="col col-md-4" style="padding:0;">' +
+                '<div class="' + recallClassCircle + '">' +
+                '<span>' + recall + '%</span>' +
+                    '<div class="slice">' +
+                        '<div class="bar"></div>' +
+                        '<div class="fill"></div>' +
+                    '</div>' +
+                '</div>'+
+            '</div>'+
+            '<div class="col col-md-4" style="padding:0;">' +
+                '<div class="' + f1ClassCircle + '">' +
+                    '<span>' + f1 + '%</span>' +
+                    '<div class="slice">' +
+                        '<div class="bar"></div>' +
+                        '<div class="fill"></div>' +
+                    '</div>' +
+                '</div>'+
+            '</div>'+
+        '</div>';
+
+        return htmlText;
+    }
 }

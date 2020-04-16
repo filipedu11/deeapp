@@ -74,7 +74,6 @@ function calcOccupiedAreaForEachClass(classKeys, features, filterAreaInterval, p
 
                 dataArea[pos] += calcArea;
             }
-            console.log(count++ + ' : ' + lendra);
         }
         //Convert area to hectares (ha = m^2 / 10000)
         for(var i = 0, length = dataArea.length; i < length; i++){
