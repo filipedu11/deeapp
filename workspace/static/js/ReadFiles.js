@@ -21,17 +21,17 @@ export class ReadFiles{
     //     return JSON.parse(readFileAsync('./workspace/static/data/GEE_Burned_Area_Experiments/evaluation/validation_burned_area_VS_classification_continuousNaiveBayes_difference_map_out.geojson', 'utf8').trim());
     // }
 
-    readValidation(){
-        return JSON.parse(readFileSync('./workspace/static/data/buildings/validation/tomar_GT_group1_classification_reclass_out.geojson', 'utf8').trim());
-    }
+    // readValidation(){
+    //     return JSON.parse(readFileSync('./workspace/static/data/buildings/validation/tomar_GT_group1_classification_reclass_out.geojson', 'utf8').trim());
+    // }
 
-    readClassification(){
-        return JSON.parse(readFileSync('./workspace/static/data/buildings/classification/tomar_boosted_20px_static_group1_classification_reclass_out.geojson', 'utf8').trim());
-    }
+    // readClassification(){
+    //     return JSON.parse(readFileSync('./workspace/static/data/buildings/classification/tomar_boosted_20px_static_group1_classification_reclass_out.geojson', 'utf8').trim());
+    // }
 
-    readEvaluation(){
-        return JSON.parse(readFileAsync('./workspace/static/data/buildings/evaluation/tomar_GT_group1_classification_reclass_VS_tomar_boosted_20px_static_group1_classification_reclass_difference_map_out.geojson', 'utf8').trim());
-    }
+    // readEvaluation(){
+    //     return JSON.parse(readFileAsync('./workspace/static/data/buildings/evaluation/tomar_GT_group1_classification_reclass_VS_tomar_boosted_20px_static_group1_classification_reclass_difference_map_out.geojson', 'utf8').trim());
+    // }
 
     // readValidation(){
     //     return JSON.parse(readFileSync('./workspace/static/data/deimos/validation/subset_1_v2_out.geojson', 'utf8').trim());
@@ -44,5 +44,21 @@ export class ReadFiles{
     // readEvaluation(){
     //     return JSON.parse(readFileAsync('./workspace/static/data/deimos/evaluation/subset_1_v2_VS_subset_1_v1_difference_map_out.geojson', 'utf8').trim());
     // }
+
+    readValidation(){
+        return JSON.parse(readFileSync('./workspace/static/data/parcelas_agricolas/tomate/validation/validation_tomate_out.geojson', 'utf8').trim());
+    }
+
+    readClassification(){
+        return JSON.parse(readFileSync('./workspace/static/data/parcelas_agricolas/tomate/classification/classification_tomate_out.geojson', 'utf8').trim());
+    }
+
+    readEvaluation(){
+        return JSON.parse(readFileAsync('./workspace/static/data/parcelas_agricolas/tomate/evaluation/validation_tomate_VS_classification_tomate_difference_map_out.geojson', 'utf8').trim());
+    }
+
+    readEvaluationGlobal(){
+        return JSON.parse(readFileAsync('./workspace/static/data/parcelas_agricolas/validation_VS_classification_erro_acerto_map_out.geojson', 'utf8').trim());
+    }
     
 }

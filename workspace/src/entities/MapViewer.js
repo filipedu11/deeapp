@@ -511,6 +511,19 @@ export class MapViewer{
     }
 
     /**
+     * Add evaluation layer to map
+     * @param {*} evaluationGeojson 
+     */
+    addEvaluationGlobal(evaluationGeojson){
+
+        var newLayer = this.createLayer(evaluationGeojson, this.createEvaluationnLayerObj(evaluationGeojson));
+
+        this.addLayerToMapGroup(EVALUATION_STRING, newLayer);
+
+        this.loadLayerSwitcher();
+    }
+
+    /**
      * Remove evaluation layer in map
      * 
      * @param {*} evaluationLayer 
@@ -701,7 +714,10 @@ export class MapViewer{
         this.controllers.displayControllers();
         this.createPolygonInteraction();
         this.createAreaFilterInteraction(dataLyr, layerSel);
-        this.createBufferFilter(dataLyr, layerSel);
+        if (dataLyr.validationLayer) {
+            this.createBufferFilter(dataLyr, layerSel);
+        }
+            
 
         this.addEventListenerToClearButton(dataLyr, layerSel);
         this.addEventToApplyButton(dataLyr, layerSel);
@@ -809,7 +825,7 @@ export class MapViewer{
         w.postMessage([classKeys, features, null, null]);
  
         //CREATE AREA FILTER GRAPH
-        let precision = 3;
+        let precision = 6;
         let steps = dataLyr.getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision);
         workerAreaFilter.addEventListener('message', function(e) {
             metrics.createMetricsGraph(e.data);
@@ -817,12 +833,13 @@ export class MapViewer{
         workerAreaFilter.postMessage([classKeys, features, steps]);
 
         //CREATE BUFFER FILTER GRAPH
-        let valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
-        workerBufferFilter.addEventListener('message', function(e) {
-            metrics.createMetricsGraphForBuffer(e.data);
-        }, false);
-        workerBufferFilter.postMessage([classKeys, features, valLayer.getFeatures()]);
-
+        if (dataLyr.validationLayer) {
+            let valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
+            workerBufferFilter.addEventListener('message', function(e) {
+                metrics.createMetricsGraphForBuffer(e.data);
+            }, false);
+            workerBufferFilter.postMessage([classKeys, features, valLayer.getFeatures()]);
+        }
     }
 
     /**

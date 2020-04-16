@@ -40,20 +40,20 @@ function computeDataForMetricsGraph(classKeys, features, steps){
     for (let i = 1; i < len; i++) {
 
         end = steps[i];
-        
-        dataArea = calcOccupiedAreaForEachClass(classKeys, features, [start, end]);
-        
-        const oaValue = computeOA(dataArea);
-        const paValue = computeRecall(dataArea);
-        const uaValue = computePrecision(dataArea);
-        const f1score = computeF1(parseFloat(uaValue), parseFloat(paValue));
+        if (end >= 0.09) {
+            dataArea = calcOccupiedAreaForEachClass(classKeys, features, [start, end]);
+            
+            const oaValue = computeOA(dataArea);
+            const paValue = computeRecall(dataArea);
+            const uaValue = computePrecision(dataArea);
+            const f1score = computeF1(parseFloat(uaValue), parseFloat(paValue));
 
-        metricsDataGraph[0].data.push([end, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
-        metricsDataGraph[1].data.push([end, isNaN(paValue) ? 0 : parseFloat(paValue)]);
-        metricsDataGraph[2].data.push([end, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);
-        metricsDataGraph[3].data.push([end, isNaN(f1score) ? 0 : parseFloat(f1score)]);
+            metricsDataGraph[0].data.push([end, isNaN(oaValue) ? 0 : parseFloat(oaValue)]);
+            metricsDataGraph[1].data.push([end, isNaN(paValue) ? 0 : parseFloat(paValue)]);
+            metricsDataGraph[2].data.push([end, isNaN(uaValue) ? 0 : parseFloat(uaValue)]);
+            metricsDataGraph[3].data.push([end, isNaN(f1score) ? 0 : parseFloat(f1score)]);
+        }
 
-        end = steps[i];
     }
 
     return metricsDataGraph;

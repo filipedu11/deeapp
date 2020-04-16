@@ -17,7 +17,8 @@ import colorsys
 def create_map_raster(
     LULC_filepath_1, classification_json_file, 
     LULC_filepath_2, validation_json_file,
-    map_output_filepath, json_output_filepath):
+    map_output_filepath, json_output_filepath,
+    map_output_filepath_dee, json_output_filepath_dee):
     """
     Creates a new raster image with the difference map between two LULC labels
     """
@@ -38,6 +39,7 @@ def create_map_raster(
             classes.append(cl)
     
     mapDiff = np.zeros(r2.shape)
+    mapDee = np.zeros(r2.shape)
     [cols, rows] = r2.shape
 
     classId = 1
@@ -47,8 +49,9 @@ def create_map_raster(
     for c1 in classes:
         for c2 in classes:
             if c1 >= 0 and c2 >= 0:
-                calcAux = ((r1==c1) * (r2==c2)) * classId
-                mapDiff = mapDiff + calcAux
+                calcAux = ((r1==c1) * (r2==c2)) 
+                mapDiff = mapDiff + calcAux * classId
+                mapDee = mapDee + calcAux * ((c1 == c2) + 1)
                 classMap[(c1,c2)] = classId
                 classId += 1
 
@@ -61,10 +64,21 @@ def create_map_raster(
     band.SetNoDataValue(0)
     outdata.FlushCache()
     outdata = None
+
+    outdata = driver.Create(map_output_filepath_dee, rows, cols, 1, gdal.GDT_UInt16)
+    outdata.SetGeoTransform(ds1.GetGeoTransform())
+    outdata.SetProjection(ds1.GetProjection())
+    band = outdata.GetRasterBand(1)
+    band.WriteArray(mapDee)
+    band.SetNoDataValue(0)
+    outdata.FlushCache()
+    outdata = None
+
     ds2=None
     ds1=None
 
     create_json(classes, classMap, classification_json_file, validation_json_file, json_output_filepath)
+    create_json_dee(classes, classMap, classification_json_file, validation_json_file, json_output_filepath_dee)
 
     print("\n ======================================== \n")
 
@@ -92,11 +106,9 @@ def create_json(classes, classMap, classification_json_file, validation_json_fil
         "classNamesEval": {}  
     }
 
-
     color = ""
     nClasses = len(classes)
     color_palette = []
-    
     
     for c in classes:
         try:
@@ -125,6 +137,39 @@ def create_json(classes, classMap, classification_json_file, validation_json_fil
 
             content_json["layerStyle"]["color"][str(classMap[(c1,c2)])] = color
                 
+    with open(json_output_filepath, encoding='utf-8-sig', mode="w+") as outfile:
+        json.dump(content_json, outfile, ensure_ascii=False, indent=2)
+
+def create_json_dee(classes, classMap, classification_json_file, validation_json_file, json_output_filepath):
+    classification_json_object = json.load(open(classification_json_file, encoding='utf-8-sig'))
+    validation_json_object = json.load(open(validation_json_file, encoding='utf-8-sig'))
+
+    content_json = {
+        "layerID": "{}_vs_{}".format(classification_json_object["layerID"], validation_json_object["layerID"]),
+        "layerName": "{} | {}".format(classification_json_object["layerName"] + ' (v)', validation_json_object["layerName"] + ' (c)'),
+        "layerDescription": "Evaluation map for comparing {} with {}".format(classification_json_object["layerName"], validation_json_object["layerName"]),
+        "layerRasterFile": "",
+        "layerSource": {
+            "author": "Eduardo Lopes",
+            "classifierAlgorithm": "None",
+            "preProcTechniquesUsed": [],
+            "postProcTechniquesUsed": [],
+            "collectedDate": "",
+            "layerDate": datetime.today().strftime('%Y-%m-%d')
+        },
+        "layerStyle": {
+            "color": {
+                "1": "rgb(255,0,0)",
+                "2": "rgb(0,255,0)"
+            }
+        },
+        "classNames": {
+            "1": "Erro",
+            "2": "Acerto"
+        },
+        "classNamesEval": {}  
+    }
+
     with open(json_output_filepath, encoding='utf-8-sig', mode="w+") as outfile:
         json.dump(content_json, outfile, ensure_ascii=False, indent=2)
 
@@ -171,8 +216,13 @@ if __name__ == '__main__':
 
             map_output_filepath = output_dirpath + "/{}_VS_{}_difference_map.tif".format(file1, file2)
             json_output_filepath = output_dirpath + "/{}_VS_{}_difference_map.json".format(file1, file2)
+            map_output_filepath_dee = output_dirpath + "/{}_VS_{}_erro_acerto_map.tif".format(file1, file2)
+            json_output_filepath_dee = output_dirpath + "/{}_VS_{}_erro_acerto_map.json".format(file1, file2)
 
             print(map_output_filepath)
             print(json_output_filepath)
+            print(map_output_filepath_dee)
+            print(json_output_filepath_dee)
 
-            create_map_raster(filepath, validation_json_files[i], filepath_t, classification_json_files[j], map_output_filepath, json_output_filepath)
+            create_map_raster(filepath, validation_json_files[i], filepath_t, classification_json_files[j], 
+            map_output_filepath, json_output_filepath, map_output_filepath_dee, json_output_filepath_dee)
