@@ -14,8 +14,8 @@ function computeDataForBufferGraph(classKeys, features, valFeatures){
         return metricsDataGraph;
     }
 
-    let step = 0.02;
-    let min = 0.02;
+    let step = 0.01;
+    let min = 0.01;
     let max = 0.50;
     let dataArea;
 
@@ -77,7 +77,7 @@ function computeDataForBufferGraph(classKeys, features, valFeatures){
 function computeBufferAuxiliary(valFeatures, value) {
 
     let mainFeats = [];
-    var options = {tolerance: 0.0005
+    var options = {tolerance: 0.0001
         , highQuality: false, mutate: false};
 
     for (let index = 0, len = valFeatures.length; index < len; ++index) {
