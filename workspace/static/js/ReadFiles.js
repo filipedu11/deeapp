@@ -46,6 +46,14 @@ export class ReadFiles{
         return JSON.parse(readFileAsync('./workspace/static/data/faixas_combustao/validation_VS_classification_difference_map_out.geojson', 'utf8').trim());
     }
 
+    readEvaluation2(){
+        return JSON.parse(readFileAsync('./workspace/static/data/faixas_combustao/cloropleth_error_out.geojson', 'utf8').trim());
+    }
+
+    readEvaluation3(){
+        return JSON.parse(readFileAsync('./workspace/static/data/faixas_combustao/cardigos.geojson', 'utf8').trim());
+    }
+
     // readValidation(){
     //     return JSON.parse(readFileSync('./workspace/static/data/deimos/validation/subset_1_v2_out.geojson', 'utf8').trim());
     // }

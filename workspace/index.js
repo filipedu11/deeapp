@@ -27,10 +27,19 @@ var app = new Main();
 
 var readFiles = new ReadFiles();
 
+
+app.addEvaluation(
+    readFiles.readEvaluation2()
+);
+
+app.addEvaluation(
+    readFiles.readEvaluation3()
+);
+
 app.addEvaluation(
     readFiles.readEvaluation(), 
     readFiles.readValidation(),
     readFiles.readClassification()
 );
 
-app.addRemoteSensingImage(readFiles.readRemoteSensingImage());
+//app.addRemoteSensingImage(readFiles.readRemoteSensingImage());

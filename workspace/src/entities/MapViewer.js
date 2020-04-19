@@ -304,8 +304,6 @@ export class MapViewer{
             })
         });
 
-        
-
         this.addProgressStatus(base.getSource());
         this.addProgressStatus(base2.getSource());
         this.addProgressStatus(base3.getSource());
