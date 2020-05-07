@@ -59,6 +59,7 @@ var DRAW_LAYER_STRING = 'draw';
 var CLASSIFICATION_TYPE_STRING = 'classification';
 var VALIDATION_STRING = 'validation';
 var EVALUATION_STRING = 'evaluation';
+var REMOTESENSINGIMAGE_STRING = 'remoteSensingImage';
 
 var w = new Worker('./worker.js');
 var workerAreaFilter = new Worker('./workerAreaFilter.js');
@@ -222,6 +223,12 @@ export class MapViewer{
             typeBase: BASE_TYPE_STRING,
         });
 
+        var remoteSensingImages = new LayerGroup({
+            title: 'Imagem de Deteção Remota',
+            fold: 'open',
+            typeBase: REMOTESENSINGIMAGE_STRING,
+        });
+
         var classifications = new LayerGroup({
             title: 'Classificação',
             fold: 'open',
@@ -241,6 +248,7 @@ export class MapViewer{
         });
 
         this.map.addLayer(base);
+        this.map.addLayer(remoteSensingImages);
         this.map.addLayer(classifications);
         this.map.addLayer(validations);
         this.map.addLayer(evaluations);
@@ -267,7 +275,7 @@ export class MapViewer{
     addBaseLayers(){
 
         var base = new TileLayer({
-            visible: false,
+            visible: true,
             title: 'World Map - Dark',
             typeBase: BASE_TYPE_STRING,
             source: new XYZ({
@@ -287,7 +295,7 @@ export class MapViewer{
         });
 
         var base3 = new TileLayer({
-            visible: true,
+            visible: false,
             title: 'Google Terrain',
             typeBase: BASE_TYPE_STRING,
             source: new XYZ({
@@ -295,8 +303,6 @@ export class MapViewer{
                 crossOrigin: 'anonymous'
             })
         });
-
-        
 
         this.addProgressStatus(base.getSource());
         this.addProgressStatus(base2.getSource());
@@ -351,6 +357,21 @@ export class MapViewer{
             layerGeojson[cD.classNames[k]],
             layerGeojson
         );
+
+        const classNames = Object.values(layerGeojson[cD.classNames[k]]);
+        const classKeys = Object.keys(layerGeojson[cD.classNames[k]]);
+
+        const selectClass = document.getElementById('class-classification');
+
+        if (!selectClass.length) {
+            for (let i = 0; i < classNames.length; i++) {
+                const cName = classNames[i];
+                var opt = document.createElement('option');
+                opt.value = classKeys[i];
+                opt.innerHTML = cName;
+                selectClass.appendChild(opt); 
+            }
+        }
 
         this.allLayersDict[id] = lyr;
 
@@ -419,26 +440,26 @@ export class MapViewer{
 
     /**
      * Add classified image (png/tiff) to map 
-     * @param {*} classifiedImage 
+     * @param {*} remoteSensingImage 
      */
-    addClassifiedImage(classifiedImage){
+    addRemoteSensingImage(remoteSensingImage){
     
         var projection = this.projStudyArea;
         var extent = this.extendStudyArea;
         
         var newLayer = new ImageLayer({
             source: new Static({
-                url: classifiedImage,
+                url: remoteSensingImage,
                 projection: projection,
                 imageExtent: extent,
                 crossOrigin: null
             }),
             visible: false,
             title: 'Imagem Satélite',
-            typeBase: BASE_TYPE_STRING
+            typeBase: REMOTESENSINGIMAGE_STRING
         });
 
-        this.addLayerToMapGroup(BASE_TYPE_STRING, newLayer);
+        this.addLayerToMapGroup(REMOTESENSINGIMAGE_STRING, newLayer);
 
         this.loadLayerSwitcher();
     }
@@ -698,6 +719,7 @@ export class MapViewer{
 
         var typeSelect = document.getElementById('type-geo');
         var classBufferSelect = document.getElementById('class-buffer');
+        var classClassificationSelect = document.getElementById('class-classification');
 
         clearFilterPAnel.onclick = function(){
             if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
@@ -709,6 +731,7 @@ export class MapViewer{
 
             typeSelect.value = typeSelect.options[0].value;
             classBufferSelect.value = classBufferSelect.options[0].value;
+            classClassificationSelect.value = classClassificationSelect.options[0].value;
 
             min.value = dataLyr.getMinimumOccupiedArea();
             min.dispatchEvent(new Event('change'));
@@ -784,19 +807,19 @@ export class MapViewer{
         w.postMessage([classKeys, features, null, null]);
  
         //CREATE AREA FILTER GRAPH
-        let precision = 3;
-        let steps = dataLyr.getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision);
-        workerAreaFilter.addEventListener('message', function(e) {
-            metrics.createMetricsGraph(e.data);
-        }, false);
-        workerAreaFilter.postMessage([classKeys, features, steps]);
+        // let precision = 3;
+        // let steps = dataLyr.getUniqueValuesForOccupiedAreaByGivingPrecisionScale(precision);
+        // workerAreaFilter.addEventListener('message', function(e) {
+        //     metrics.createMetricsGraph(e.data);
+        // }, false);
+        // workerAreaFilter.postMessage([classKeys, features, steps]);
 
-        //CREATE BUFFER FILTER GRAPH
-        let valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
-        workerBufferFilter.addEventListener('message', function(e) {
-            metrics.createMetricsGraphForBuffer(e.data);
-        }, false);
-        workerBufferFilter.postMessage([classKeys, features, valLayer.getFeatures()]);
+        // //CREATE BUFFER FILTER GRAPH
+        // let valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
+        // workerBufferFilter.addEventListener('message', function(e) {
+        //     metrics.createMetricsGraphForBuffer(e.data);
+        // }, false);
+        // workerBufferFilter.postMessage([classKeys, features, valLayer.getFeatures()]);
 
     }
 
@@ -820,11 +843,16 @@ export class MapViewer{
         
         var buffer = document.getElementById('area-buffer');
         var classBuffer = document.getElementById('class-buffer');
+        var classClassification = document.getElementById('class-classification');
 
         var valLayer = this.getObjectLayer(dataLyr.validationLayer.get('layerId'));
         var allFeatures = valLayer.getFeatures();
 
         classBuffer.addEventListener('change', function () {
+            computeBuffer();
+        });
+
+        classClassification.addEventListener('change', function () {
             computeBuffer();
         });
 
@@ -856,7 +884,7 @@ export class MapViewer{
             if (classBuffer.value != -1) {
                 if (allFeatures.length > 1) {
 
-                    let mainFeat = mapViewer.computeBufferAuxiliary(allFeatures, buffer.value, classBuffer.value);
+                    let mainFeat = mapViewer.computeBufferAuxiliary(allFeatures, buffer.value, classBuffer.value, classClassification.value);
 
                     if (mainFeat) {
                         if (mapViewer.vectorDraw.getSource().getFeatures().length > 0 )
@@ -874,16 +902,16 @@ export class MapViewer{
 
     }
 
-    computeBufferAuxiliary(allFeatures, value, classBuffer) {
+    computeBufferAuxiliary(allFeatures, value, classBuffer, classClassification) {
 
         let mainFeats = [];
-        var options = {tolerance: 0.0005
+        var options = {tolerance: 0.0001
             , highQuality: false, mutate: false};
 
         for (let index = 0, len = allFeatures.length; index < len; index++) {
             const feat = allFeatures[index];
             
-            if (feat.properties.classId == 1) {
+            if (feat.properties.classId == classClassification) {
 
                 let featBuffer;
                 let bufferLine = feat;

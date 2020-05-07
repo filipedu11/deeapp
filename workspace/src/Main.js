@@ -7,15 +7,19 @@ export class Main {
         this.mapViewer = new MapViewer();
     }
 
-    addClassifiedImage(classifiedImageTiff){
-        this.mapViewer.addClassifiedImage(classifiedImageTiff);
+    addRemoteSensingImage(remoteSensingImage){
+        this.mapViewer.addRemoteSensingImage(remoteSensingImage);
     }
 
     addEvaluation(evaluationGeojson, validationGeojson, classificationGeojson){
+        
+        let validation, classification;
 
-        var validation = this.mapViewer.addValidation(validationGeojson);
-        var classification = this.mapViewer.addClassification(classificationGeojson);
-
+        if(validationGeojson && classificationGeojson) {
+            validation = this.mapViewer.addValidation(validationGeojson);
+            classification = this.mapViewer.addClassification(classificationGeojson);
+        }
+        
         this.mapViewer.addEvaluation(evaluationGeojson, validation, classification);
     }
     

@@ -279,7 +279,7 @@ import Feature from 'ol/Feature';
                 var lyrId = lyr.get('layerId');
                 var mapView = map.get('mapViewer');
 
-                if (lyr.get('typeBase') !== 'basemap' && lyr.get('typeBase') !== 'draw' ) {
+                if (lyr.get('typeBase') !== 'basemap' && lyr.get('typeBase') !== 'remoteSensingImage' && lyr.get('typeBase') !== 'draw' ) {
                     
                     if (visible) {
                         var sourceAux = lyr.get('sourceAux');
@@ -321,7 +321,7 @@ import Feature from 'ol/Feature';
                 var lyrSelected = null;
                 
                 LayerSwitcher.forEachRecursive(map, function (l, idx, a) {
-                    if (l.getVisible() && l.get('typeBase') !== 'basemap' && l.get('typeBase') !== 'draw' && !l.getLayers) {
+                    if (l.getVisible() && l.get('typeBase') !== 'remoteSensingImage' && l.get('typeBase') !== 'basemap' && l.get('typeBase') !== 'draw' && !l.getLayers) {
                         lyrsSelected.push(l);
                         lyrSelected = l;
                     }

@@ -9,6 +9,10 @@ export class EvaluationEntity extends LayerEntity{
 
         this.validationLayer = validationLayer;
         this.classificationLayer = classificationLayer;
-        this.type = 'evaluation';
+        if (validationLayer && classificationLayer) {
+            this.type = 'evaluation';
+        } else {
+            this.type = 'evaluation_other';
+        }
     }
 }
