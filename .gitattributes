@@ -1,2 +1,0 @@
-workspace/static/data/ filter=lfs diff=lfs merge=lfs -text
-*.geojson filter=lfs diff=lfs merge=lfs -text

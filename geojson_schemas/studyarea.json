@@ -1,8 +1,0 @@
-{
-    "type": "string",
-    "idClassification": "string",
-    "name": "string",
-    "description": "string",
-    "crs": "object",
-    "pathToClassifiedImage": "string"
-}
